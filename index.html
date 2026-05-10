@@ -361,6 +361,12 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
 .lvl-btn{ padding:6px 14px; border-radius:8px; border:1px solid #333; background:#16213e; color:#aaa; font-size:12px; cursor:pointer; transition:all .2s; }
 .lvl-btn.active{ background:linear-gradient(135deg,#e94560,#a855f7); color:#fff; border-color:transparent; }
 .lvl-btn:hover{ border-color:#a855f7; }
+/* 自动播放选项页 */
+.ap-tag{ user-select:none; }
+.ap-tag:hover{ opacity:0.85; transform:scale(0.97); }
+.ap-section{ transition:border-color 0.2s; }
+.ap-section:hover{ border-color:rgba(255,255,255,0.12) !important; }
+#ap-cat-body, #ap-lvl-body{ display:flex; gap:6px; flex-wrap:wrap; }
 </style>
 </head>
 <body>
@@ -388,12 +394,23 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
     <div class="sc"><div class="sn" id="s2">0</div><div class="sl">今日待复习</div></div>
     <div class="sc"><div class="sn" id="s3">0</div><div class="sl">已掌握语法</div></div>
   </div>
+  <!-- 背单词快速入口 -->
+  <div class="vwb" onclick="go('autoplay')" style="cursor:pointer;padding:20px 20px;margin-bottom:12px;background:linear-gradient(135deg,#1a1a3e,#16213e);border:1px solid rgba(233,69,96,0.3);border-radius:16px;transition:all 0.3s" onmouseover="this.style.borderColor='#e94560'" onmouseout="this.style.borderColor='rgba(233,69,96,0.3)'">
+    <div style="display:flex;align-items:center;gap:12px">
+      <div style="font-size:32px">📚</div>
+      <div style="flex:1">
+        <div style="font-size:18px;font-weight:700;color:#e2e8f0">背单词</div>
+        <div style="font-size:11px;color:#94a3b8">考级分类 · 场景分类 · 自动播放</div>
+      </div>
+      <div style="font-size:18px;color:#64748b">›</div>
+    </div>
+  </div>
   <!-- 三大核心入口 -->
   <div class="h-entries">
     <div class="h-entry h-entry-vocab" onclick="go('vocab')">
       <div class="h-icon">📖</div>
-      <div class="h-title">背单词</div>
-      <div class="h-sub">N5 → N1 核心词汇 · 智能记忆</div>
+      <div class="h-title">单词墙</div>
+      <div class="h-sub">N5 → N1 全部词汇 · 浏览筛选</div>
     </div>
     <div class="h-entry h-entry-grammar" onclick="go('grammar')">
       <div class="h-icon">📝</div>
@@ -630,6 +647,9 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
 
 <!-- ===== 游戏页 ===== -->
 <div class="page" id="p-game"></div>
+
+<!-- ===== 自动播放 ===== -->
+<div class="page" id="p-autoplay"></div>
 
 </div><!-- /main -->
 
