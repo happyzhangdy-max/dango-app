@@ -1,0 +1,18 @@
+<div style="display:flex;justify-content:center;gap:8px;margin-bottom:10px">
+        <button class="btn bs" style="padding:5px 12px;font-size:11px" onclick="speakW()">🔊 单词</button>
+        <button class="btn bs" style="padding:5px 12px;font-size:11px" onclick="speakE()">📢 例句</button>
+        <button class="btn br" style="padding:5px 12px;font-size:11px" onclick="studyNext()">⏭ 跳过</button>
+      </div>
+      <div id="abtns" style="display:none;justify-content:center;flex-wrap:wrap;gap:8px">
+        <button class="btn ba" onclick="rate(0)">😵 不会</button>
+        <button class="btn bh" onclick="rate(3)">😰 还行</button>
+        <button class="btn bg" onclick="rate(4)">😊 记住</button>
+        <button class="btn be" onclick="rate(5)">😎 简单</button>
+      </div>
+    </div>
+    <div class="comp" id="comp">
+      <div class="cemo">🎉</div>
+      <div class="ctit">本轮学习完成！</div>
+      <div class="cdesc">太棒了！这批词汇已加入遗忘曲线复习计划。</div>
+      <div class="cst">
+        <div><div class="csn" id="rn1" style="color:#4ecca3">0</div><div class="csl">学习数</div></div>

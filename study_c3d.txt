@@ -1,0 +1,7 @@
+height:100%; background:linear-gradient(90deg,#e94560,#533483); border-radius:99px; transition:width 0.4s; }
+.cs { perspective:1000px; width:100%; height:240px; margin:0 auto 14px; cursor:pointer; }
+.c3d { width:100%; height:100%; position:relative; transform-style:preserve-3d; transition:transform 0.55s cubic-bezier(0.4,0,0.2,1); }
+.c3d.f { transform:rotateY(180deg); }
+.cf { position:absolute; inset:0; border-radius:14px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; backface-visibility:hidden; }
+.cfr { background:linear-gradient(135deg,#1a1a3e,#0f3460); border:1px solid rgba(83,52,131,0.5); box-shadow:0 14px 44px rgba(0,0,0,0.4); }
+.cbk { ba

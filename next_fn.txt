@@ -1,0 +1,1 @@
+function studyNext(){if(ci<q.length-1){ci++;showC()}else{showComp()}}

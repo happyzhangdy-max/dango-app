@@ -1,0 +1,5 @@
+OLD:
+function rate(q){const v=q[ci];const p=lp();const cur=p[v.id]||{};const r=sm2(cur,q);p[v.id]={...r,word:v.word};sp(p);ci++;if(ci<q.length)setTimeout(showC,200);else showComp()}
+
+NEW:
+function rate(q){const v=q[ci];const p=lp();const cur=p[v.id]||{};const r=sm2(cur,q);p[v.id]={...r,word:v.word};sp(p);if(q===0)toggleMark(v.id,"red");else if(q===3)toggleMark(v.id,"yellow");else if(q===4)toggleMark(v.id,"green");ci++;if(ci<q.length)setTimeout(showC,200);else showComp()}

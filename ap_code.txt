@@ -1,0 +1,2 @@
+function apSyncMarks(){var v=_apQueue[_apIdx];if(!v)return;var b=getBook().indexOf(v.id)>=0;document.getElementById('apBmk').textContent=b?'⭐':'☆';var m=getMarks()[v.id];document.querySelectorAll('#apScreen .ap-marks .vm-btn').forEach(function(x){var c=x.getAttribute('data-color');x.style.borderColor=m===c?'#fff':'transparent';x.style.opacity=m===c?'1':'0.5'})}
+let _reviewMode='sm2';
