@@ -13,9 +13,17 @@
 // ============================================================
 // 常量
 // ============================================================
-const MAX_HP = 5;
+const MAX_HP = 6;
 const ROUNDS_PER_OPPONENT = 3; // 每个对手挨 3 拳 KO
 const BOSS_INTERVAL = 5;       // 每 5 回合打 Boss
+const INSTANT_KO_STREAK = 20;  // 连续答对 20 道直接 KO
+
+const DIRECTIONS = [
+  { id: 'upper', name: '上勾拳', icon: '⬆️' },
+  { id: 'left',  name: '左勾拳', icon: '⬅️' },
+  { id: 'right', name: '右勾拳', icon: '➡️' },
+  { id: 'straight', name: '直拳',   icon: '🎯' },
+];
 
 const DIFFICULTY_TABLE = [
   { min: 1,  max: 3,  level: 'N5', time: 7000 },
@@ -58,6 +66,7 @@ let state = {
   currentOpponent: null,
   animating: false,
   winStreak: 0,
+  consecutiveCorrect: 0, // 连续答对计数（用于 20 连胜 KO）
 };
 
 let currentQuestion = null;
@@ -377,6 +386,9 @@ function renderRing() {
         
         <!-- 浮字区 -->
         <div id="bx-float" style="position:absolute;top:35%;left:50%;transform:translateX(-50%);font-size:36px;font-weight:900;pointer-events:none;z-index:5;text-shadow:0 0 40px rgba(255,255,255,0.3)"></div>
+        
+        <!-- 方向显示 -->
+        <div id="bx-dir-display" style="position:absolute;top:48%;left:50%;transform:translate(-50%,-50%);font-size:22px;font-weight:800;text-shadow:0 2px 12px rgba(0,0,0,0.8);z-index:20;pointer-events:none;white-space:nowrap;text-align:center"></div>
       </div>
       
       <!-- 问题区 -->
@@ -475,8 +487,16 @@ function handleAnswer(index) {
 
 function onCorrect(index) {
   state.combo++;
+  state.consecutiveCorrect++;
   if (state.combo > state.maxCombo) state.maxCombo = state.combo;
   state.score += 10 * state.combo;
+  
+  // 方向系统：我方随机出拳 vs 对方随机防3方向
+  const punchIdx = Math.floor(Math.random() * 4);
+  const punch = DIRECTIONS[punchIdx];
+  // 对方随机选1个方向不防（即防3个方向）
+  const unguardedIdx = Math.floor(Math.random() * 4);
+  const isBlocked = punchIdx !== unguardedIdx;
   
   SFX.punch();
   
@@ -485,6 +505,36 @@ function onCorrect(index) {
   if (glove) {
     glove.style.animation = 'bxPunch 0.35s ease-out';
     setTimeout(() => { if (glove) glove.style.animation = ''; }, 400);
+  }
+  
+  // 显示出拳方向
+  const dirEl = document.getElementById('bx-dir-display');
+  if (dirEl) {
+    dirEl.textContent = isBlocked ? '🛡️ 被格挡！' : (punch.icon + ' ' + punch.name + '！');
+    dirEl.style.color = isBlocked ? '#94a3b8' : '#fbbf24';
+    dirEl.style.animation = 'none';
+    void dirEl.offsetHeight;
+    dirEl.style.animation = 'bxFloatUp 0.8s ease-out forwards';
+    setTimeout(() => { if (dirEl) dirEl.textContent = ''; }, 900);
+  }
+  
+  // 被格挡 → 无伤害
+  if (isBlocked) {
+    showFloat('🛡️', '#94a3b8');
+    updateHUD();
+    setTimeout(() => {
+      state.animating = false;
+      if (state.isPlaying) nextRound();
+    }, 400);
+    return;
+  }
+  
+  // 打中了！
+  // 检查 20 连胜 KO
+  if (state.consecutiveCorrect >= INSTANT_KO_STREAK) {
+    state.opponentHp = 1; // 下一击 KO
+    showFloat('🔥🔥 20连胜！必杀一击！🔥🔥', '#ff6b6b');
+    SFX.ko();
   }
   
   // 对手受击
@@ -526,11 +576,11 @@ function onCorrect(index) {
     if (oppFace && opp) oppFace.textContent = opp.koFace || '💀';
     state.winStreak++;
     state.round++;
+    state.consecutiveCorrect = 0; // KO 后重置连胜计数
     
     showFloat('💥 KO！+' + (state.isBoss ? 200 : 100), '#22c55e');
     state.score += state.isBoss ? 200 : 100;
     
-    // 重置 combo（KO 后不连击）
     state.combo = 0;
     
     setTimeout(() => {
@@ -552,8 +602,39 @@ function onCorrect(index) {
 }
 
 function onWrong(index) {
-  SFX.wrong();
   state.combo = 0;
+  state.consecutiveCorrect = 0;
+  
+  // 方向系统：对方随机攻1方向 vs 我方随机防1方向
+  const attackIdx = Math.floor(Math.random() * 4);
+  const attack = DIRECTIONS[attackIdx];
+  const guardIdx = Math.floor(Math.random() * 4);
+  const isGuarded = attackIdx === guardIdx;
+  
+  // 方向显示
+  const dirEl = document.getElementById('bx-dir-display');
+  if (dirEl) {
+    dirEl.textContent = isGuarded ? ('🛡️ 防御成功！挡住 ' + attack.icon) : (attack.icon + ' 对方' + attack.name + '！');
+    dirEl.style.color = isGuarded ? '#4ecca3' : '#ef4444';
+    dirEl.style.animation = 'none';
+    void dirEl.offsetHeight;
+    dirEl.style.animation = 'bxFloatUp 0.8s ease-out forwards';
+    setTimeout(() => { if (dirEl) dirEl.textContent = ''; }, 900);
+  }
+  
+  // 防御成功 → 无伤害
+  if (isGuarded) {
+    SFX.hit();
+    showFloat('🛡️ 防御！', '#4ecca3');
+    updateHUD();
+    setTimeout(() => {
+      state.animating = false;
+      if (state.isPlaying) nextRound();
+    }, 400);
+    return;
+  }
+  
+  SFX.wrong();
   state.hp--;
   
   // 屏幕震动更剧烈
@@ -690,6 +771,7 @@ function startTimer() {
 function onTimeout() {
   if (state.animating) return;
   state.animating = true;
+  state.consecutiveCorrect = 0;
   SFX.wrong();
   
   state.combo = 0;
@@ -762,6 +844,7 @@ function start() {
   state.isPlaying = true;
   state.winStreak = 0;
   state.animating = false;
+  state.consecutiveCorrect = 0;
   
   pickOpponent();
   renderRing();
