@@ -548,6 +548,17 @@ function renderAutoPlayOptions(){
     +ALL_CATEGORIES.map(function(cat){var a=selCats.length===0||selCats.indexOf(cat)>=0;return '<span class="ap-tag'+(a?' ap-tag-on':'')+'" data-cat="'+cat.replace(/'/g,'\\\'')+'" onclick="_apToggleCat(this)" style="display:inline-block;padding:5px 12px;border-radius:16px;font-size:11px;cursor:pointer;transition:all 0.2s;'+(a?'background:linear-gradient(135deg,#a855f7,#7c3aed);color:#fff':'background:rgba(255,255,255,0.06);color:#64748b')+'">'+cat+'</span>'}).join('')
     +'</div>'
     +'</div>'
+    // 形式
+    +'<div style="padding:14px 16px;background:rgba(255,255,255,0.03);border-radius:12px;margin-bottom:12px;border:1px solid rgba(255,255,255,0.06)">'
+    +'<div style="font-size:14px;font-weight:600;color:#e2e8f0;margin-bottom:10px">📐 形式</div>'
+    +'<div style="display:flex;gap:8px">'
+    +[['word','单词'],['word_sent','单词+例句']].map(function(f){
+      var val=f[0],label=f[1];
+      var cur=saved.format||'word';
+      return '<span class="ap-tag'+(cur===val?' ap-tag-on':'')+'" data-format="'+val+'" onclick="_apSetFormat(this,\''+val+'\')" style="display:inline-block;padding:6px 16px;border-radius:20px;font-size:13px;cursor:pointer;transition:all 0.2s;'+(cur===val?'background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff':'background:rgba(255,255,255,0.06);color:#64748b')+'">'+label+'</span>'
+    }).join('')
+    +'</div>'
+    +'</div>'
     // 播放间隔
     +'<div style="padding:14px 16px;background:rgba(255,255,255,0.03);border-radius:12px;margin-bottom:12px;border:1px solid rgba(255,255,255,0.06)">'
     +'<div style="font-size:14px;font-weight:600;color:#e2e8f0;margin-bottom:10px">⏱️ 播放间隔</div>'
@@ -636,6 +647,14 @@ function _apCatAll(){
   document.querySelectorAll('#ap-cat-body .ap-tag').forEach(function(el){el.classList.add('ap-tag-on');el.style.background='linear-gradient(135deg,#a855f7,#7c3aed)';el.style.color='#fff'});
 }
 
+// 形式
+function _apSetFormat(el,f){
+  var saved=JSON.parse(localStorage.getItem('ap_settings')||'{}');
+  saved.format=f;localStorage.setItem('ap_settings',JSON.stringify(saved));
+  document.querySelectorAll('[data-format]').forEach(function(x){x.classList.remove('ap-tag-on');x.style.background='rgba(255,255,255,0.06)';x.style.color='#64748b'});
+  el.classList.add('ap-tag-on');el.style.background='linear-gradient(135deg,#6366f1,#8b5cf6)';el.style.color='#fff';
+}
+
 // 速度
 function _apSetSpeed(el,s){
   var saved=JSON.parse(localStorage.getItem('ap_settings')||'{}');
@@ -661,6 +680,7 @@ function startVocabAutoPlay(){
   var count=saved.count||50;
   var lvlOn=saved.lvlOn!==false;
   var catOn=saved.catOn||false;
+  var format=saved.format||'word';
   
   // 过滤词汇
   var pool=VOCAB.filter(function(v){
@@ -699,24 +719,27 @@ function startVocabAutoPlay(){
   vApShowCard();
 }
 
-var _vApSpeed=3;
+var _vApSpeed=1;
 
 function vApShowCard(){
   if(!_vApQueue||_vApQueue.length===0)return;
   var w=_vApQueue[_vApIdx];
   if(!w)return;
+  var saved=JSON.parse(localStorage.getItem('ap_settings')||'{}');
+  var format=saved.format||'word';
+  var showSent=(format==='word_sent');
   speechSynthesis.cancel();
   document.querySelector('#gApScreen .ap-word').textContent=w.word;
   document.querySelector('#gApScreen .ap-read').textContent=w.reading;
   document.querySelector('#gApScreen .ap-mean').textContent=w.meaning;
-  document.querySelector('#gApScreen .ap-exjp').textContent=w.ex_jp||'';
-  document.querySelector('#gApScreen .ap-excn').textContent=w.ex_cn||'';
+  document.querySelector('#gApScreen .ap-exjp').textContent=showSent?(w.ex_jp||''):'';
+  document.querySelector('#gApScreen .ap-excn').textContent=showSent?(w.ex_cn||''):'';
   document.querySelector('#gApScreen .ap-progress-bar').style.width=((_vApIdx+1)/_vApQueue.length*100)+'%';
   document.querySelector('#gApScreen .ap-counter').textContent=(_vApIdx+1)+'/'+_vApQueue.length;
   // 同步标记
   vApSyncMarks(w);
   // 自动发音
-  vApSpeak(w);
+  vApSpeak(w,showSent);
   // 自动下一词
   clearTimeout(_vApTimer);_vApTimer=null;
   if(!_vApPaused&&_vApIdx<_vApQueue.length-1){
@@ -727,7 +750,7 @@ function vApShowCard(){
   }
 }
 
-function vApSpeak(w){
+function vApSpeak(w,showSent){
   try{
     var utter=new SpeechSynthesisUtterance(w.word);
     utter.lang='ja-JP';
@@ -735,7 +758,7 @@ function vApSpeak(w){
     if(window._jpVoice)utter.voice=window._jpVoice;
     speechSynthesis.speak(utter);
     // 迟一点读例句
-    if(w.ex_jp){
+    if(showSent&&w.ex_jp){
       setTimeout(function(){
         var u2=new SpeechSynthesisUtterance(w.ex_jp);
         u2.lang='ja-JP';u2.rate=0.7;

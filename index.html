@@ -90,9 +90,17 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
 .sc { background:#1a1a2e; border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:14px; text-align:center; }
 .sn { font-size:22px; font-weight:700; }
 .sl { font-size:11px; color:#888; margin-top:3px; }
-.h-entries { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin-bottom:16px; }
+.h-entries { display:grid; grid-template-columns:repeat(6,1fr); gap:10px; margin-bottom:16px; }
 .h-entry { background:linear-gradient(135deg,#1a1a3e,#0f3460); border:1px solid rgba(168,85,247,0.3); border-radius:14px; padding:24px 14px; cursor:pointer; text-align:center; transition:all 0.3s; position:relative; overflow:hidden; }
 .h-entry:hover { transform:translateY(-3px); box-shadow:0 8px 30px rgba(168,85,247,0.2); }
+.h-entry-large { grid-column:span 3; padding:30px 18px; }
+.h-entry-small { grid-column:span 2; padding:18px 10px; }
+.h-entry-large .h-icon { font-size:42px; margin-bottom:10px; }
+.h-entry-small .h-icon { font-size:28px; margin-bottom:6px; }
+.h-entry-large .h-title { font-size:22px; }
+.h-entry-small .h-title { font-size:15px; }
+.h-entry-large .h-sub { font-size:12px; }
+.h-entry-small .h-sub { font-size:11px; margin-top:4px; }
 .h-entry-vocab { border-color:rgba(233,69,96,0.3); }
 .h-entry-vocab:hover { border-color:#e94560; box-shadow:0 8px 30px rgba(233,69,96,0.2); }
 .h-entry-grammar { border-color:rgba(245,166,35,0.3); }
@@ -312,7 +320,14 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
   .vg .vc{ padding:10px 55px 38px 8px; }
   /* 首页卡片 */
   .qg{ grid-template-columns:1fr 1fr !important; gap:8px; }
-  .h-entries{ grid-template-columns:repeat(3,1fr); gap:8px; }
+  .h-entries{ grid-template-columns:1fr 1fr; gap:8px; }
+  .h-entry-large{ grid-column:span 2; padding:24px 14px; }
+  .h-entry-large .h-icon{ font-size:36px; }
+  .h-entry-large .h-title{ font-size:20px; }
+  .h-entry-small{ grid-column:span 1; padding:16px 8px; }
+  .h-entry-small .h-icon{ font-size:24px; }
+  .h-entry-small .h-title{ font-size:13px; }
+  .h-entry-small .h-sub{ font-size:10px; }
   .h-entry{ padding:18px 14px; }
   .ac{ padding:12px; }
   .ac .ai{ font-size:24px; }
@@ -399,30 +414,30 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
   </div>
   <!-- 核心入口 -->
   <div class="h-entries">
-    <div class="h-entry h-entry-vocab" onclick="go('vocab')">
-      <div class="h-icon">📖</div>
-      <div class="h-title">单词墙</div>
-      <div class="h-sub">N5 → N1 全部词汇 · 浏览筛选</div>
+    <div class="h-entry h-entry-large h-entry-autoplay" onclick="go('autoplay')">
+      <div class="h-icon">📚</div>
+      <div class="h-title">背单词</div>
+      <div class="h-sub">考级分类 · 场景分类 · 自动播放</div>
     </div>
-    <div class="h-entry h-entry-game" onclick="go('game')">
+    <div class="h-entry h-entry-large h-entry-game" onclick="go('game')">
       <div class="h-icon">🎮</div>
       <div class="h-title">单词闯关</div>
       <div class="h-sub">爬塔答题 · 拳击对战 · 边玩边学</div>
     </div>
-    <div class="h-entry h-entry-review" onclick="go('review')">
+    <div class="h-entry h-entry-small h-entry-review" onclick="go('review')">
       <div class="h-icon">🔄</div>
       <div class="h-title">复习</div>
       <div class="h-sub">遗忘曲线 · 按学习次数巩固</div>
     </div>
-    <div class="h-entry h-entry-grammar" onclick="go('grammar')">
+    <div class="h-entry h-entry-small h-entry-grammar" onclick="go('grammar')">
       <div class="h-icon">📝</div>
       <div class="h-title">背语法</div>
       <div class="h-sub">N3 / N2 常考句型 · 精讲例句</div>
     </div>
-    <div class="h-entry h-entry-autoplay" onclick="go('autoplay')">
-      <div class="h-icon">📚</div>
-      <div class="h-title">背单词</div>
-      <div class="h-sub">考级分类 · 场景分类 · 自动播放</div>
+    <div class="h-entry h-entry-small h-entry-vocab" onclick="go('vocab')">
+      <div class="h-icon">📖</div>
+      <div class="h-title">单词墙</div>
+      <div class="h-sub">N5 → N1 全部词汇 · 浏览筛选</div>
     </div>
   </div>
   <!-- 继续学习 -->
