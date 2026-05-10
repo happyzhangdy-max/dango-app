@@ -64,6 +64,7 @@ const DIFFICULTY_TABLE = [
 
 let _cachedByLevel = {};
 let _cachedByLevelCn = {}; // 仅含中文释义的词，用于单词模式
+let _cachedByCategory = {}; // 按场景分类缓存
 
 // 判断字符串是否含中文字符
 function hasChinese(str) {
@@ -105,6 +106,7 @@ let state = {
   quizMode: 'word',          // 'word' | 'sentence'
   // 选中的词库（默认全选）
   selectedLevels: ['N5', 'N4', 'N3', 'N2', 'N1'],
+  selectedCategories: [],     // 选中的场景分类（空=不限）
   // 回血机制
   healComboTarget: 0,      // 目标连击数（4~8 随机）
   healPending: false,       // 💊 已经达标，下一题答对就回血
@@ -150,6 +152,10 @@ function cacheByLevel() {
     if (hasChinese(w.meaning)) {
       _cachedByLevelCn[lv].push(w);
     }
+    // 按场景分类缓存
+    const cat = w.category || '未分类';
+    if (!_cachedByCategory[cat]) _cachedByCategory[cat] = [];
+    _cachedByCategory[cat].push(w);
   }
 }
 
@@ -172,6 +178,12 @@ function getRandomWords(level, exclude, count = 3, useCn = true) {
   if (pool.length === 0) {
     pool = _cachedByLevel[level] || _cachedByLevel['N5'];
   }
+  
+  // 按场景分类过滤
+  if (state.selectedCategories && state.selectedCategories.length > 0) {
+    pool = pool.filter(function(w) { return state.selectedCategories.indexOf(w.category) >= 0; });
+  }
+  
   const shuffled = [...pool].sort(() => Math.random() - 0.5);
   const result = [];
   for (const w of shuffled) {
@@ -385,6 +397,11 @@ function generateQuestion() {
     pool = fallback[level] || _cachedByLevel['N5'] || _cachedByLevelCn['N5'];
   }
   if (!pool || pool.length === 0) return null;
+  
+  // 按场景分类过滤
+  if (state.selectedCategories && state.selectedCategories.length > 0) {
+    pool = pool.filter(function(w) { return state.selectedCategories.indexOf(w.category) >= 0; });
+  }
 
   let word;
   let options;
@@ -1186,55 +1203,159 @@ function startTimer() {
 // ============================================================
 // 游戏菜单（替换原先直接显示爬塔的 init）
 // ============================================================
+// 游戏选择菜单（含单词分类选择）
+// ============================================================
+function _gmLoadSettings() {
+  var s = JSON.parse(localStorage.getItem('game_settings') || '{}');
+  return {
+    lvlOn: s.lvlOn !== false,      // 默认开启
+    selLvls: s.selLvls || ['N5','N4','N3'],
+    catOn: s.catOn || false,
+    selCats: s.selCats || [],
+  };
+}
+function _gmSaveSettings(settings) {
+  localStorage.setItem('game_settings', JSON.stringify(settings));
+}
+// 切换考级分类展开/收起
+function _gmToggle(el, bodyId) {
+  var body = document.getElementById(bodyId);
+  if (!body) return;
+  var isHidden = body.style.display === 'none';
+  body.style.display = isHidden ? 'block' : 'none';
+  if (el) el.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
+}
+function _gmToggleLvlSection() {
+  var cb = document.getElementById('gm-cb-lvl');
+  var body = document.getElementById('gm-lvl-body');
+  if (!cb) return;
+  var on = cb.textContent === '☐';
+  cb.textContent = on ? '☑' : '☐';
+  cb.classList.toggle('ap-checked', on);
+  body.style.opacity = on ? '1' : '0.35';
+  body.style.pointerEvents = on ? '' : 'none';
+  var s = _gmLoadSettings(); s.lvlOn = on; _gmSaveSettings(s);
+}
+function _gmToggleCatSection() {
+  var cb = document.getElementById('gm-cb-cat');
+  var body = document.getElementById('gm-cat-body');
+  if (!cb) return;
+  var on = cb.textContent === '☐';
+  cb.textContent = on ? '☑' : '☐';
+  cb.classList.toggle('ap-checked', on);
+  body.style.opacity = on ? '1' : '0.35';
+  body.style.pointerEvents = on ? '' : 'none';
+  var s = _gmLoadSettings(); s.catOn = on; _gmSaveSettings(s);
+}
+function _gmToggleLvl(el, lvl) {
+  var s = _gmLoadSettings();
+  var idx = s.selLvls.indexOf(lvl);
+  if (idx >= 0) { s.selLvls.splice(idx, 1); } else { s.selLvls.push(lvl); }
+  if (s.selLvls.length === 0) s.selLvls = [lvl]; // 至少选一个
+  _gmSaveSettings(s);
+  el.classList.toggle('ap-tag-on');
+  el.style.background = el.classList.contains('ap-tag-on')
+    ? 'linear-gradient(135deg,#e94560,#ff6b9d)'
+    : 'rgba(255,255,255,0.06)';
+  el.style.color = el.classList.contains('ap-tag-on') ? '#fff' : '#64748b';
+}
+function _gmToggleCat(el, cat) {
+  var s = _gmLoadSettings();
+  var idx = s.selCats.indexOf(cat);
+  if (idx >= 0) { s.selCats.splice(idx, 1); } else { s.selCats.push(cat); }
+  _gmSaveSettings(s);
+  el.classList.toggle('ap-tag-on');
+  el.style.background = el.classList.contains('ap-tag-on')
+    ? 'linear-gradient(135deg,#e94560,#ff6b9d)'
+    : 'rgba(255,255,255,0.06)';
+  el.style.color = el.classList.contains('ap-tag-on') ? '#fff' : '#64748b';
+}
+
 function init() {
   cacheByLevel();
   initVoice();
-  const container = document.getElementById('p-game');
+  var container = document.getElementById('p-game');
   if (!container) return;
   
-  container.innerHTML = `
-    <style>
-      @keyframes gmFadeIn { from { opacity:0; transform:translateY(12px) } to { opacity:1; transform:translateY(0) } }
-      .gm-title { font-size:22px; font-weight:800; letter-spacing:2px; margin-bottom:4px; }
-      .gm-sub { font-size:12px; color:#64748b; margin-bottom:20px; }
-      .gm-card {
-        background:linear-gradient(135deg,#1a1a3e,#0f3460); border-radius:16px; padding:24px 16px;
-        cursor:pointer; text-align:center; transition:all 0.3s; position:relative; overflow:hidden;
-        border:1px solid rgba(255,255,255,0.06);
-      }
-      .gm-card:hover { transform:translateY(-4px); box-shadow:0 8px 30px rgba(168,85,247,0.15); }
-      .gm-card-icon { font-size:42px; display:block; margin-bottom:8px; }
-      .gm-card-title { font-size:18px; font-weight:700; margin-bottom:4px; }
-      .gm-card-desc { font-size:11px; color:#64748b; line-height:1.6; }
-      .gm-card-climb { border-color:rgba(168,85,247,0.3); }
-      .gm-card-climb .gm-card-title { background:linear-gradient(135deg,#a855f7,#ec4899); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-      .gm-card-boxing { border-color:rgba(239,68,68,0.3); }
-      .gm-card-boxing .gm-card-title { background:linear-gradient(135deg,#ef4444,#fbbf24); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-    </style>
-    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:30px;text-align:center;background:#0a0a18">
-      <div style="font-size:38px;margin-bottom:6px;animation:bounceIn 0.6s cubic-bezier(0.34,1.56,0.64,1) both">🎮</div>
-      <div class="gm-title" style="background:linear-gradient(135deg,#e94560,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent">游戏模式</div>
-      <div class="gm-sub">选一个模式开始学习</div>
-      
-      <div style="display:flex;flex-direction:column;gap:12px;width:100%;max-width:320px;animation:gmFadeIn 0.4s ease-out 0.2s both">
-        <div class="gm-card gm-card-climb" onclick="Game.start()">
-          <div class="gm-card-icon">🏔️</div>
-          <div class="gm-card-title">爬塔闯关</div>
-          <div class="gm-card-desc">答对向上跳 · 答错摔下来<br>老师/家长/同事/课长 Boss 战</div>
-        </div>
-        <div class="gm-card gm-card-boxing" onclick="window.GameBoxing.start()">
-          <div class="gm-card-icon">🥊</div>
-          <div class="gm-card-title">单词拳击</div>
-          <div class="gm-card-desc">第一人称视角 · 出拳KO对手<br>连击越高伤害越高</div>
-        </div>
-      </div>
-      
-      <div style="margin-top:18px;font-size:10px;color:#3a3a5a">
-        爬塔最高层: ${localStorage.getItem('tower_high_floor') || '无'} |
-        拳击最高分: ${localStorage.getItem('bx_high_score') || '无'}
-      </div>
-    </div>
-  `;
+  var gm = _gmLoadSettings();
+  var lvls = ['N5','N4','N3','N2','N1'];
+  // ALL_CATEGORIES 来自 inline.js（全局变量）
+  var cats = typeof ALL_CATEGORIES !== 'undefined' ? ALL_CATEGORIES : [];
+  
+  container.innerHTML = [
+    '<style>',
+    '  @keyframes gmFadeIn { from { opacity:0; transform:translateY(12px) } to { opacity:1; transform:translateY(0) } }',
+    '  .gm-title { font-size:22px; font-weight:800; letter-spacing:2px; margin-bottom:4px; }',
+    '  .gm-sub { font-size:12px; color:#64748b; margin-bottom:16px; }',
+    '  .gm-card { background:linear-gradient(135deg,#1a1a3e,#0f3460); border-radius:16px; padding:24px 16px; cursor:pointer; text-align:center; transition:all 0.3s; position:relative; overflow:hidden; border:1px solid rgba(255,255,255,0.06); }',
+    '  .gm-card:hover { transform:translateY(-4px); box-shadow:0 8px 30px rgba(168,85,247,0.15); }',
+    '  .gm-card-icon { font-size:42px; display:block; margin-bottom:8px; }',
+    '  .gm-card-title { font-size:18px; font-weight:700; margin-bottom:4px; }',
+    '  .gm-card-desc { font-size:11px; color:#64748b; line-height:1.6; }',
+    '  .gm-card-climb { border-color:rgba(168,85,247,0.3); }',
+    '  .gm-card-climb .gm-card-title { background:linear-gradient(135deg,#a855f7,#ec4899); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }',
+    '  .gm-card-boxing { border-color:rgba(239,68,68,0.3); }',
+    '  .gm-card-boxing .gm-card-title { background:linear-gradient(135deg,#ef4444,#fbbf24); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }',
+    '  .gm-section { padding:12px 14px; background:rgba(255,255,255,0.03); border-radius:12px; margin-bottom:10px; border:1px solid rgba(255,255,255,0.06); }',
+    '  .gm-checkbox { font-size:16px; cursor:pointer; user-select:none; }',
+    '  .gm-checked { color:#e94560; }',
+    '  .gm-tag { display:inline-block; padding:5px 14px; border-radius:20px; font-size:12px; font-weight:600; cursor:pointer; transition:all 0.2s; background:rgba(255,255,255,0.06); color:#64748b; }',
+    '  .gm-tag-on { background:linear-gradient(135deg,#e94560,#ff6b9d); color:#fff; }',
+    '  .gm-arrow { color:#64748b; font-size:12px; cursor:pointer; transition:transform 0.2s; }',
+    '</style>',
+    '<div style="display:flex;flex-direction:column;align-items:center;height:100%;padding:16px 20px;text-align:center;background:#0a0a18;overflow-y:auto">',
+    '  <div style="font-size:34px;margin-bottom:4px">🎮</div>',
+    '  <div class="gm-title" style="background:linear-gradient(135deg,#e94560,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent">游戏模式</div>',
+    '  <div class="gm-sub">先选单词范围，再选游戏开始</div>',
+    
+    // ---- 单词选择区 ----
+    '  <div style="width:100%;max-width:340px;text-align:left;animation:gmFadeIn 0.3s ease-out both">',
+    
+    // 考级分类
+    '  <div class="gm-section">',
+    '    <div style="display:flex;justify-content:space-between;align-items:center">',
+    '      <span onclick="_gmToggleLvlSection()" style="cursor:pointer;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#e2e8f0">',
+    '        <span class="gm-checkbox'+(gm.lvlOn?' gm-checked':'')+'" id="gm-cb-lvl">'+(gm.lvlOn?'☑':'☐')+'</span>🏷️ 考级分类</span>',
+    '      <span class="gm-arrow" onclick="_gmToggle(this,\'gm-lvl-body\')">▼</span>',
+    '    </div>',
+    '    <div id="gm-lvl-body" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;'+(gm.lvlOn?'':'opacity:0.35;pointer-events:none')+'">',
+        lvls.map(function(l){var a=gm.selLvls.indexOf(l)>=0;return '<span class="gm-tag'+(a?' gm-tag-on':'')+'" onclick="_gmToggleLvl(this,\''+l+'\')" style="background:'+(a?'linear-gradient(135deg,#e94560,#ff6b9d)':'rgba(255,255,255,0.06)')+';color:'+(a?'#fff':'#64748b')+'">'+l+'</span>'}).join(''),
+    '    </div>',
+    '  </div>',
+    
+    // 场景分类
+    '  <div class="gm-section">',
+    '    <div style="display:flex;justify-content:space-between;align-items:center">',
+    '      <span onclick="_gmToggleCatSection()" style="cursor:pointer;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#e2e8f0">',
+    '        <span class="gm-checkbox'+(gm.catOn?' gm-checked':'')+'" id="gm-cb-cat">'+(gm.catOn?'☑':'☐')+'</span>📂 场景分类</span>',
+    '      <span class="gm-arrow" onclick="_gmToggle(this,\'gm-cat-body\')">▼</span>',
+    '    </div>',
+    '    <div id="gm-cat-body" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;max-height:140px;overflow-y:auto;'+(gm.catOn?'':'opacity:0.35;pointer-events:none')+'">',
+        cats.map(function(c){var a=gm.selCats.indexOf(c)>=0;return '<span class="gm-tag'+(a?' gm-tag-on':'')+'" onclick="_gmToggleCat(this,\''+c.replace(/'/g,"\\'")+'\')" style="background:'+(a?'linear-gradient(135deg,#e94560,#ff6b9d)':'rgba(255,255,255,0.06)')+';color:'+(a?'#fff':'#64748b')+'">'+c+'</span>'}).join(''),
+    '    </div>',
+    '  </div>',
+    
+    '  </div>',
+    
+    // ---- 游戏卡片 ----
+    '  <div style="display:flex;flex-direction:column;gap:10px;width:100%;max-width:320px;animation:gmFadeIn 0.4s ease-out 0.15s both;margin-top:8px">',
+    '    <div class="gm-card gm-card-climb" onclick="Game.start()">',
+    '      <div class="gm-card-icon">🏔️</div>',
+    '      <div class="gm-card-title">爬塔闯关</div>',
+    '      <div class="gm-card-desc">答对向上跳 · 答错摔下来<br>老师/家长/同事/课长 Boss 战</div>',
+    '    </div>',
+    '    <div class="gm-card gm-card-boxing" onclick="window.GameBoxing.start()">',
+    '      <div class="gm-card-icon">🥊</div>',
+    '      <div class="gm-card-title">单词拳击</div>',
+    '      <div class="gm-card-desc">第一人称视角 · 出拳KO对手<br>连击越高伤害越高</div>',
+    '    </div>',
+    '  </div>',
+    
+    '  <div style="margin-top:14px;font-size:10px;color:#3a3a5a">',
+    '    爬塔最高层: '+(localStorage.getItem('tower_high_floor')||'无')+' | 拳击最高分: '+(localStorage.getItem('bx_high_score')||'无'),
+    '  </div>',
+    '</div>',
+  ].join('\n');
 }
 
 // 爬塔原有初始化内容移到 showTowerClimb
@@ -1483,6 +1604,13 @@ function showTowerClimb() {
 
 function start() {
   try {
+  // 从 localStorage 读取单词范围设置
+  var gm = JSON.parse(localStorage.getItem('game_settings') || '{}');
+  state.selectedLevels = gm.lvlOn !== false && gm.selLvls && gm.selLvls.length
+    ? gm.selLvls.map(function(l){return l.toUpperCase().replace(/^N/,'N')})
+    : ['N5','N4','N3','N2','N1'];
+  state.selectedCategories = gm.catOn && gm.selCats && gm.selCats.length ? gm.selCats : [];
+  
   // 如果还没渲染爬塔界面（从游戏菜单启动），先渲染
   if (!document.getElementById('gh-world')) {
     showTowerClimb();

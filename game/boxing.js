@@ -91,6 +91,7 @@ let state = {
   score: 0,
   isPlaying: false,
   selectedLevels: ['N5', 'N4', 'N3', 'N2', 'N1'],
+  selectedCategories: [],
   quizMode: 'word',
   currentOpponent: null,
   animating: false,
@@ -130,6 +131,7 @@ function hasChinese(str) {
 
 let _cachedByLevel = {};
 let _cachedByLevelCn = {};
+let _cachedByCategory = {};
 
 function cacheByLevel() {
   if (Object.keys(_cachedByLevel).length > 0) return;
@@ -140,6 +142,10 @@ function cacheByLevel() {
     _cachedByLevel[lv].push(w);
     if (!_cachedByLevelCn[lv]) _cachedByLevelCn[lv] = [];
     if (hasChinese(w.meaning)) _cachedByLevelCn[lv].push(w);
+    // 按场景分类缓存
+    const cat = w.category || '未分类';
+    if (!_cachedByCategory[cat]) _cachedByCategory[cat] = [];
+    _cachedByCategory[cat].push(w);
   }
 }
 
@@ -165,6 +171,12 @@ function getRandomWords(level, exclude, count = 3) {
     }
   }
   if (pool.length === 0) pool = _cachedByLevel[level] || _cachedByLevel['N5'];
+  
+  // 按场景分类过滤
+  if (state.selectedCategories && state.selectedCategories.length > 0) {
+    pool = pool.filter(function(w) { return state.selectedCategories.indexOf(w.category) >= 0; });
+  }
+  
   const shuffled = [...pool].sort(() => Math.random() - 0.5);
   const result = [];
   for (const w of shuffled) {
@@ -277,6 +289,11 @@ function generateQuestion() {
     pool = source[level] || _cachedByLevel['N5'];
   }
   if (!pool || pool.length === 0) return null;
+
+  // 按场景分类过滤
+  if (state.selectedCategories && state.selectedCategories.length > 0) {
+    pool = pool.filter(function(w) { return state.selectedCategories.indexOf(w.category) >= 0; });
+  }
 
   const word = pool[Math.floor(Math.random() * pool.length)];
   const distractors = getRandomWords(level, word.id, 2); // 拳击只出3选项
@@ -1038,6 +1055,13 @@ function gameOver() {
 // ============================================================
 function start() {
   cacheByLevel();
+  // 从 localStorage 读取单词范围设置
+  var gm = JSON.parse(localStorage.getItem('game_settings') || '{}');
+  state.selectedLevels = gm.lvlOn !== false && gm.selLvls && gm.selLvls.length
+    ? gm.selLvls.map(function(l){return l.toUpperCase().replace(/^N/,'N')})
+    : ['N5','N4','N3','N2','N1'];
+  state.selectedCategories = gm.catOn && gm.selCats && gm.selCats.length ? gm.selCats : [];
+  
   state.round = 1;
   state.opponentIndex = 0;
   state.hp = MAX_HP;
