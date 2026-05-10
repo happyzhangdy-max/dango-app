@@ -90,7 +90,7 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
 .sc { background:#1a1a2e; border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:14px; text-align:center; }
 .sn { font-size:22px; font-weight:700; }
 .sl { font-size:11px; color:#888; margin-top:3px; }
-.h-entries { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:16px; }
+.h-entries { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin-bottom:16px; }
 .h-entry { background:linear-gradient(135deg,#1a1a3e,#0f3460); border:1px solid rgba(168,85,247,0.3); border-radius:14px; padding:24px 14px; cursor:pointer; text-align:center; transition:all 0.3s; position:relative; overflow:hidden; }
 .h-entry:hover { transform:translateY(-3px); box-shadow:0 8px 30px rgba(168,85,247,0.2); }
 .h-entry-vocab { border-color:rgba(233,69,96,0.3); }
@@ -107,6 +107,9 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
 .h-entry-grammar .h-title { background:linear-gradient(135deg,#f5a623,#ffd700); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
 .h-entry-review .h-title { background:linear-gradient(135deg,#4ecca3,#2ecc71); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
 .h-entry-game .h-title { background:linear-gradient(135deg,#a855f7,#ec4899); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.h-entry-autoplay { border-color:rgba(233,69,96,0.3); }
+.h-entry-autoplay:hover { border-color:#e94560; box-shadow:0 8px 30px rgba(233,69,96,0.2); }
+.h-entry-autoplay .h-title { background:linear-gradient(135deg,#e94560,#ff6b9d); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
 .h-sub { font-size:12px; color:#888; margin-top:6px; letter-spacing:1px; }
 .review-tabs { display:flex; gap:8px; margin-bottom:14px; }
 .review-tab { flex:1; background:#1a1a2e; border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:10px 12px; cursor:pointer; text-align:center; font-size:13px; font-weight:600; color:#888; transition:all 0.2s; }
@@ -309,7 +312,7 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
   .vg .vc{ padding:10px 55px 38px 8px; }
   /* 首页卡片 */
   .qg{ grid-template-columns:1fr 1fr !important; gap:8px; }
-  .h-entries{ grid-template-columns:1fr; gap:8px; }
+  .h-entries{ grid-template-columns:repeat(3,1fr); gap:8px; }
   .h-entry{ padding:18px 14px; }
   .ac{ padding:12px; }
   .ac .ai{ font-size:24px; }
@@ -394,38 +397,32 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
     <div class="sc"><div class="sn" id="s2">0</div><div class="sl">今日待复习</div></div>
     <div class="sc"><div class="sn" id="s3">0</div><div class="sl">已掌握语法</div></div>
   </div>
-  <!-- 背单词快速入口 -->
-  <div class="vwb" onclick="go('autoplay')" style="cursor:pointer;padding:20px 20px;margin-bottom:12px;background:linear-gradient(135deg,#1a1a3e,#16213e);border:1px solid rgba(233,69,96,0.3);border-radius:16px;transition:all 0.3s" onmouseover="this.style.borderColor='#e94560'" onmouseout="this.style.borderColor='rgba(233,69,96,0.3)'">
-    <div style="display:flex;align-items:center;gap:12px">
-      <div style="font-size:32px">📚</div>
-      <div style="flex:1">
-        <div style="font-size:18px;font-weight:700;color:#e2e8f0">背单词</div>
-        <div style="font-size:11px;color:#94a3b8">考级分类 · 场景分类 · 自动播放</div>
-      </div>
-      <div style="font-size:18px;color:#64748b">›</div>
-    </div>
-  </div>
-  <!-- 三大核心入口 -->
+  <!-- 核心入口 -->
   <div class="h-entries">
     <div class="h-entry h-entry-vocab" onclick="go('vocab')">
       <div class="h-icon">📖</div>
       <div class="h-title">单词墙</div>
       <div class="h-sub">N5 → N1 全部词汇 · 浏览筛选</div>
     </div>
-    <div class="h-entry h-entry-grammar" onclick="go('grammar')">
-      <div class="h-icon">📝</div>
-      <div class="h-title">背语法</div>
-      <div class="h-sub">N3 / N2 常考句型 · 精讲例句</div>
+    <div class="h-entry h-entry-game" onclick="go('game')">
+      <div class="h-icon">🎮</div>
+      <div class="h-title">单词闯关</div>
+      <div class="h-sub">爬塔答题 · 拳击对战 · 边玩边学</div>
     </div>
     <div class="h-entry h-entry-review" onclick="go('review')">
       <div class="h-icon">🔄</div>
       <div class="h-title">复习</div>
       <div class="h-sub">遗忘曲线 · 按学习次数巩固</div>
     </div>
-    <div class="h-entry h-entry-game" onclick="go('game')">
-      <div class="h-icon">🎮</div>
-      <div class="h-title">单词闯关</div>
-      <div class="h-sub">爬塔答题 · N5→N1 词库任选</div>
+    <div class="h-entry h-entry-grammar" onclick="go('grammar')">
+      <div class="h-icon">📝</div>
+      <div class="h-title">背语法</div>
+      <div class="h-sub">N3 / N2 常考句型 · 精讲例句</div>
+    </div>
+    <div class="h-entry h-entry-autoplay" onclick="go('autoplay')">
+      <div class="h-icon">📚</div>
+      <div class="h-title">背单词</div>
+      <div class="h-sub">考级分类 · 场景分类 · 自动播放</div>
     </div>
   </div>
   <!-- 继续学习 -->

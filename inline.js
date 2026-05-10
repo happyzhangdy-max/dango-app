@@ -515,38 +515,47 @@ function renderAutoPlayOptions(){
   var saved=JSON.parse(localStorage.getItem('ap_settings')||'{}');
   var selLvls=saved.levels||['n5','n4','n3'];
   var selCats=saved.categories||[];
-  var speed=saved.speed||3;
+  var speed=saved.speed||1;
   var count=saved.count||50;
+  var lvlOn=saved.lvlOn!==false; // 默认开启
+  var catOn=saved.catOn||false;   // 默认关闭（需要显式开启）
   c.innerHTML='<div style="padding:20px;max-width:600px;margin:0 auto">'
     +'<div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">'
     +'<button onclick="go(\'home\')" style="background:none;border:none;color:#94a3b8;font-size:20px;cursor:pointer;padding:4px 8px">←</button>'
     +'<div style="font-size:20px;font-weight:700;color:#e2e8f0">📚 背单词 · 自动播放</div>'
     +'</div>'
-    // 考级分类
-    +'<div class="ap-section" onclick="_apToggle(this,\'ap-lvl-body\')" style="cursor:pointer;padding:14px 16px;background:rgba(255,255,255,0.03);border-radius:12px;margin-bottom:12px;border:1px solid rgba(255,255,255,0.06)">'
+    // 考级分类（带勾选）
+    +'<div class="ap-section" style="padding:14px 16px;background:rgba(255,255,255,0.03);border-radius:12px;margin-bottom:12px;border:1px solid rgba(255,255,255,0.06)">'
     +'<div style="display:flex;justify-content:space-between;align-items:center">'
-    +'<span style="font-size:14px;font-weight:600;color:#e2e8f0">🏷️ 考级分类</span>'
-    +'<span id="ap-lvl-arrow" style="color:#64748b;font-size:14px;transition:transform 0.2s">▼</span>'
+    +'<span onclick="_apToggleLvlSection()" style="cursor:pointer;display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:#e2e8f0">'
+    +'<span class="ap-checkbox'+(lvlOn?' ap-checked':'')+'" id="ap-cb-lvl">'+(lvlOn?'☑':'☐')+'</span>🏷️ 考级分类</span>'
+    +'<span id="ap-lvl-arrow" onclick="_apToggle(document.getElementById(\'ap-lvl-section\'),\'ap-lvl-body\')" style="color:#64748b;font-size:14px;cursor:pointer;transition:transform 0.2s">▼</span>'
     +'</div>'
-    +'<div id="ap-lvl-body" style="margin-top:12px;display:flex;flex-wrap:wrap;gap:8px">'
+    +'<div id="ap-lvl-body" style="margin-top:12px;display:flex;flex-wrap:wrap;gap:8px;'+(lvlOn?'':'opacity:0.35;pointer-events:none')+'">'
     +lvls.map(function(l){var a=selLvls.indexOf(l)>=0;return '<span class="ap-tag'+(a?' ap-tag-on':'')+'" data-lvl="'+l+'" onclick="_apToggleLvl(this,\''+l+'\')" style="display:inline-block;padding:6px 16px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;'+(a?'background:linear-gradient(135deg,#e94560,#ff6b9d);color:#fff':'background:rgba(255,255,255,0.06);color:#64748b')+'">'+lvlNames[l]+'</span>'}).join('')
     +'</div>'
     +'</div>'
-    // 场景分类
-    +'<div class="ap-section" onclick="_apToggle(this,\'ap-cat-body\')" style="cursor:pointer;padding:14px 16px;background:rgba(255,255,255,0.03);border-radius:12px;margin-bottom:12px;border:1px solid rgba(255,255,255,0.06)">'
+    // 场景分类（带勾选）
+    +'<div class="ap-section" style="padding:14px 16px;background:rgba(255,255,255,0.03);border-radius:12px;margin-bottom:12px;border:1px solid rgba(255,255,255,0.06)">'
     +'<div style="display:flex;justify-content:space-between;align-items:center">'
-    +'<span style="font-size:14px;font-weight:600;color:#e2e8f0">📂 场景分类</span>'
-    +'<span style="display:flex;gap:8px;align-items:center"><span onclick="event.stopPropagation();_apCatAll()" style="font-size:11px;color:#4ecca3;cursor:pointer">全选</span><span id="ap-cat-arrow" style="color:#64748b;font-size:14px;margin-left:4px;transition:transform 0.2s">▼</span></span>'
+    +'<span onclick="_apToggleCatSection()" style="cursor:pointer;display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:#e2e8f0">'
+    +'<span class="ap-checkbox'+(catOn?' ap-checked':'')+'" id="ap-cb-cat">'+(catOn?'☑':'☐')+'</span>📂 场景分类</span>'
+    +'<span style="display:flex;gap:6px;align-items:center">'
+    +(catOn?'<span onclick="event.stopPropagation();_apCatAll()" style="font-size:11px;color:#4ecca3;cursor:pointer">全选</span>':'')
+    +'<span id="ap-cat-arrow" onclick="_apToggle(document.getElementById(\'ap-cat-section\'),\'ap-cat-body\')" style="color:#64748b;font-size:14px;cursor:pointer;transition:transform 0.2s">▼</span></span>'
     +'</div>'
-    +'<div id="ap-cat-body" style="margin-top:12px;display:flex;flex-wrap:wrap;gap:6px">'
+    +'<div id="ap-cat-body" style="margin-top:12px;display:flex;flex-wrap:wrap;gap:6px;'+(catOn?'':'opacity:0.35;pointer-events:none')+'">'
     +ALL_CATEGORIES.map(function(cat){var a=selCats.length===0||selCats.indexOf(cat)>=0;return '<span class="ap-tag'+(a?' ap-tag-on':'')+'" data-cat="'+cat.replace(/'/g,'\\\'')+'" onclick="_apToggleCat(this)" style="display:inline-block;padding:5px 12px;border-radius:16px;font-size:11px;cursor:pointer;transition:all 0.2s;'+(a?'background:linear-gradient(135deg,#a855f7,#7c3aed);color:#fff':'background:rgba(255,255,255,0.06);color:#64748b')+'">'+cat+'</span>'}).join('')
     +'</div>'
     +'</div>'
-    // 速度
+    // 播放间隔
     +'<div style="padding:14px 16px;background:rgba(255,255,255,0.03);border-radius:12px;margin-bottom:12px;border:1px solid rgba(255,255,255,0.06)">'
-    +'<div style="font-size:14px;font-weight:600;color:#e2e8f0;margin-bottom:10px">⏱️ 播放速度</div>'
+    +'<div style="font-size:14px;font-weight:600;color:#e2e8f0;margin-bottom:10px">⏱️ 播放间隔</div>'
     +'<div style="display:flex;gap:8px">'
-    +[2,3,4,5].map(function(s){return '<span class="ap-tag'+(speed===s?' ap-tag-on':'')+'" data-speed="'+s+'" onclick="_apSetSpeed(this,'+s+')" style="display:inline-block;padding:6px 16px;border-radius:20px;font-size:13px;cursor:pointer;transition:all 0.2s;'+(speed===s?'background:linear-gradient(135deg,#4ecca3,#2ecc71);color:#fff':'background:rgba(255,255,255,0.06);color:#64748b')+'">'+s+'秒/词</span>'}).join('')
+    +[[0,'0秒'],[0.5,'0.5秒'],[1,'1秒'],[2,'2秒'],[3,'3秒']].map(function(s){
+      var val=s[0],label=s[1];
+      return '<span class="ap-tag'+(speed===val?' ap-tag-on':'')+'" data-speed="'+val+'" onclick="_apSetSpeed(this,'+val+')" style="display:inline-block;padding:6px 16px;border-radius:20px;font-size:13px;cursor:pointer;transition:all 0.2s;'+(speed===val?'background:linear-gradient(135deg,#4ecca3,#2ecc71);color:#fff':'background:rgba(255,255,255,0.06);color:#64748b')+'">'+label+'</span>'
+    }).join('')
     +'</div>'
     +'</div>'
     // 数量
@@ -563,7 +572,36 @@ function renderAutoPlayOptions(){
 }
 
 // 展开/收起
-function _apToggle(el,id){var body=document.getElementById(id);if(!body)return;var arrow=el.querySelector('[id$="-arrow"]');if(body.style.display==='none'||body.style.display===''){body.style.display='flex';if(arrow)arrow.style.transform='rotate(0deg)'}else{body.style.display='none';if(arrow)arrow.style.transform='rotate(-90deg)'}}
+function _apToggle(triggerEl,bodyId){
+  var body=document.getElementById(bodyId);if(!body)return;
+  var arrow=triggerEl?triggerEl.querySelector('[id$="-arrow"]'):null;
+  if(!arrow)arrow=document.getElementById(bodyId.replace('body','arrow'));
+  if(body.style.display==='none'||body.style.display===''){
+    body.style.display='flex';
+    if(arrow)arrow.style.transform='rotate(0deg)'
+  }else{
+    body.style.display='none';
+    if(arrow)arrow.style.transform='rotate(-90deg)'
+  }
+}
+
+// 考级分类勾选切换
+function _apToggleLvlSection(){
+  var saved=JSON.parse(localStorage.getItem('ap_settings')||'{}');
+  saved.lvlOn=!saved.lvlOn;
+  if(!saved.lvlOn&&!saved.catOn){saved.lvlOn=true} // 至少保留一个
+  localStorage.setItem('ap_settings',JSON.stringify(saved));
+  renderAutoPlayOptions();
+}
+
+// 场景分类勾选切换
+function _apToggleCatSection(){
+  var saved=JSON.parse(localStorage.getItem('ap_settings')||'{}');
+  saved.catOn=!saved.catOn;
+  if(!saved.lvlOn&&!saved.catOn){saved.catOn=true} // 至少保留一个
+  localStorage.setItem('ap_settings',JSON.stringify(saved));
+  renderAutoPlayOptions();
+}
 
 // 考级点击
 function _apToggleLvl(el,lvl){
@@ -592,7 +630,11 @@ function _apToggleCat(el){
 }
 
 // 全选场景
-function _apCatAll(){}
+function _apCatAll(){
+  var saved=JSON.parse(localStorage.getItem('ap_settings')||'{}');
+  saved.categories=[];localStorage.setItem('ap_settings',JSON.stringify(saved));
+  document.querySelectorAll('#ap-cat-body .ap-tag').forEach(function(el){el.classList.add('ap-tag-on');el.style.background='linear-gradient(135deg,#a855f7,#7c3aed)';el.style.color='#fff'});
+}
 
 // 速度
 function _apSetSpeed(el,s){
@@ -615,13 +657,15 @@ function startVocabAutoPlay(){
   var saved=JSON.parse(localStorage.getItem('ap_settings')||'{}');
   var selLvls=saved.levels||['n5','n4','n3'];
   var selCats=saved.categories||[];
-  var speed=saved.speed||3;
+  var speed=saved.speed||1;
   var count=saved.count||50;
+  var lvlOn=saved.lvlOn!==false;
+  var catOn=saved.catOn||false;
   
   // 过滤词汇
   var pool=VOCAB.filter(function(v){
-    if(selLvls.indexOf(v.level)<0)return false;
-    if(selCats.length>0&&selCats.indexOf(v.category)<0)return false;
+    if(lvlOn&&selLvls.indexOf(v.level)<0)return false;
+    if(catOn&&selCats.length>0&&selCats.indexOf(v.category)<0)return false;
     return true;
   });
   if(pool.length===0){showT('没有符合条件的词汇，请调整筛选条件');return}
