@@ -154,12 +154,20 @@ function cacheByLevel() {
 }
 
 function getRandomWords(level, exclude, count = 3, useCn = true) {
-  // 从所有选中词库取干扰项
+  // 从同难度层级的选中词库取干扰项
   let pool = [];
   const source = (useCn && state.quizMode === 'word') ? _cachedByLevelCn : _cachedByLevel;
-  for (const lv of state.selectedLevels) {
-    const p = source[lv];
+  // 只取当前难度级别的词，确保干扰项与正确答案同级别
+  if (state.selectedLevels.includes(level)) {
+    const p = source[level];
     if (p && p.length) pool = pool.concat(p);
+  }
+  // 回退：取选中词库中最接近级别的词
+  if (pool.length < count) {
+    for (const lv of state.selectedLevels) {
+      const p = source[lv];
+      if (p && p.length) pool = pool.concat(p);
+    }
   }
   if (pool.length === 0) {
     pool = _cachedByLevel[level] || _cachedByLevel['N5'];
@@ -331,15 +339,23 @@ const SFX = {};
 function generateQuestion() {
   const diff = getDifficulty(state.floor);
   const level = diff.level;
-  // 从选中的词库中获取所有词
+  // 从选中的词库中获取当前楼层难度的词
   let pool = [];
   const source = (state.quizMode === 'word') ? _cachedByLevelCn : _cachedByLevel;
-  for (const lv of state.selectedLevels) {
-    const p = source[lv];
+  // 优先：只取当前楼层难度级别的词
+  if (state.selectedLevels.includes(level)) {
+    const p = source[level];
     if (p && p.length) pool = pool.concat(p);
   }
+  // 回退：当前难度不在选中词库中，取选中词库中最接近的级别
   if (pool.length === 0) {
-    // 回退到当前楼层等级的词汇（也优先取中文）
+    for (const lv of state.selectedLevels) {
+      const p = source[lv];
+      if (p && p.length) pool = pool.concat(p);
+    }
+  }
+  // 二次回退：用楼层级别兜底
+  if (pool.length === 0) {
     const fallback = (state.quizMode === 'word') ? _cachedByLevelCn : _cachedByLevel;
     pool = fallback[level] || _cachedByLevel['N5'] || _cachedByLevelCn['N5'];
   }
@@ -458,21 +474,7 @@ function onCorrect() {
   //       下一题答对 → ❤️+1；答错 → 机会消失 + 😅提示
   let healed = false;
   
-  if (state.healPending) {
-    // 💊 机会已就绪，这题答对就回血
-    if (state.hp < state.maxHp) {
-      state.hp++;
-      healed = true;
-    }
-    state.healPending = false;
-    initHealTarget(); // 进入下一轮
-  }
-  
-  // combo 达标 → 激活回血机会（供下一题使用）
-  if (!state.healPending && state.hp < state.maxHp && state.combo >= state.healComboTarget) {
-    state.healPending = true;
-  }
-
+  // ⚠️ 重要：先处理 boss 战逻辑，boss 战期间不触发回血
   if (state.isBoss) {
     // Boss 战逻辑
     state.bossProgress++;
@@ -486,6 +488,9 @@ function onCorrect() {
       state.currentBossData = null;
       state.floor++;
       state.animType = 'bossClear';
+      // Boss 清掉后重置回血进度
+      state.combo = 0;
+      initHealTarget();
       renderWorld(state.floor);
       renderHUD();
       renderQuizFeedback(true);
@@ -493,7 +498,7 @@ function onCorrect() {
       setTimeout(() => { state.animating = false; nextRound(); }, 1500);
       return;
     }
-    // Boss 命中
+    // Boss 命中（未击倒）
     state.animType = 'bossHit';
     renderWorld(state.floor);
     renderHUD();
@@ -501,6 +506,22 @@ function onCorrect() {
     showFloatText('💥', '#ef4444', 38);
     setTimeout(() => { state.animating = false; nextRound(); }, 500);
     return;
+  }
+  
+  // ⚠️ 非 Boss 战 → 处理回血
+  if (state.healPending) {
+    // 💊 机会已就绪，这题答对就回血
+    if (state.hp < state.maxHp) {
+      state.hp++;
+      healed = true;
+    }
+    state.healPending = false;
+    initHealTarget(); // 进入下一轮
+  }
+  
+  // combo 达标 → 激活回血机会（供下一题使用）
+  if (!state.healPending && state.hp < state.maxHp && state.combo >= state.healComboTarget) {
+    state.healPending = true;
   }
 
   // 普通答对：玩家跳到上一层
@@ -552,14 +573,26 @@ function onCorrect() {
       state.animating = false;
       // Boss 出现浮字
       showFloatText(`${bossHere.boss.icon} ${bossHere.boss.name} 出现！`, bossHere.boss.color, 36);
-      // Boss 说随机台词
+      // Boss 说随机台词 — 用独立元素，不会被 renderWorld 清掉
       if (bossHere.boss.lines && bossHere.boss.lines.length > 0) {
         const line = bossHere.boss.lines[Math.floor(Math.random() * bossHere.boss.lines.length)];
-        setTimeout(() => {
-          showFloatText(`💬 "${line}"`, '#f5f5f5', 28);
-        }, 700);
+        const world = document.getElementById('gh-world');
+        if (world) {
+          const bubble = document.createElement('div');
+          bubble.textContent = `💬 ${line}`;
+          bubble.style.cssText = `
+            position:absolute; top:35%; left:50%; transform:translateX(-50%);
+            font-size:14px; font-weight:700; color:#fff;
+            background:rgba(0,0,0,0.75); padding:8px 16px; border-radius:12px;
+            border:1px solid rgba(255,255,255,0.15);
+            z-index:30; pointer-events:none; white-space:nowrap;
+            animation:fadeIn 0.4s ease-out;
+          `;
+          bubble.id = 'gh-boss-speech';
+          world.appendChild(bubble);
+        }
       }
-      setTimeout(nextRound, 1400);
+      setTimeout(nextRound, 2200);
     }, 500);
     return;
   }
@@ -580,8 +613,6 @@ function onWrong(index) {
   const hadHealChance = state.healPending;
   
   state.combo = 0;
-  state.hp--;
-  state.healPending = false;
   state.hp--;
   state.healPending = false; // 连击断了，回血机会消失
   
@@ -704,6 +735,10 @@ function showFloatText(text, color, size = 32) {
 function renderWorld(centerFloor) {
   const world = document.getElementById('gh-world');
   if (!world) return;
+  
+  // 清理 Boss 台词气泡（独立元素，不被 innerHTML 清掉）
+  const oldBubble = document.getElementById('gh-boss-speech');
+  if (oldBubble) oldBubble.remove();
   
   const center = centerFloor || state.floor;
   const half = Math.floor(VISIBLE_FLOORS / 2);
