@@ -1,11 +1,8 @@
 /**
- * boxing.js v1 — 第一人称单词拳击
+ * boxing.js v2 — 第一人称单词拳击（冠军之路）
  * 
- * 第一人称视角，日语单词从对手方向飞来
- * 正确答案作为"出拳目标"，答对挥拳暴击
- * 
- * 剧情：1~10R 业余拳手 → 11~20R 职业拳手
- * Boss：每 5 回合出现强力对手
+ * 第一人称视角，5个对手依次挑战：新人→业余→职业→明星→冠军
+ * 答对出拳，答错挨打，方向攻防系统
  */
 ;(function() {
 'use strict';
@@ -14,9 +11,9 @@
 // 常量
 // ============================================================
 const MAX_HP = 6;
-const ROUNDS_PER_OPPONENT = 3; // 每个对手挨 3 拳 KO
-const BOSS_INTERVAL = 5;       // 每 5 回合打 Boss
 const INSTANT_KO_STREAK = 20;  // 连续答对 20 道直接 KO
+const TAUNT_CHANCE = 0.22;     // 每回合嘲讽概率
+const TAUNT_MIN_INTERVAL = 3;  // 最少间隔 3 回合才出嘲讽
 
 const DIRECTIONS = [
   { id: 'upper', name: '上勾拳', icon: '⬆️' },
@@ -34,20 +31,36 @@ const DIFFICULTY_TABLE = [
 ];
 
 const OPPONENTS = [
-  // 普通对手
-  { id: 'rookie',    icon: '😤', name: '新人拳手', color: '#f59e0b', boss: false,
-    hitFace: '😵', koFace: '💀' },
-  { id: 'fighter',   icon: '😠', name: '格斗者',   color: '#ef4444', boss: false,
-    hitFace: '😫', koFace: '😵' },
-  { id: 'veteran',   icon: '🤨', name: '老手',     color: '#8b5cf6', boss: false,
-    hitFace: '😰', koFace: '💫' },
-  { id: 'champion',  icon: '🏆', name: '冠军',     color: '#ec4899', boss: false,
-    hitFace: '😱', koFace: '🤯' },
-  // Boss
-  { id: 'boss1',     icon: '👹', name: '拳王',     color: '#dc2626', boss: true,
-    hitFace: '😡', koFace: '😭' },
-  { id: 'boss2',     icon: '🥷', name: '忍者拳手', color: '#1d4ed8', boss: true,
-    hitFace: '😤', koFace: '😵' },
+  { id: 'rookie',    icon: '😤', name: '新人拳手', color: '#f59e0b',
+    hitFace: '😵', koFace: '💀', hp: 5,
+    size: 64, glow: 'none',
+    bgColor: 'rgba(245,158,11,0.05)',
+    tauntsCN: ['就这？给我挠痒痒呢', '你拳头是棉花做的吗', '我还没热身你就倒了？', '回家再练两年吧', '你这水平也来打拳击？'],
+    tauntsJP: ['その程度？', 'もっと強く！', 'まだまだだね', '練習して来いよ', '君には無理だ'] },
+  { id: 'amateur',   icon: '😠', name: '业余拳手', color: '#ef4444',
+    hitFace: '😫', koFace: '😵', hp: 6,
+    size: 70, glow: '0 0 10px rgba(239,68,68,0.3)',
+    bgColor: 'rgba(239,68,68,0.05)',
+    tauntsCN: ['有点意思…但不够', '看我怎么收拾你', '你的破绽太多了', '下一拳就把你打倒', '这种速度也太慢了'],
+    tauntsJP: ['面白いけど…', 'これで終わりだ', '遅すぎるよ', '隙だらけだ', '本気出せよ'] },
+  { id: 'pro',       icon: '🥊', name: '职业拳手', color: '#8b5cf6',
+    hitFace: '😰', koFace: '💫', hp: 7,
+    size: 78, glow: '0 0 15px rgba(139,92,246,0.4)',
+    bgColor: 'rgba(139,92,246,0.06)',
+    tauntsCN: ['职业赛场不是过家家', '你的动作我全看穿了', '这一拳教你做人', '实力差距就摆在这', '你只是运气好罢了'],
+    tauntsJP: ['プロの世界をなめるな', '全て見えている', '実力の差を見せてやる', '運だけじゃ勝てない', 'ここからが本番だ'] },
+  { id: 'star',      icon: '⭐', name: '明星拳手', color: '#ec4899',
+    hitFace: '😱', koFace: '🤯', hp: 8,
+    size: 82, glow: '0 0 20px rgba(236,72,153,0.5)',
+    bgColor: 'rgba(236,72,153,0.07)',
+    tauntsCN: ['观众都在看我呢', '你的表情真有趣', '这场表演该结束了', '我会让你输得体面', '和我对战是你的荣幸'],
+    tauntsJP: ['観客は私を見ている', 'そろそろ終わりにしよう', 'よくここまで来たね', 'だがここが限界だ', '華麗に決めてやる'] },
+  { id: 'champion',  icon: '👑', name: '冠军拳手', color: '#fbbf24',
+    hitFace: '😱', koFace: '💀', hp: 9,
+    size: 90, glow: '0 0 25px rgba(251,191,36,0.6), 0 0 50px rgba(251,191,36,0.2)',
+    bgColor: 'rgba(251,191,36,0.08)',
+    tauntsCN: ['挑战冠军？勇气可嘉', '你的旅程到此为止了', '王座不会让给任何人', '让你见识真正的拳击', '你是我见过最有毅力的对手……但还不够'],
+    tauntsJP: ['よく来たな挑戦者', '王者の力を見せてやる', '夢はここで終わりだ', '誇りに思え、ここまで来たことを', 'これが本当の強さだ'] },
 ];
 
 // ============================================================
@@ -55,18 +68,24 @@ const OPPONENTS = [
 // ============================================================
 let state = {
   round: 1,
+  opponentIndex: 0,          // 当前对手索引 (0~4)
   hp: MAX_HP, maxHp: MAX_HP,
-  opponentHp: ROUNDS_PER_OPPONENT, opponentMaxHp: ROUNDS_PER_OPPONENT,
+  opponentHp: 5, opponentMaxHp: 5,
   combo: 0, maxCombo: 0,
   score: 0,
   isPlaying: false,
-  isBoss: false,
   selectedLevels: ['N5', 'N4', 'N3', 'N2', 'N1'],
   quizMode: 'word',
   currentOpponent: null,
   animating: false,
   winStreak: 0,
-  consecutiveCorrect: 0, // 连续答对计数（用于 20 连胜 KO）
+  consecutiveCorrect: 0,
+  // 统计
+  startTime: 0,
+  totalAnswered: 0,
+  totalCorrect: 0,
+  // 嘲讽
+  roundsSinceTaunt: 0,
 };
 
 let currentQuestion = null;
@@ -261,7 +280,7 @@ function generateQuestion() {
     displayReading: word.reading || '',
     displaySentence: word.ex_jp || '',
     displayMeaning: word.meaning || '',
-    timeLimit: state.isBoss ? diff.time - 1000 : diff.time,
+    timeLimit: diff.time,
     level,
   };
 }
@@ -270,16 +289,12 @@ function generateQuestion() {
 // 对手选择
 // ============================================================
 function pickOpponent() {
-  const isBoss = state.round % BOSS_INTERVAL === 0;
-  const bossPool = OPPONENTS.filter(o => o.boss);
-  const normalPool = OPPONENTS.filter(o => !o.boss);
-  const pool = isBoss ? bossPool : normalPool;
-  const opp = pool[Math.floor(Math.random() * pool.length)];
-  state.isBoss = isBoss;
-  state.opponentHp = ROUNDS_PER_OPPONENT + (isBoss ? 2 : 0); // Boss 多 2 血
-  state.opponentMaxHp = state.opponentHp;
+  const idx = Math.min(state.opponentIndex, OPPONENTS.length - 1);
+  const opp = OPPONENTS[idx];
   state.currentOpponent = opp;
-  if (isBoss) SFX.bossAppear();
+  state.opponentHp = opp.hp;
+  state.opponentMaxHp = opp.hp;
+  state.roundsSinceTaunt = 0;
 }
 
 // ============================================================
@@ -335,6 +350,15 @@ function renderRing() {
         0%,100% { opacity:1; transform:scale(1); }
         50% { opacity:0.7; transform:scale(1.05); }
       }
+      @keyframes bxSpeechIn {
+        0% { opacity:0; transform:translate(-50%,10px) scale(0.8); }
+        50% { opacity:1; transform:translate(-50%,0) scale(1.05); }
+        100% { opacity:1; transform:translate(-50%,0) scale(1); }
+      }
+      @keyframes bxCrownGlow {
+        0%,100% { filter:drop-shadow(0 0 8px #fbbf24); }
+        50% { filter:drop-shadow(0 0 20px #fbbf24) drop-shadow(0 0 40px #f59e0b); }
+      }
       .bx-ring {
         display:flex; flex-direction:column; height:100%;
         background:radial-gradient(ellipse at 50% 0%, #1a1a2e 0%, #0a0a18 100%);
@@ -373,16 +397,20 @@ function renderRing() {
       <!-- 对手区 -->
       <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;min-height:0">
         <!-- 对手血量 -->
-        <div style="width:140px;height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;margin-bottom:6px">
-          <div style="height:100%;width:${oppHpPct}%;background:linear-gradient(90deg,#22c55e,#ef4444);border-radius:3px;transition:width 0.3s ease-out" id="bx-opp-hp-bar"></div>
+        <div style="width:160px;height:8px;background:rgba(255,255,255,0.08);border-radius:4px;overflow:hidden;margin-bottom:6px">
+          <div style="height:100%;width:${oppHpPct}%;background:linear-gradient(90deg,#22c55e,#ef4444);border-radius:4px;transition:width 0.3s ease-out" id="bx-opp-hp-bar"></div>
         </div>
-        <div style="font-size:10px;color:#94a3b8;margin-bottom:10px" id="bx-opp-name">${opp.icon} ${opp.name}</div>
+        <div style="font-size:11px;color:#94a3b8;margin-bottom:6px" id="bx-opp-name">${opp.icon} ${opp.name}</div>
         
-        <!-- 对手表情 -->
-        <div id="bx-opp-face" style="font-size:72px;margin-bottom:6px;transition:all 0.15s;user-select:none;line-height:1">
+        <!-- 对手表情（尺寸和光效随对手变化） -->
+        <div id="bx-opp-face" style="font-size:${opp.size || 72}px;margin-bottom:2px;transition:all 0.15s;user-select:none;line-height:1;filter:drop-shadow(${opp.glow || 'none'});animation:${state.opponentIndex >= 4 ? 'bxCrownGlow 2s ease-in-out infinite' : 'none'}">
           ${opp.icon}
         </div>
         <div style="font-size:10px;color:#64748b">👊 ${state.opponentHp}/${state.opponentMaxHp}</div>
+        
+        <!-- 嘲讽气泡 -->
+        <div id="bx-taunt" style="position:absolute;top:5%;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.85);color:#fff;padding:8px 16px;border-radius:12px;font-size:14px;font-weight:600;max-width:260px;text-align:center;pointer-events:none;opacity:0;z-index:15;border:1px solid rgba(255,255,255,0.1);box-shadow:0 4px 20px rgba(0,0,0,0.5)">
+        </div>
         
         <!-- 浮字区 -->
         <div id="bx-float" style="position:absolute;top:35%;left:50%;transform:translateX(-50%);font-size:36px;font-weight:900;pointer-events:none;z-index:5;text-shadow:0 0 40px rgba(255,255,255,0.3)"></div>
@@ -486,10 +514,13 @@ function handleAnswer(index) {
 }
 
 function onCorrect(index) {
+  state.totalAnswered++;
+  state.totalCorrect++;
   state.combo++;
   state.consecutiveCorrect++;
   if (state.combo > state.maxCombo) state.maxCombo = state.combo;
   state.score += 10 * state.combo;
+  tryTaunt();
   
   // 方向系统：我方随机出拳 vs 对方随机防3方向
   const punchIdx = Math.floor(Math.random() * 4);
@@ -578,10 +609,24 @@ function onCorrect(index) {
     state.round++;
     state.consecutiveCorrect = 0; // KO 后重置连胜计数
     
-    showFloat('💥 KO！+' + (state.isBoss ? 200 : 100), '#22c55e');
-    state.score += state.isBoss ? 200 : 100;
+    const bonus = 50 + state.opponentIndex * 30; // 越往后奖励越高
+    showFloat('💥 KO！+' + bonus, '#22c55e');
+    state.score += bonus;
     
     state.combo = 0;
+    
+    // 已击败冠军 → 胜利
+    if (state.opponentIndex >= OPPONENTS.length - 1) {
+      setTimeout(() => {
+        state.animating = false;
+        victoryScreen();
+      }, 1500);
+      updateHUD();
+      return;
+    }
+    
+    // 切换到下一对手
+    state.opponentIndex++;
     
     setTimeout(() => {
       state.animating = false;
@@ -602,8 +647,10 @@ function onCorrect(index) {
 }
 
 function onWrong(index) {
+  state.totalAnswered++;
   state.combo = 0;
   state.consecutiveCorrect = 0;
+  tryTaunt();
   
   // 方向系统：对方随机攻1方向 vs 我方随机防1方向
   const attackIdx = Math.floor(Math.random() * 4);
@@ -680,6 +727,44 @@ function showFloat(text, color) {
   el.style.animation = 'none';
   void el.offsetHeight;
   el.style.animation = 'bxFloatUp 0.8s ease-out forwards';
+}
+
+// ============================================================
+// 嘲讽系统
+// ============================================================
+function showTaunt() {
+  const opp = state.currentOpponent;
+  if (!opp || !opp.tauntsCN) return;
+  
+  // 随机选中文或日文
+  const useJP = Math.random() < 0.5;
+  const pool = useJP ? opp.tauntsJP : opp.tauntsCN;
+  const text = pool[Math.floor(Math.random() * pool.length)];
+  
+  const el = document.getElementById('bx-taunt');
+  if (!el) return;
+  el.textContent = '💬 ' + text;
+  el.style.animation = 'none';
+  void el.offsetHeight;
+  el.style.animation = 'bxSpeechIn 0.3s ease-out forwards';
+  el.style.opacity = '1';
+  
+  // 2.5 秒后消失
+  setTimeout(() => {
+    if (el) {
+      el.style.opacity = '0';
+      el.style.animation = 'none';
+    }
+  }, 2500);
+}
+
+function tryTaunt() {
+  state.roundsSinceTaunt++;
+  if (state.roundsSinceTaunt < TAUNT_MIN_INTERVAL) return;
+  if (Math.random() < TAUNT_CHANCE) {
+    showTaunt();
+    state.roundsSinceTaunt = 0;
+  }
 }
 
 // ============================================================
@@ -771,6 +856,7 @@ function startTimer() {
 function onTimeout() {
   if (state.animating) return;
   state.animating = true;
+  state.totalAnswered++;
   state.consecutiveCorrect = 0;
   SFX.wrong();
   
@@ -796,6 +882,93 @@ function onTimeout() {
   }
 }
 
+// ============================================================
+// 胜利画面
+// ============================================================
+function victoryScreen() {
+  state.isPlaying = false;
+  if (timerId) { clearInterval(timerId); timerId = null; }
+  
+  const elapsed = Math.floor((Date.now() - state.startTime) / 1000);
+  const mins = Math.floor(elapsed / 60);
+  const secs = elapsed % 60;
+  const accuracy = state.totalAnswered > 0
+    ? Math.round(state.totalCorrect / state.totalAnswered * 100)
+    : 0;
+  
+  const container = document.getElementById('p-game');
+  if (!container) return;
+  
+  const isHighScore = state.score > (parseInt(localStorage.getItem('bx_high_score') || '0'));
+  if (isHighScore) localStorage.setItem('bx_high_score', state.score);
+  
+  container.innerHTML = `
+    <style>
+      @keyframes bxChampionPulse {
+        0% { transform:scale(1); text-shadow:0 0 20px #fbbf24; }
+        50% { transform:scale(1.05); text-shadow:0 0 40px #fbbf24,0 0 80px #f59e0b; }
+        100% { transform:scale(1); text-shadow:0 0 20px #fbbf24; }
+      }
+      @keyframes bxChampionBg {
+        0% { background-position:0% 50%; }
+        50% { background-position:100% 50%; }
+        100% { background-position:0% 50%; }
+      }
+      @keyframes bxStars {
+        0% { transform:translateY(0) rotate(0deg); opacity:0; }
+        50% { opacity:1; }
+        100% { transform:translateY(-60px) rotate(360deg); opacity:0; }
+      }
+    </style>
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:20px 30px;text-align:center;background:linear-gradient(-45deg,#1a1a2e,#16213e,#0f3460,#1a1a2e);background-size:400% 400%;animation:bxChampionBg 4s ease infinite;position:relative;overflow:hidden">
+      
+      <!-- 五彩纸屑 -->
+      <div style="position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;overflow:hidden">
+        ${'⭐🌟✨💫'.split('').map((s,i) => 
+          '<div style="position:absolute;top:' + (Math.random()*30+5) + '%;left:' + (Math.random()*80+10) + '%;font-size:' + (16+Math.random()*20) + 'px;animation:bxStars ' + (1.5+Math.random()*2) + 's ease-out ' + (Math.random()*0.5) + 's forwards">' + s + '</div>'
+        ).join('')}
+      </div>
+      
+      <div style="font-size:48px;margin-bottom:8px;animation:bxChampionPulse 1.5s ease-in-out infinite">👑</div>
+      <div style="font-size:28px;font-weight:900;background:linear-gradient(90deg,#fbbf24,#f59e0b,#fbbf24);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px;letter-spacing:2px">恭喜获得冠军！</div>
+      <div style="font-size:13px;color:#94a3b8;margin-bottom:20px">你击败了所有对手，站上了顶峰！</div>
+      
+      <!-- 战绩面板 -->
+      <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:16px 24px;width:260px;margin-bottom:20px">
+        <div style="font-size:11px;color:#64748b;font-weight:600;margin-bottom:10px;letter-spacing:1px">📊 战后统计</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div style="text-align:left;font-size:12px;color:#94a3b8">⏱ 用时</div>
+          <div style="text-align:right;font-size:14px;font-weight:700;color:#e2e8f0">${mins}分${secs.toString().padStart(2,'0')}秒</div>
+          <div style="text-align:left;font-size:12px;color:#94a3b8">📝 单词量</div>
+          <div style="text-align:right;font-size:14px;font-weight:700;color:#e2e8f0">${state.totalAnswered} 题</div>
+          <div style="text-align:left;font-size:12px;color:#94a3b8">✅ 正确率</div>
+          <div style="text-align:right;font-size:14px;font-weight:700;color:#${accuracy >= 80 ? '22c55e' : accuracy >= 60 ? 'fbbf24' : 'ef4444'}">${accuracy}%</div>
+          <div style="text-align:left;font-size:12px;color:#94a3b8">💯 得分</div>
+          <div style="text-align:right;font-size:14px;font-weight:700;color:#fbbf24">${state.score}</div>
+          <div style="text-align:left;font-size:12px;color:#94a3b8">🔥 最高连击</div>
+          <div style="text-align:right;font-size:14px;font-weight:700;color:#ec4899">${state.maxCombo}</div>
+          <div style="text-align:left;font-size:12px;color:#94a3b8">🥊 击败对手</div>
+          <div style="text-align:right;font-size:14px;font-weight:700;color:#22c55e">${OPPONENTS.length}</div>
+        </div>
+      </div>
+      
+      ${isHighScore ? '<div style="font-size:14px;color:#fbbf24;font-weight:700;margin-bottom:12px">🏆 新纪录！</div>' : ''}
+      
+      <div style="font-size:12px;color:#64748b;margin-bottom:14px">
+        🏆 最高分 ${localStorage.getItem('bx_high_score') || state.score}
+      </div>
+      
+      <div style="display:flex;gap:10px">
+        <button onclick="GameBoxing.start()" style="padding:14px 32px;border-radius:24px;border:none;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#1a1a2e;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 24px rgba(251,191,36,0.3);transition:all 0.2s">🔄 再来一局</button>
+        <button onclick="window.GameBoxing.backToMenu()" style="padding:14px 20px;border-radius:24px;border:1px solid rgba(255,255,255,0.1);background:transparent;color:#94a3b8;font-size:13px;cursor:pointer;transition:all 0.2s">🔙 返回</button>
+      </div>
+    </div>
+  `;
+}
+
+// ============================================================
+// 游戏结束
+// ============================================================
 function gameOver() {
   state.isPlaying = false;
   if (timerId) { clearInterval(timerId); timerId = null; }
@@ -816,11 +989,12 @@ function gameOver() {
     </style>
     <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:30px;text-align:center">
       <div style="font-size:60px;margin-bottom:10px;animation:bxGameOver 0.6s cubic-bezier(0.34,1.56,0.64,1) both">😵</div>
-      <div style="font-size:22px;font-weight:800;color:#ef4444;margin-bottom:4px">你被击倒了！</div>
-      <div style="font-size:13px;color:#94a3b8;margin-bottom:16px">坚持了 ${state.round} 回合 · ${state.score} 分</div>
+      <div style="font-size:22px;font-weight:800;color:#ef4444;margin-bottom:4px">被 ${state.currentOpponent ? state.currentOpponent.name : '???'} 击倒了！</div>
+      ${state.opponentIndex < OPPONENTS.length - 1 ? '<div style="font-size:13px;color:#94a3b8;margin-bottom:16px">坚持了 ' + state.round + ' 回合 · ' + state.score + ' 分</div>' : ''}
+      <div style="font-size:13px;color:#94a3b8;margin-bottom:16px">✅ 正确率 ${state.totalAnswered > 0 ? Math.round(state.totalCorrect / state.totalAnswered * 100) : 0}% · ⏱ ${Math.floor((Date.now() - state.startTime) / 1000)}s</div>
       ${isHighScore ? '<div style="font-size:14px;color:#fbbf24;font-weight:700;margin-bottom:10px">🏆 新纪录！</div>' : ''}
       <div style="font-size:12px;color:#64748b;margin-bottom:16px">
-        🔥 最高连击 ${state.maxCombo} · 🏆 最高分 ${localStorage.getItem('bx_high_score') || state.score}
+        🔥 最高连击 ${state.maxCombo} · 📝 ${state.totalAnswered} 题
       </div>
       <div style="display:flex;gap:10px">
         <button onclick="GameBoxing.start()" style="padding:12px 28px;border-radius:24px;border:none;background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;font-size:15px;font-weight:600;cursor:pointer;box-shadow:0 4px 24px rgba(239,68,68,0.3);transition:all 0.2s">🔄 再来一局</button>
@@ -836,6 +1010,7 @@ function gameOver() {
 function start() {
   cacheByLevel();
   state.round = 1;
+  state.opponentIndex = 0;
   state.hp = MAX_HP;
   state.maxHp = MAX_HP;
   state.combo = 0;
@@ -845,6 +1020,9 @@ function start() {
   state.winStreak = 0;
   state.animating = false;
   state.consecutiveCorrect = 0;
+  state.startTime = Date.now();
+  state.totalAnswered = 0;
+  state.totalCorrect = 0;
   
   pickOpponent();
   renderRing();
