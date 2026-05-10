@@ -1204,82 +1204,97 @@ function startTimer() {
 // 游戏菜单（替换原先直接显示爬塔的 init）
 // ============================================================
 // 游戏选择菜单（含单词分类选择）
-// 这些函数需要暴露到 window，因为 onclick 在全局作用域执行
+// 使用事件委托处理所有点击，避免 onclick 全局作用域问题
+var _gmSettings = null; // 缓存设置，避免频繁 localStorage
+
 function _gmLoadSettings() {
+  if (_gmSettings) return _gmSettings;
   var s = JSON.parse(localStorage.getItem('game_settings') || '{}');
-  return {
-    lvlOn: s.lvlOn !== false,      // 默认开启
+  _gmSettings = {
+    lvlOn: s.lvlOn !== false,
     selLvls: s.selLvls || ['N5','N4','N3'],
     catOn: s.catOn || false,
     selCats: s.selCats || [],
   };
+  return _gmSettings;
 }
-function _gmSaveSettings(settings) {
-  localStorage.setItem('game_settings', JSON.stringify(settings));
+function _gmSaveSettings() {
+  if (_gmSettings) localStorage.setItem('game_settings', JSON.stringify(_gmSettings));
 }
-// 切换考级分类展开/收起
-window._gmToggle = function(el, bodyId) {
-  var body = document.getElementById(bodyId);
-  if (!body) return;
-  var isHidden = body.style.display === 'none';
-  body.style.display = isHidden ? 'block' : 'none';
-  if (el) el.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
-};
-window._gmToggleLvlSection = function() {
-  var cb = document.getElementById('gm-cb-lvl');
-  var body = document.getElementById('gm-lvl-body');
-  if (!cb) return;
-  var on = cb.textContent === '☐';
-  cb.textContent = on ? '☑' : '☐';
-  cb.classList.toggle('ap-checked', on);
-  body.style.opacity = on ? '1' : '0.35';
-  body.style.pointerEvents = on ? '' : 'none';
-  var s = _gmLoadSettings(); s.lvlOn = on; _gmSaveSettings(s);
-};
-window._gmToggleCatSection = function() {
-  var cb = document.getElementById('gm-cb-cat');
-  var body = document.getElementById('gm-cat-body');
-  if (!cb) return;
-  var on = cb.textContent === '☐';
-  cb.textContent = on ? '☑' : '☐';
-  cb.classList.toggle('ap-checked', on);
-  body.style.opacity = on ? '1' : '0.35';
-  body.style.pointerEvents = on ? '' : 'none';
-  var s = _gmLoadSettings(); s.catOn = on; _gmSaveSettings(s);
-};
-window._gmToggleLvl = function(el, lvl) {
+function _gmClearCache() { _gmSettings = null; }
+
+function _gmHandleClick(e) {
+  var target = e.target;
+  var action = target.getAttribute('data-gm');
+  if (!action) {
+    // 可能点击了子元素，向上找
+    target = target.closest('[data-gm]');
+    if (!target) return;
+    action = target.getAttribute('data-gm');
+  }
+  
   var s = _gmLoadSettings();
-  var idx = s.selLvls.indexOf(lvl);
-  if (idx >= 0) { s.selLvls.splice(idx, 1); } else { s.selLvls.push(lvl); }
-  if (s.selLvls.length === 0) s.selLvls = [lvl]; // 至少选一个
-  _gmSaveSettings(s);
-  el.classList.toggle('ap-tag-on');
-  el.style.background = el.classList.contains('ap-tag-on')
-    ? 'linear-gradient(135deg,#e94560,#ff6b9d)'
-    : 'rgba(255,255,255,0.06)';
-  el.style.color = el.classList.contains('ap-tag-on') ? '#fff' : '#64748b';
-};
-window._gmToggleCat = function(el, cat) {
-  var s = _gmLoadSettings();
-  var idx = s.selCats.indexOf(cat);
-  if (idx >= 0) { s.selCats.splice(idx, 1); } else { s.selCats.push(cat); }
-  _gmSaveSettings(s);
-  el.classList.toggle('ap-tag-on');
-  el.style.background = el.classList.contains('ap-tag-on')
-    ? 'linear-gradient(135deg,#e94560,#ff6b9d)'
-    : 'rgba(255,255,255,0.06)';
-  el.style.color = el.classList.contains('ap-tag-on') ? '#fff' : '#64748b';
-};
+  
+  if (action === 'toggle-lvl-section') {
+    s.lvlOn = !s.lvlOn;
+    _gmSaveSettings();
+    var cb = document.getElementById('gm-cb-lvl');
+    var body = document.getElementById('gm-lvl-body');
+    if (cb) { cb.textContent = s.lvlOn ? '☑' : '☐'; cb.classList.toggle('gm-checked', s.lvlOn); }
+    if (body) { body.style.opacity = s.lvlOn ? '1' : '0.35'; body.style.pointerEvents = s.lvlOn ? '' : 'none'; }
+    return;
+  }
+  
+  if (action === 'toggle-cat-section') {
+    s.catOn = !s.catOn;
+    _gmSaveSettings();
+    var cb = document.getElementById('gm-cb-cat');
+    var body = document.getElementById('gm-cat-body');
+    if (cb) { cb.textContent = s.catOn ? '☑' : '☐'; cb.classList.toggle('gm-checked', s.catOn); }
+    if (body) { body.style.opacity = s.catOn ? '1' : '0.35'; body.style.pointerEvents = s.catOn ? '' : 'none'; }
+    return;
+  }
+  
+  if (action === 'toggle-lvl') {
+    var lvl = target.getAttribute('data-lvl');
+    if (!lvl) return;
+    var idx = s.selLvls.indexOf(lvl);
+    if (idx >= 0) { s.selLvls.splice(idx, 1); } else { s.selLvls.push(lvl); }
+    if (s.selLvls.length === 0) s.selLvls = [lvl];
+    _gmSaveSettings();
+    target.classList.toggle('gm-tag-on');
+    target.style.background = target.classList.contains('gm-tag-on')
+      ? 'linear-gradient(135deg,#e94560,#ff6b9d)' : 'rgba(255,255,255,0.06)';
+    target.style.color = target.classList.contains('gm-tag-on') ? '#fff' : '#64748b';
+    return;
+  }
+  
+  if (action === 'toggle-cat') {
+    var cat = target.getAttribute('data-cat');
+    if (!cat) return;
+    var idx = s.selCats.indexOf(cat);
+    if (idx >= 0) { s.selCats.splice(idx, 1); } else { s.selCats.push(cat); }
+    _gmSaveSettings();
+    target.classList.toggle('gm-tag-on');
+    target.style.background = target.classList.contains('gm-tag-on')
+      ? 'linear-gradient(135deg,#e94560,#ff6b9d)' : 'rgba(255,255,255,0.06)';
+    target.style.color = target.classList.contains('gm-tag-on') ? '#fff' : '#64748b';
+    return;
+  }
+  
+  if (action === 'start-climb') { Game.start(); return; }
+  if (action === 'start-boxing') { window.GameBoxing.start(); return; }
+}
 
 function init() {
   cacheByLevel();
+  _gmClearCache();
   initVoice();
   var container = document.getElementById('p-game');
   if (!container) return;
   
   var gm = _gmLoadSettings();
   var lvls = ['N5','N4','N3','N2','N1'];
-  // ALL_CATEGORIES 来自 inline.js（全局变量）
   var cats = typeof ALL_CATEGORIES !== 'undefined' ? ALL_CATEGORIES : [];
   
   container.innerHTML = [
@@ -1301,9 +1316,8 @@ function init() {
     '  .gm-checked { color:#e94560; }',
     '  .gm-tag { display:inline-block; padding:5px 14px; border-radius:20px; font-size:12px; font-weight:600; cursor:pointer; transition:all 0.2s; background:rgba(255,255,255,0.06); color:#64748b; }',
     '  .gm-tag-on { background:linear-gradient(135deg,#e94560,#ff6b9d); color:#fff; }',
-    '  .gm-arrow { color:#64748b; font-size:12px; cursor:pointer; transition:transform 0.2s; }',
     '</style>',
-    '<div style="display:flex;flex-direction:column;align-items:center;height:100%;padding:16px 20px;text-align:center;background:#0a0a18;overflow-y:auto">',
+    '<div id="gm-root" style="display:flex;flex-direction:column;align-items:center;height:100%;padding:16px 20px;text-align:center;background:#0a0a18;overflow-y:auto">',
     '  <div style="font-size:34px;margin-bottom:4px">🎮</div>',
     '  <div class="gm-title" style="background:linear-gradient(135deg,#e94560,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent">游戏模式</div>',
     '  <div class="gm-sub">先选单词范围，再选游戏开始</div>',
@@ -1314,24 +1328,22 @@ function init() {
     // 考级分类
     '  <div class="gm-section">',
     '    <div style="display:flex;justify-content:space-between;align-items:center">',
-    '      <span onclick="_gmToggleLvlSection()" style="cursor:pointer;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#e2e8f0">',
+    '      <span data-gm="toggle-lvl-section" style="cursor:pointer;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#e2e8f0">',
     '        <span class="gm-checkbox'+(gm.lvlOn?' gm-checked':'')+'" id="gm-cb-lvl">'+(gm.lvlOn?'☑':'☐')+'</span>🏷️ 考级分类</span>',
-    '      <span class="gm-arrow" onclick="_gmToggle(this,\'gm-lvl-body\')">▼</span>',
     '    </div>',
     '    <div id="gm-lvl-body" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;'+(gm.lvlOn?'':'opacity:0.35;pointer-events:none')+'">',
-        lvls.map(function(l){var a=gm.selLvls.indexOf(l)>=0;return '<span class="gm-tag'+(a?' gm-tag-on':'')+'" onclick="_gmToggleLvl(this,\''+l+'\')" style="background:'+(a?'linear-gradient(135deg,#e94560,#ff6b9d)':'rgba(255,255,255,0.06)')+';color:'+(a?'#fff':'#64748b')+'">'+l+'</span>'}).join(''),
+        lvls.map(function(l){var a=gm.selLvls.indexOf(l)>=0;return '<span class="gm-tag'+(a?' gm-tag-on':'')+'" data-gm="toggle-lvl" data-lvl="'+l+'" style="background:'+(a?'linear-gradient(135deg,#e94560,#ff6b9d)':'rgba(255,255,255,0.06)')+';color:'+(a?'#fff':'#64748b')+'">'+l+'</span>'}).join(''),
     '    </div>',
     '  </div>',
     
     // 场景分类
     '  <div class="gm-section">',
     '    <div style="display:flex;justify-content:space-between;align-items:center">',
-    '      <span onclick="_gmToggleCatSection()" style="cursor:pointer;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#e2e8f0">',
+    '      <span data-gm="toggle-cat-section" style="cursor:pointer;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#e2e8f0">',
     '        <span class="gm-checkbox'+(gm.catOn?' gm-checked':'')+'" id="gm-cb-cat">'+(gm.catOn?'☑':'☐')+'</span>📂 场景分类</span>',
-    '      <span class="gm-arrow" onclick="_gmToggle(this,\'gm-cat-body\')">▼</span>',
     '    </div>',
     '    <div id="gm-cat-body" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;max-height:140px;overflow-y:auto;'+(gm.catOn?'':'opacity:0.35;pointer-events:none')+'">',
-        cats.map(function(c){var a=gm.selCats.indexOf(c)>=0;return '<span class="gm-tag'+(a?' gm-tag-on':'')+'" onclick="_gmToggleCat(this,\''+c.replace(/'/g,"\\'")+'\')" style="background:'+(a?'linear-gradient(135deg,#e94560,#ff6b9d)':'rgba(255,255,255,0.06)')+';color:'+(a?'#fff':'#64748b')+'">'+c+'</span>'}).join(''),
+        cats.map(function(c){var a=gm.selCats.indexOf(c)>=0;return '<span class="gm-tag'+(a?' gm-tag-on':'')+'" data-gm="toggle-cat" data-cat="'+c.replace(/"/g,'&quot;').replace(/'/g,'&#39;')+'" style="background:'+(a?'linear-gradient(135deg,#e94560,#ff6b9d)':'rgba(255,255,255,0.06)')+';color:'+(a?'#fff':'#64748b')+'">'+c+'</span>'}).join(''),
     '    </div>',
     '  </div>',
     
@@ -1339,12 +1351,12 @@ function init() {
     
     // ---- 游戏卡片 ----
     '  <div style="display:flex;flex-direction:column;gap:10px;width:100%;max-width:320px;animation:gmFadeIn 0.4s ease-out 0.15s both;margin-top:8px">',
-    '    <div class="gm-card gm-card-climb" onclick="Game.start()">',
+    '    <div class="gm-card gm-card-climb" data-gm="start-climb">',
     '      <div class="gm-card-icon">🏔️</div>',
     '      <div class="gm-card-title">爬塔闯关</div>',
     '      <div class="gm-card-desc">答对向上跳 · 答错摔下来<br>老师/家长/同事/课长 Boss 战</div>',
     '    </div>',
-    '    <div class="gm-card gm-card-boxing" onclick="window.GameBoxing.start()">',
+    '    <div class="gm-card gm-card-boxing" data-gm="start-boxing">',
     '      <div class="gm-card-icon">🥊</div>',
     '      <div class="gm-card-title">单词拳击</div>',
     '      <div class="gm-card-desc">第一人称视角 · 出拳KO对手<br>连击越高伤害越高</div>',
@@ -1356,6 +1368,16 @@ function init() {
     '  </div>',
     '</div>',
   ].join('\n');
+  
+  // 事件委托：所有点击由 gm-root 统一处理
+  var root = document.getElementById('gm-root');
+  if (root) {
+    // 移除旧监听器以避免重复
+    var oldHandler = root._gmHandler;
+    if (oldHandler) root.removeEventListener('click', oldHandler);
+    root.addEventListener('click', _gmHandleClick);
+    root._gmHandler = _gmHandleClick;
+  }
 }
 
 // 爬塔原有初始化内容移到 showTowerClimb
