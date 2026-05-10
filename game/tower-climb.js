@@ -237,15 +237,40 @@ function initHealTarget() {
 // ============================================================
 // 语音合成（自动发音）
 // ============================================================
+let _jpVoice = null;
+let _voiceReady = false;
+
+// 初始化语音：查找可用的日语声线
+function initVoice() {
+  if (_voiceReady) return;
+  try {
+    const voices = window.speechSynthesis.getVoices();
+    if (voices.length === 0) {
+      // iOS Safari 需要异步加载，监听 voiceschanged
+      window.speechSynthesis.onvoiceschanged = function() {
+        const v = window.speechSynthesis.getVoices();
+        _jpVoice = v.find(voice => voice.lang.startsWith('ja')) || null;
+        _voiceReady = true;
+      };
+      return;
+    }
+    _jpVoice = voices.find(voice => voice.lang.startsWith('ja')) || null;
+    _voiceReady = true;
+  } catch(e) { /* 静默 */ }
+}
+
 function speak(text, lang = 'ja-JP') {
   try {
-    if (!window.speechSynthesis) return;
+    if (!window.speechSynthesis || !text) return;
     window.speechSynthesis.cancel(); // 打断上一个发音
     const utter = new SpeechSynthesisUtterance(text);
     utter.lang = lang;
     utter.rate = 0.8;
     utter.pitch = 1.0;
     utter.volume = 1.0;
+    // 手动指定日语声线（关键：防 iOS 读成中文）
+    if (!_voiceReady) initVoice();
+    if (_jpVoice) utter.voice = _jpVoice;
     window.speechSynthesis.speak(utter);
   } catch(e) { /* 静默失败，不影响游戏 */ }
 }
@@ -405,8 +430,8 @@ function generateQuestion() {
     ];
     shuffle(options);
 
-    // 自动朗读整句
-    setTimeout(() => speak(sentence), 100);
+    // 自动朗读整句（直接调用，iOS Safari 不认 setTimeout 链）
+    speak(sentence);
 
     return {
       word, options,
@@ -426,8 +451,8 @@ function generateQuestion() {
     ];
     shuffle(options);
 
-    // 自动朗读单词
-    setTimeout(() => speak(word.word), 100);
+    // 自动朗读单词（直接调用，iOS Safari 不认 setTimeout 链）
+    speak(word.word);
 
     return {
       word, options,
@@ -1156,6 +1181,7 @@ function startTimer() {
 // ============================================================
 function init() {
   cacheByLevel();
+  initVoice(); // 提前加载日语声线（iOS Safari 需要）
   const container = document.getElementById('p-game');
   if (!container) return;
   
