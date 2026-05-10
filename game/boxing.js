@@ -10,7 +10,7 @@
 // ============================================================
 // 常量
 // ============================================================
-const MAX_HP = 6;
+const MAX_HP = 5;
 const INSTANT_KO_STREAK = 20;  // 连续答对 20 道直接 KO
 const TAUNT_CHANCE = 0.22;     // 每回合嘲讽概率
 const TAUNT_MIN_INTERVAL = 3;  // 最少间隔 3 回合才出嘲讽
@@ -34,33 +34,49 @@ const OPPONENTS = [
   { id: 'rookie',    icon: '😤', name: '新人拳手', color: '#f59e0b',
     hitFace: '😵', koFace: '💀', hp: 5,
     size: 64, glow: 'none',
-    bgColor: 'rgba(245,158,11,0.05)',
-    tauntsCN: ['就这？给我挠痒痒呢', '你拳头是棉花做的吗', '我还没热身你就倒了？', '回家再练两年吧', '你这水平也来打拳击？'],
-    tauntsJP: ['その程度？', 'もっと強く！', 'まだまだだね', '練習して来いよ', '君には無理だ'] },
+    bgColor: 'rgba(245,158,11,0.05)' },
   { id: 'amateur',   icon: '😠', name: '业余拳手', color: '#ef4444',
     hitFace: '😫', koFace: '😵', hp: 6,
     size: 70, glow: '0 0 10px rgba(239,68,68,0.3)',
-    bgColor: 'rgba(239,68,68,0.05)',
-    tauntsCN: ['有点意思…但不够', '看我怎么收拾你', '你的破绽太多了', '下一拳就把你打倒', '这种速度也太慢了'],
-    tauntsJP: ['面白いけど…', 'これで終わりだ', '遅すぎるよ', '隙だらけだ', '本気出せよ'] },
+    bgColor: 'rgba(239,68,68,0.05)' },
   { id: 'pro',       icon: '🥊', name: '职业拳手', color: '#8b5cf6',
     hitFace: '😰', koFace: '💫', hp: 7,
     size: 78, glow: '0 0 15px rgba(139,92,246,0.4)',
-    bgColor: 'rgba(139,92,246,0.06)',
-    tauntsCN: ['职业赛场不是过家家', '你的动作我全看穿了', '这一拳教你做人', '实力差距就摆在这', '你只是运气好罢了'],
-    tauntsJP: ['プロの世界をなめるな', '全て見えている', '実力の差を見せてやる', '運だけじゃ勝てない', 'ここからが本番だ'] },
+    bgColor: 'rgba(139,92,246,0.06)' },
   { id: 'star',      icon: '⭐', name: '明星拳手', color: '#ec4899',
     hitFace: '😱', koFace: '🤯', hp: 8,
     size: 82, glow: '0 0 20px rgba(236,72,153,0.5)',
-    bgColor: 'rgba(236,72,153,0.07)',
-    tauntsCN: ['观众都在看我呢', '你的表情真有趣', '这场表演该结束了', '我会让你输得体面', '和我对战是你的荣幸'],
-    tauntsJP: ['観客は私を見ている', 'そろそろ終わりにしよう', 'よくここまで来たね', 'だがここが限界だ', '華麗に決めてやる'] },
+    bgColor: 'rgba(236,72,153,0.07)' },
   { id: 'champion',  icon: '👑', name: '冠军拳手', color: '#fbbf24',
     hitFace: '😱', koFace: '💀', hp: 9,
     size: 90, glow: '0 0 25px rgba(251,191,36,0.6), 0 0 50px rgba(251,191,36,0.2)',
-    bgColor: 'rgba(251,191,36,0.08)',
-    tauntsCN: ['挑战冠军？勇气可嘉', '你的旅程到此为止了', '王座不会让给任何人', '让你见识真正的拳击', '你是我见过最有毅力的对手……但还不够'],
-    tauntsJP: ['よく来たな挑戦者', '王者の力を見せてやる', '夢はここで終わりだ', '誇りに思え、ここまで来たことを', 'これが本当の強さだ'] },
+    bgColor: 'rgba(251,191,36,0.08)' },
+];
+
+// 共享嘲讽池（50 句：35 中文 + 15 日文网络梗）
+const TAUNTS_CN = [
+  '我大意了没有闪！', '年轻人不讲武德', '耗子尾汁！', '这好吗？这不好！', '接化发！以柔克刚！',
+  '我劝你耗子尾汁', '你过来呀！', '你瞅啥？', '小朋友你是否有很多问号', '我读书少你不要骗我',
+  '还有这种操作？', '这就很尴尬了', '我太难了', '啊这……不是吧？', '就这就这就这？',
+  '真的会谢', '栓Q！（thank you）', '格局小了', '你是在跟我说话吗？', '无敌是多么寂寞',
+  '我的内心毫无波动', '人类的本质就是复读机', '你开心就好', '不会吧不会吧不会吧', '厉害了我的哥',
+  '请开始你的表演', '我信你个鬼', '这波在大气层', '你不对劲', '弱小可怜又无助',
+  '但是——我拒绝！', '你的下一句话是……', '我真是嗨到不行啊！', '我已经记住你了', '做我的对手你还早两万年呢',
+];
+
+const TAUNTS_JP = [
+  'はい論破🙃', '草（www）', 'ワロタｗｗｗ', '大草原不可避', '詰んだ…😇',
+  'ガチで？', 'そんな装備で大丈夫か？', '大丈夫じゃない、大問題だ', 'エモすぎる…', 'バグってるぞ',
+  'お前の考えは読める', 'ざこ（雑魚）すぎる', '知らんけど', 'なんか言えよ', 'やっぱりな',
+];
+
+// 被击败台词（20 句随机）
+const DEFEAT_QUOTES = [
+  '啊……终于还是败了……', '我大意了没有闪！', '我还会回来的！', '你赢了……但别得意',
+  '这次算你狠……', '我不服！下次一定赢你！', '长江后浪推前浪啊……', '你确实有两下子',
+  '江山代有才人出……', '败给你了……心服口服', '这就是努力的结果吗……', 'まだまだ……',
+  'やられた……', 'さすがだ……', '我不会就这样结束的！', '你成功引起了我的注意',
+  '好吧……你赢了，我认输', '你的实力我认可了', '这次是我大意了，下次不会了', '打得不错……下次赢回来',
 ];
 
 // ============================================================
@@ -409,7 +425,7 @@ function renderRing() {
         <div style="font-size:10px;color:#64748b">👊 ${state.opponentHp}/${state.opponentMaxHp}</div>
         
         <!-- 嘲讽气泡 -->
-        <div id="bx-taunt" style="position:absolute;top:5%;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.85);color:#fff;padding:8px 16px;border-radius:12px;font-size:14px;font-weight:600;max-width:260px;text-align:center;pointer-events:none;opacity:0;z-index:15;border:1px solid rgba(255,255,255,0.1);box-shadow:0 4px 20px rgba(0,0,0,0.5)">
+        <div id="bx-taunt" style="position:absolute;top:5%;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.88);color:#fff;padding:10px 20px;border-radius:14px;font-size:19px;font-weight:700;max-width:300px;text-align:center;pointer-events:none;opacity:0;z-index:15;border:1px solid rgba(255,255,255,0.12);box-shadow:0 6px 28px rgba(0,0,0,0.6);line-height:1.4">
         </div>
         
         <!-- 浮字区 -->
@@ -605,6 +621,7 @@ function onCorrect(index) {
   if (state.opponentHp <= 0) {
     SFX.ko();
     if (oppFace && opp) oppFace.textContent = opp.koFace || '💀';
+    showDefeatQuote(); // 被击败台词
     state.winStreak++;
     state.round++;
     state.consecutiveCorrect = 0; // KO 后重置连胜计数
@@ -733,12 +750,9 @@ function showFloat(text, color) {
 // 嘲讽系统
 // ============================================================
 function showTaunt() {
-  const opp = state.currentOpponent;
-  if (!opp || !opp.tauntsCN) return;
-  
-  // 随机选中文或日文
-  const useJP = Math.random() < 0.5;
-  const pool = useJP ? opp.tauntsJP : opp.tauntsCN;
+  // 随机选中文或日文（35:15 概率 ≈ 70% 中文）
+  const useJP = Math.random() < 0.3;
+  const pool = useJP ? TAUNTS_JP : TAUNTS_CN;
   const text = pool[Math.floor(Math.random() * pool.length)];
   
   const el = document.getElementById('bx-taunt');
@@ -765,6 +779,21 @@ function tryTaunt() {
     showTaunt();
     state.roundsSinceTaunt = 0;
   }
+}
+
+// ============================================================
+// 被击败台词
+// ============================================================
+function showDefeatQuote() {
+  const text = DEFEAT_QUOTES[Math.floor(Math.random() * DEFEAT_QUOTES.length)];
+  
+  const el = document.getElementById('bx-taunt');
+  if (!el) return;
+  el.textContent = '😵 "' + text + '"';
+  el.style.animation = 'none';
+  void el.offsetHeight;
+  el.style.animation = 'bxSpeechIn 0.4s ease-out forwards';
+  el.style.opacity = '1';
 }
 
 // ============================================================
