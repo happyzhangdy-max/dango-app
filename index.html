@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>行小之的外语角 · 日语突击版</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
@@ -819,7 +822,30 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
 <script src="quiz_data_real.js?v=3"></script>
 <script src="quiz_data_normal.js?v=3"></script>
 <script src="inline.js?v=36"></script>
-<script src="game/tower-climb.js?v=2"></script>
-<script src="game/boxing.js?v=1"></script>
+<script src="game/tower-climb.js?v=1778430785734"></script>
+<script>
+// 诊断：检查 tower-climb 版本
+(function(){
+  var pg = document.getElementById('p-game');
+  if (pg) {
+    var dbg = document.createElement('div');
+    dbg.style.cssText = 'position:fixed;left:0;bottom:0;font-size:10px;color:#fff;background:#e94560;padding:3px 10px;z-index:99999;border-radius:0 8px 0 0';
+    dbg.textContent = 'tower: ' + (typeof Game !== 'undefined' ? 'OK ' + (Game.init ? 'hasInit' : 'noInit') : 'MISSING');
+    document.body.appendChild(dbg);
+  }
+  // 检查 init() 里的 gm-section 个数
+  if (pg) {
+    setTimeout(function() {
+      var sections = pg.querySelectorAll('.gm-section');
+      console.log('gm-sections found:', sections.length);
+      var dbg2 = document.createElement('div');
+      dbg2.style.cssText = 'position:fixed;right:0;bottom:0;font-size:10px;color:#fff;background:' + (sections.length >= 4 ? '#22c55e' : '#e94560') + ';padding:3px 10px;z-index:99999;border-radius:8px 0 0 0';
+      dbg2.textContent = 'gm-sections: ' + sections.length;
+      document.body.appendChild(dbg2);
+    }, 500);
+  }
+})();
+</script>
+<script src="game/boxing.js?v=1778430787050"></script>
 </body>
 </html>

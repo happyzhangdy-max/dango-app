@@ -162,7 +162,7 @@ function cacheByLevel() {
 function getRandomWords(level, exclude, count = 3, useCn = true) {
   // 从同难度层级的选中词库取干扰项
   let pool = [];
-  const source = (useCn && state.quizMode === 'word') ? _cachedByLevelCn : _cachedByLevel;
+  const source = (useCn && (state.quizType || state.quizMode) === 'word') ? _cachedByLevelCn : _cachedByLevel;
   // 只取当前难度级别的词，确保干扰项与正确答案同级别
   if (state.selectedLevels.includes(level)) {
     const p = source[level];
@@ -378,7 +378,9 @@ function generateQuestion() {
   const level = diff.level;
   // 从选中的词库中获取当前楼层难度的词
   let pool = [];
-  const source = (state.quizMode === 'word') ? _cachedByLevelCn : _cachedByLevel;
+  // 词源：使用 quizType 代替旧的 quizMode
+  var qType = state.quizType || state.quizMode || 'word';
+  const source = (qType === 'word') ? _cachedByLevelCn : _cachedByLevel;
   // 优先：只取当前楼层难度级别的词
   if (state.selectedLevels.includes(level)) {
     const p = source[level];
@@ -393,7 +395,7 @@ function generateQuestion() {
   }
   // 二次回退：用楼层级别兜底
   if (pool.length === 0) {
-    const fallback = (state.quizMode === 'word') ? _cachedByLevelCn : _cachedByLevel;
+    const fallback = (qType === 'word') ? _cachedByLevelCn : _cachedByLevel;
     pool = fallback[level] || _cachedByLevel['N5'] || _cachedByLevelCn['N5'];
   }
   if (!pool || pool.length === 0) return null;
@@ -405,7 +407,16 @@ function generateQuestion() {
 
   let word;
   let options;
-  let questionType = state.quizMode;
+  let questionType = qType;
+
+  // "模拟试题"模式：四分之一的概率分别出四种题型
+  if (questionType === 'mock') {
+    var _r = Math.random();
+    if (_r < 0.25) questionType = 'word';
+    else if (_r < 0.5) questionType = 'sentence';
+    else if (_r < 0.75) questionType = 'grammar';
+    else questionType = 'word';
+  }
 
   if (questionType === 'sentence') {
     // 例句模式：只选词真正出现在句中的好例句
@@ -418,6 +429,88 @@ function generateQuestion() {
       questionType = 'word'; // 没有好例句就回退
     } else {
       word = goodSentences[Math.floor(Math.random() * goodSentences.length)];
+    }
+  }
+  
+  // 文法例句模式
+  if (questionType === 'grammar') {
+    var gData = (typeof GRAMMAR_DATA !== 'undefined') ? GRAMMAR_DATA : null;
+    if (gData && gData.length > 0) {
+      // 从难度匹配的文法中随机选一个
+      var gPool = gData;
+      var gLevel = level.toLowerCase().replace('n','');
+      if (gLevel) {
+        var gFiltered = gPool.filter(function(g) { return (g.level || '').toLowerCase() === gLevel; });
+        if (gFiltered.length > 0) gPool = gFiltered;
+      }
+      var gItem = gPool[Math.floor(Math.random() * gPool.length)];
+      if (gItem && gItem.ex_jp) {
+        var gSentence = gItem.ex_jp;
+        var gPattern = gItem.pattern || '';
+        // 把文型用下划线替换（去掉 〜 符号）
+        var gBlanked = gPattern;
+        var gSearch = gPattern.replace(/〜/g, '');
+        // 在句子中找到文法模式并替换为下划线
+        var gIdx = gSentence.indexOf(gSearch);
+        if (gIdx === -1) {
+          // 尝试用 pattern 本身直接搜索
+          var gParts = gPattern.replace(/〜/g, '___').split('___');
+          var gBlankText = '';
+          // 简单做法：取 pattern 去掉 〜 的内容
+          gIdx = gSentence.indexOf(gPattern.replace(/〜/g, ''));
+          if (gIdx === -1) {
+            // 放弃，回退 word
+            questionType = 'word';
+          } else {
+            gBlankText = gPattern.replace(/〜/g, '');
+          }
+        }
+        if (questionType === 'grammar') {
+          // 构建干扰：从其他文法取 3 个不同的 pattern
+          var gWrongPool = gData.filter(function(g) { return g.pattern !== gItem.pattern; });
+          var gShuffled = gWrongPool.sort(function() { return Math.random() - 0.5; });
+          var gWrong = [];
+          for (var gi = 0; gi < gShuffled.length && gWrong.length < 3; gi++) {
+            if (gWrong.indexOf(gShuffled[gi].pattern) === -1) gWrong.push(gShuffled[gi].pattern);
+          }
+          
+          var gBlankedSentence = gSentence;
+          var gSearchText = gPattern.replace(/〜/g, '');
+          var gIdx2 = gSentence.indexOf(gSearchText);
+          if (gIdx2 >= 0) {
+            gBlankedSentence = gSentence.slice(0, gIdx2) + '＿＿' + gSentence.slice(gIdx2 + gSearchText.length);
+          } else {
+            // 回退：直接用 pattern 替换
+            gBlankedSentence = '＿＿（' + gItem.desc + '）';
+          }
+          
+          var gOptions = [
+            { text: gItem.pattern, correct: true },
+          ];
+          gWrong.forEach(function(p) {
+            gOptions.push({ text: p, correct: false });
+          });
+          shuffle(gOptions);
+          
+          speak(gSentence);
+          
+          return {
+            word: { word: gItem.pattern, meaning: gItem.meaning, reading: '', level: gItem.level },
+            options: gOptions,
+            displayWord: gBlankedSentence,
+            displayReading: '',
+            displaySentence: gSentence,
+            displayMeaning: gItem.meaning || '',
+            timeLimit: state.isBoss ? diff.time + 2000 : diff.time + 2000,
+            level: (gItem.level || '').toUpperCase(),
+            type: 'grammar',
+          };
+        }
+      } else {
+        questionType = 'word';
+      }
+    } else {
+      questionType = 'word';
     }
   }
   
@@ -977,20 +1070,29 @@ function renderQuiz() {
     hintText = '💊 答对回血！';
   } else if (q.type === 'sentence') {
     hintText = '正しい言葉を選んでください';
+  } else if (q.type === 'grammar') {
+    hintText = '正しい文型を選んでください';
   } else {
     hintText = '正しい意味を選んでください';
   }
   
+  var qtLabel = '';
+  var _qt = state.quizType || 'word';
+  if (_qt === 'mock') qtLabel = '📋 模拟';
+  else if (_qt === 'sentence') qtLabel = '💬 例句';
+  else if (_qt === 'grammar') qtLabel = '📐 文法';
+  else qtLabel = '📖 单词';
+  
   let html = `
     <div id="quiz-card" style="padding:10px 14px 14px;animation:slideUp 0.3s ease-out">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
-        <span style="font-size:10px;color:#64748b">${q.level} · ${state.floor}F ${state.isBoss ? '👹' : '🏔️'}</span>
+        <span style="font-size:10px;color:#64748b">${qtLabel} ${q.level} · ${state.floor}F ${state.isBoss ? '👹' : '🏔️'}</span>
         <span style="font-size:10px;color:#64748b">正答 ${state.correctWords}/${state.answeredWords}</span>
       </div>
-      <div style="text-align:center;margin-bottom:5px;min-height:${q.type === 'sentence' ? '64px' : '50px'}">
+      <div style="text-align:center;margin-bottom:5px;min-height:${(q.type === 'sentence' || q.type === 'grammar') ? '64px' : '50px'}">
   `;
   
-  if (q.type === 'sentence') {
+  if (q.type === 'sentence' || q.type === 'grammar') {
     // 例句模式：展示句子填空
     const meaningLine = q.displayMeaning ? `<div style="font-size:10px;color:#94a3b8;margin-top:2px">（${q.displayMeaning}）</div>` : '';
     html += `
@@ -999,10 +1101,22 @@ function renderQuiz() {
         <div style="font-size:10px;color:#64748b;margin-top:3px">${hintText}</div>`;
   } else {
     // 单词模式：展示单词
-    html += `
-        <div style="font-size:20px;font-weight:700;color:#e2e8f0;letter-spacing:1px">${word.word}</div>
-        ${word.reading ? `<div style="font-size:11px;color:#94a3b8;margin-top:2px">${word.reading}</div>` : ''}
-        <div style="font-size:10px;color:#64748b;margin-top:2px">${hintText}</div>`;
+    // 根据 displayMode 切换显示
+    var dm = state.displayMode || 0;
+    var wordHtml = '';
+    if (dm === 0) {
+      // 汉字大 + 假名小
+      wordHtml = '<div style="font-size:20px;font-weight:700;color:#e2e8f0;letter-spacing:1px">'+word.word+'</div>'+
+        (word.reading ? '<div style="font-size:11px;color:#94a3b8;margin-top:2px">'+word.reading+'</div>' : '');
+    } else if (dm === 1) {
+      // 假名大 + 汉字小
+      wordHtml = (word.reading ? '<div style="font-size:20px;font-weight:700;color:#fbbf24;letter-spacing:1px">'+word.reading+'</div>' : '')+
+        '<div style="font-size:11px;color:#94a3b8;margin-top:2px">'+word.word+'</div>';
+    } else {
+      // 仅假名
+      wordHtml = word.reading ? '<div style="font-size:20px;font-weight:700;color:#4ade80;letter-spacing:1px">'+word.reading+'</div>' : '';
+    }
+    html += wordHtml + '<div style="font-size:10px;color:#64748b;margin-top:2px">'+hintText+'</div>';
   }
   
   html += `
@@ -1215,6 +1329,8 @@ function _gmLoadSettings() {
     selLvls: s.selLvls || ['N5','N4','N3'],
     catOn: s.catOn || false,
     selCats: s.selCats || [],
+    displayMode: s.displayMode !== undefined ? s.displayMode : 0,
+    quizType: s.quizType || 'word',
   };
   return _gmSettings;
 }
@@ -1282,6 +1398,39 @@ function _gmHandleClick(e) {
     return;
   }
   
+  if (action === 'toggle-display') {
+    s.displayMode = (s.displayMode + 1) % 3;
+    _gmSaveSettings();
+    var btn = document.getElementById('gm-display-btn');
+    var labels = ['📖 汉字大+假名小', '🔊 假名大+汉字小', '🎧 仅假名'];
+    var icons = ['📖', '🔊', '🎧'];
+    if (btn) {
+      btn.textContent = icons[s.displayMode] + ' ' + ['汉字大', '假名大', '仅假名'][s.displayMode];
+      btn.style.background = ['rgba(168,85,247,0.15)', 'rgba(251,191,36,0.15)', 'rgba(52,211,153,0.15)'][s.displayMode];
+      btn.style.borderColor = ['rgba(168,85,247,0.4)', 'rgba(251,191,36,0.4)', 'rgba(52,211,153,0.4)'][s.displayMode];
+      btn.style.color = ['#c4b5fd', '#fbbf24', '#4ade80'][s.displayMode];
+    }
+    return;
+  }
+  
+  if (action === 'toggle-quiztype') {
+    var _qtCycle = ['word', 'sentence', 'grammar', 'mock'];
+    var _qtIdx = _qtCycle.indexOf(s.quizType || 'word');
+    s.quizType = _qtCycle[(_qtIdx + 1) % 4];
+    _gmSaveSettings();
+    var btn = document.getElementById('gm-quiztype-btn');
+    var _qLabels = { word:'单词', sentence:'例句', grammar:'文法例句', mock:'模拟试题' };
+    var _qBg = { word:'rgba(168,85,247,0.15)', sentence:'rgba(251,191,36,0.15)', grammar:'rgba(52,211,153,0.15)', mock:'rgba(239,68,68,0.15)' };
+    var _qBd = { word:'rgba(168,85,247,0.4)', sentence:'rgba(251,191,36,0.4)', grammar:'rgba(52,211,153,0.4)', mock:'rgba(239,68,68,0.4)' };
+    var _qCo = { word:'#c4b5fd', sentence:'#fbbf24', grammar:'#4ade80', mock:'#fca5a5' };
+    var _qDe = { word:'只看单词选释义', sentence:'使用单词例句填空', grammar:'使用文法例句填空', mock:'全部类型混合出题' };
+    var qt = s.quizType;
+    if (btn) { btn.textContent = _qLabels[qt]; btn.style.background = _qBg[qt]; btn.style.borderColor = _qBd[qt]; btn.style.color = _qCo[qt]; }
+    var desc = document.querySelector('#gm-root .gm-section:has([data-gm=toggle-quiztype]) + div');
+    if (desc) desc.textContent = _qDe[qt];
+    return;
+  }
+  
   if (action === 'start-climb') { Game.start(); return; }
   if (action === 'start-boxing') { window.GameBoxing.start(); return; }
 }
@@ -1297,77 +1446,114 @@ function init() {
   var lvls = ['N5','N4','N3','N2','N1'];
   var cats = typeof ALL_CATEGORIES !== 'undefined' ? ALL_CATEGORIES : [];
   
-  container.innerHTML = [
-    '<style>',
-    '  @keyframes gmFadeIn { from { opacity:0; transform:translateY(12px) } to { opacity:1; transform:translateY(0) } }',
-    '  .gm-title { font-size:22px; font-weight:800; letter-spacing:2px; margin-bottom:4px; }',
-    '  .gm-sub { font-size:12px; color:#64748b; margin-bottom:16px; }',
-    '  .gm-card { background:linear-gradient(135deg,#1a1a3e,#0f3460); border-radius:16px; padding:24px 16px; cursor:pointer; text-align:center; transition:all 0.3s; position:relative; overflow:hidden; border:1px solid rgba(255,255,255,0.06); }',
-    '  .gm-card:hover { transform:translateY(-4px); box-shadow:0 8px 30px rgba(168,85,247,0.15); }',
-    '  .gm-card-icon { font-size:42px; display:block; margin-bottom:8px; }',
-    '  .gm-card-title { font-size:18px; font-weight:700; margin-bottom:4px; }',
-    '  .gm-card-desc { font-size:11px; color:#64748b; line-height:1.6; }',
-    '  .gm-card-climb { border-color:rgba(168,85,247,0.3); }',
-    '  .gm-card-climb .gm-card-title { background:linear-gradient(135deg,#a855f7,#ec4899); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }',
-    '  .gm-card-boxing { border-color:rgba(239,68,68,0.3); }',
-    '  .gm-card-boxing .gm-card-title { background:linear-gradient(135deg,#ef4444,#fbbf24); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }',
-    '  .gm-section { padding:12px 14px; background:rgba(255,255,255,0.03); border-radius:12px; margin-bottom:10px; border:1px solid rgba(255,255,255,0.06); }',
-    '  .gm-checkbox { font-size:16px; cursor:pointer; user-select:none; }',
-    '  .gm-checked { color:#e94560; }',
-    '  .gm-tag { display:inline-block; padding:5px 14px; border-radius:20px; font-size:12px; font-weight:600; cursor:pointer; transition:all 0.2s; background:rgba(255,255,255,0.06); color:#64748b; }',
-    '  .gm-tag-on { background:linear-gradient(135deg,#e94560,#ff6b9d); color:#fff; }',
-    '</style>',
-    '<div id="gm-root" style="display:flex;flex-direction:column;align-items:center;height:100%;padding:16px 20px;text-align:center;background:#0a0a18;overflow-y:auto">',
-    '  <div style="font-size:34px;margin-bottom:4px">🎮</div>',
-    '  <div class="gm-title" style="background:linear-gradient(135deg,#e94560,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent">游戏模式</div>',
-    '  <div class="gm-sub">先选单词范围，再选游戏开始</div>',
-    
-    // ---- 单词选择区 ----
-    '  <div style="width:100%;max-width:340px;text-align:left;animation:gmFadeIn 0.3s ease-out both">',
-    
-    // 考级分类
-    '  <div class="gm-section">',
-    '    <div style="display:flex;justify-content:space-between;align-items:center">',
-    '      <span data-gm="toggle-lvl-section" style="cursor:pointer;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#e2e8f0">',
-    '        <span class="gm-checkbox'+(gm.lvlOn?' gm-checked':'')+'" id="gm-cb-lvl">'+(gm.lvlOn?'☑':'☐')+'</span>🏷️ 考级分类</span>',
-    '    </div>',
-    '    <div id="gm-lvl-body" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;'+(gm.lvlOn?'':'opacity:0.35;pointer-events:none')+'">',
-        lvls.map(function(l){var a=gm.selLvls.indexOf(l)>=0;return '<span class="gm-tag'+(a?' gm-tag-on':'')+'" data-gm="toggle-lvl" data-lvl="'+l+'" style="background:'+(a?'linear-gradient(135deg,#e94560,#ff6b9d)':'rgba(255,255,255,0.06)')+';color:'+(a?'#fff':'#64748b')+'">'+l+'</span>'}).join(''),
-    '    </div>',
-    '  </div>',
-    
-    // 场景分类
-    '  <div class="gm-section">',
-    '    <div style="display:flex;justify-content:space-between;align-items:center">',
-    '      <span data-gm="toggle-cat-section" style="cursor:pointer;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#e2e8f0">',
-    '        <span class="gm-checkbox'+(gm.catOn?' gm-checked':'')+'" id="gm-cb-cat">'+(gm.catOn?'☑':'☐')+'</span>📂 场景分类</span>',
-    '    </div>',
-    '    <div id="gm-cat-body" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;max-height:140px;overflow-y:auto;'+(gm.catOn?'':'opacity:0.35;pointer-events:none')+'">',
-        cats.map(function(c){var a=gm.selCats.indexOf(c)>=0;return '<span class="gm-tag'+(a?' gm-tag-on':'')+'" data-gm="toggle-cat" data-cat="'+c.replace(/"/g,'&quot;').replace(/'/g,'&#39;')+'" style="background:'+(a?'linear-gradient(135deg,#e94560,#ff6b9d)':'rgba(255,255,255,0.06)')+';color:'+(a?'#fff':'#64748b')+'">'+c+'</span>'}).join(''),
-    '    </div>',
-    '  </div>',
-    
-    '  </div>',
-    
-    // ---- 游戏卡片 ----
-    '  <div style="display:flex;flex-direction:column;gap:10px;width:100%;max-width:320px;animation:gmFadeIn 0.4s ease-out 0.15s both;margin-top:8px">',
-    '    <div class="gm-card gm-card-climb" data-gm="start-climb">',
-    '      <div class="gm-card-icon">🏔️</div>',
-    '      <div class="gm-card-title">爬塔闯关</div>',
-    '      <div class="gm-card-desc">答对向上跳 · 答错摔下来<br>老师/家长/同事/课长 Boss 战</div>',
-    '    </div>',
-    '    <div class="gm-card gm-card-boxing" data-gm="start-boxing">',
-    '      <div class="gm-card-icon">🥊</div>',
-    '      <div class="gm-card-title">单词拳击</div>',
-    '      <div class="gm-card-desc">第一人称视角 · 出拳KO对手<br>连击越高伤害越高</div>',
-    '    </div>',
-    '  </div>',
-    
-    '  <div style="margin-top:14px;font-size:10px;color:#3a3a5a">',
-    '    爬塔最高层: '+(localStorage.getItem('tower_high_floor')||'无')+' | 拳击最高分: '+(localStorage.getItem('bx_high_score')||'无'),
-    '  </div>',
-    '</div>',
-  ].join('\n');
+  var _dm = gm.displayMode || 0;
+  var _dmBg = ['rgba(168,85,247,0.15)','rgba(251,191,36,0.15)','rgba(52,211,153,0.15)'][_dm];
+  var _dmBd = ['rgba(168,85,247,0.4)','rgba(251,191,36,0.4)','rgba(52,211,153,0.4)'][_dm];
+  var _dmCo = ['#c4b5fd','#fbbf24','#4ade80'][_dm];
+  var _dmLb = ['📖 汉字大','🔊 假名大','🎧 仅假名'][_dm];
+  var _dmDe = ['日本汉字大 / 平假名小','平假名大 / 日本汉字小','只显示平假名（发音）'][_dm];
+  
+  var _qt = gm.quizType || 'word';
+  var _qtOrder = ['word','sentence','grammar','mock'];
+  var _qtLabels = { word:'单词', sentence:'例句', grammar:'文法例句', mock:'模拟试题' };
+  var _qtColors = { word:'rgba(168,85,247,0.15)', sentence:'rgba(251,191,36,0.15)', grammar:'rgba(52,211,153,0.15)', mock:'rgba(239,68,68,0.15)' };
+  var _qtBdColors = { word:'rgba(168,85,247,0.4)', sentence:'rgba(251,191,36,0.4)', grammar:'rgba(52,211,153,0.4)', mock:'rgba(239,68,68,0.4)' };
+  var _qtTextColors = { word:'#c4b5fd', sentence:'#fbbf24', grammar:'#4ade80', mock:'#fca5a5' };
+  var _qtDescs = { word:'只看单词选释义', sentence:'使用单词例句填空', grammar:'使用文法例句填空', mock:'全部类型混合出题' };
+  
+  var html = '';
+  // style
+  html += '<style>';
+  html += '  @keyframes gmFadeIn { from { opacity:0; transform:translateY(12px) } to { opacity:1; transform:translateY(0) } }';
+  html += '  .gm-title { font-size:22px; font-weight:800; letter-spacing:2px; margin-bottom:4px; }';
+  html += '  .gm-sub { font-size:12px; color:#64748b; margin-bottom:16px; }';
+  html += '  .gm-card { background:linear-gradient(135deg,#1a1a3e,#0f3460); border-radius:16px; padding:24px 16px; cursor:pointer; text-align:center; transition:all 0.3s; position:relative; overflow:hidden; border:1px solid rgba(255,255,255,0.06); }';
+  html += '  .gm-card:hover { transform:translateY(-4px); box-shadow:0 8px 30px rgba(168,85,247,0.15); }';
+  html += '  .gm-card-icon { font-size:42px; display:block; margin-bottom:8px; }';
+  html += '  .gm-card-title { font-size:18px; font-weight:700; margin-bottom:4px; }';
+  html += '  .gm-card-desc { font-size:11px; color:#64748b; line-height:1.6; }';
+  html += '  .gm-card-climb { border-color:rgba(168,85,247,0.3); }';
+  html += '  .gm-card-climb .gm-card-title { background:linear-gradient(135deg,#a855f7,#ec4899); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }';
+  html += '  .gm-card-boxing { border-color:rgba(239,68,68,0.3); }';
+  html += '  .gm-card-boxing .gm-card-title { background:linear-gradient(135deg,#ef4444,#fbbf24); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }';
+  html += '  .gm-section { padding:12px 14px; background:rgba(255,255,255,0.03); border-radius:12px; margin-bottom:10px; border:1px solid rgba(255,255,255,0.06); }';
+  html += '  .gm-checkbox { font-size:16px; cursor:pointer; user-select:none; }';
+  html += '  .gm-checked { color:#e94560; }';
+  html += '  .gm-tag { display:inline-block; padding:5px 14px; border-radius:20px; font-size:12px; font-weight:600; cursor:pointer; transition:all 0.2s; background:rgba(255,255,255,0.06); color:#64748b; }';
+  html += '  .gm-tag-on { background:linear-gradient(135deg,#e94560,#ff6b9d); color:#fff; }';
+  html += '</style>';
+  
+  // 主容器
+  html += '<div id="gm-root" style="display:flex;flex-direction:column;align-items:center;height:100%;padding:16px 20px;text-align:center;background:#0a0a18;overflow-y:auto">';
+  html += '  <div style="font-size:34px;margin-bottom:4px">🎮</div>';
+  html += '  <div class="gm-title" style="background:linear-gradient(135deg,#e94560,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent">游戏模式</div>';
+  html += '  <div class="gm-sub">先选单词范围和方式，再选游戏开始</div>';
+  
+  // ---- 单词选择区 ----
+  html += '  <div style="width:100%;max-width:340px;text-align:left;animation:gmFadeIn 0.3s ease-out both">';
+  
+  // 考级分类
+  html += '  <div class="gm-section">';
+  html += '    <div style="display:flex;justify-content:space-between;align-items:center">';
+  html += '      <span data-gm="toggle-lvl-section" style="cursor:pointer;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#e2e8f0">';
+  html += '        <span class="gm-checkbox'+(gm.lvlOn?' gm-checked':'')+'" id="gm-cb-lvl">'+(gm.lvlOn?'☑':'☐')+'</span>🏷️ 考级分类</span>';
+  html += '    </div>';
+  html += '    <div id="gm-lvl-body" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;'+(gm.lvlOn?'':'opacity:0.35;pointer-events:none')+'">';
+  lvls.forEach(function(l){var a=gm.selLvls.indexOf(l)>=0;html+='<span class="gm-tag'+(a?' gm-tag-on':'')+'" data-gm="toggle-lvl" data-lvl="'+l+'" style="background:'+(a?'linear-gradient(135deg,#e94560,#ff6b9d)':'rgba(255,255,255,0.06)')+';color:'+(a?'#fff':'#64748b')+'">'+l+'</span>';});
+  html += '    </div>';
+  html += '  </div>';
+  
+  // 场景分类
+  html += '  <div class="gm-section">';
+  html += '    <div style="display:flex;justify-content:space-between;align-items:center">';
+  html += '      <span data-gm="toggle-cat-section" style="cursor:pointer;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#e2e8f0">';
+  html += '        <span class="gm-checkbox'+(gm.catOn?' gm-checked':'')+'" id="gm-cb-cat">'+(gm.catOn?'☑':'☐')+'</span>📂 场景分类</span>';
+  html += '    </div>';
+  html += '    <div id="gm-cat-body" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;max-height:140px;overflow-y:auto;'+(gm.catOn?'':'opacity:0.35;pointer-events:none')+'">';
+  cats.forEach(function(c){var a=gm.selCats.indexOf(c)>=0;html+='<span class="gm-tag'+(a?' gm-tag-on':'')+'" data-gm="toggle-cat" data-cat="'+c.replace(/"/g,'&quot;')+'" style="background:'+(a?'linear-gradient(135deg,#e94560,#ff6b9d)':'rgba(255,255,255,0.06)')+';color:'+(a?'#fff':'#64748b')+'">'+c+'</span>';});
+  html += '    </div>';
+  html += '  </div>';
+  
+  // 显示方式切换
+  html += '  <div class="gm-section" style="padding:8px 14px">';
+  html += '    <div style="display:flex;justify-content:space-between;align-items:center">';
+  html += '      <span style="font-size:12px;font-weight:600;color:#94a3b8">👁️ 显示方式</span>';
+  html += '      <span data-gm="toggle-display" id="gm-display-btn" style="padding:5px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s;background:'+_dmBg+';border:1px solid '+_dmBd+';color:'+_dmCo+'">'+_dmLb+'</span>';
+  html += '    </div>';
+  html += '    <div style="font-size:10px;color:#4a4a6a;margin-top:4px">'+_dmDe+'</div>';
+  html += '  </div>';
+  
+  // 题库形式切换
+  html += '  <div class="gm-section" style="padding:8px 14px">';
+  html += '    <div style="display:flex;justify-content:space-between;align-items:center">';
+  html += '      <span style="font-size:12px;font-weight:600;color:#94a3b8">📝 题库形式</span>';
+  html += '      <span data-gm="toggle-quiztype" id="gm-quiztype-btn" style="padding:5px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s;background:'+_qtColors[_qt]+';border:1px solid '+_qtBdColors[_qt]+';color:'+_qtTextColors[_qt]+'">'+_qtLabels[_qt]+'</span>';
+  html += '    </div>';
+  html += '    <div style="font-size:10px;color:#4a4a6a;margin-top:4px">'+_qtDescs[_qt]+'</div>';
+  html += '  </div>';
+  
+  html += '  </div>'; // 结束单词选择区
+  
+  // ---- 游戏卡片 ----
+  html += '  <div style="display:flex;flex-direction:column;gap:10px;width:100%;max-width:320px;animation:gmFadeIn 0.4s ease-out 0.15s both;margin-top:8px">';
+  html += '    <div class="gm-card gm-card-climb" data-gm="start-climb">';
+  html += '      <div class="gm-card-icon">🏔️</div>';
+  html += '      <div class="gm-card-title">爬塔闯关</div>';
+  html += '      <div class="gm-card-desc">答对向上跳 · 答错摔下来<br>老师/家长/同事/课长 Boss 战</div>';
+  html += '    </div>';
+  html += '    <div class="gm-card gm-card-boxing" data-gm="start-boxing">';
+  html += '      <div class="gm-card-icon">🥊</div>';
+  html += '      <div class="gm-card-title">单词拳击</div>';
+  html += '      <div class="gm-card-desc">第一人称视角 · 出拳KO对手<br>连击越高伤害越高</div>';
+  html += '    </div>';
+  html += '  </div>';
+  
+  html += '  <div style="margin-top:14px;font-size:10px;color:#3a3a5a">';
+  html += '    爬塔最高层: '+(localStorage.getItem('tower_high_floor')||'无')+' | 拳击最高分: '+(localStorage.getItem('bx_high_score')||'无');
+  html += '  </div>';
+  html += '</div>';
+  
+  container.innerHTML = html;
   
   // 事件委托：所有点击由 gm-root 统一处理
   var root = document.getElementById('gm-root');
@@ -1632,6 +1818,8 @@ function start() {
     ? gm.selLvls.map(function(l){return l.toUpperCase().replace(/^N/,'N')})
     : ['N5','N4','N3','N2','N1'];
   state.selectedCategories = gm.catOn && gm.selCats && gm.selCats.length ? gm.selCats : [];
+  state.displayMode = gm.displayMode !== undefined ? gm.displayMode : 0;
+  state.quizType = gm.quizType || 'word';
   
   // 如果还没渲染爬塔界面（从游戏菜单启动），先渲染
   if (!document.getElementById('gh-world')) {

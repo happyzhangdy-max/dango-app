@@ -273,8 +273,9 @@ SFX.bossAppear = function() {
 function generateQuestion() {
   const diff = getDifficulty(state.round);
   const level = diff.level;
+  var qType = state.quizType || 'word';
   let pool = [];
-  const source = state.quizMode === 'word' ? _cachedByLevelCn : _cachedByLevel;
+  const source = (qType === 'word') ? _cachedByLevelCn : _cachedByLevel;
   if (state.selectedLevels.includes(level)) {
     const p = source[level];
     if (p && p.length) pool = pool.concat(p);
@@ -298,19 +299,117 @@ function generateQuestion() {
   const word = pool[Math.floor(Math.random() * pool.length)];
   const distractors = getRandomWords(level, word.id, 2); // 拳击只出3选项
 
-  // 单词模式：显示日语选中文
-  const options = [
+  // 选中文的干扰项
+  var options;
+  // 模拟试题模式：25% 单词释义 + 25% 例句 + 25% 文法 + 25% 单词（混合）
+  var actualQType = qType;
+  if (actualQType === 'mock') {
+    var _r = Math.random();
+    if (_r < 0.25) actualQType = 'word';
+    else if (_r < 0.5) actualQType = 'sentence';
+    else if (_r < 0.75) actualQType = 'grammar';
+    else actualQType = 'word';
+  }
+  
+  if (actualQType === 'sentence') {
+    // 句子模式：展示句子，选正确的词
+    var sentence = word.ex_jp || '';
+    if (sentence && sentence.length > 8 && findWordInSentence(word.word, sentence).found) {
+      var match = findWordInSentence(word.word, sentence);
+      var blanked = sentence.slice(0, match.matchStart) + '＿＿' + sentence.slice(match.matchStart + match.matchText.length);
+      options = [
+        { text: word.word, correct: true },
+        ...distractors.map(function(w) { return { text: w.word, correct: false }; }),
+      ];
+      shuffle(options);
+      speak(sentence);
+      return {
+        word: word, options: options,
+        displayWord: blanked,
+        displayReading: word.reading || '',
+        displaySentence: sentence,
+        displayMeaning: word.meaning || '',
+        timeLimit: diff.time,
+        level: level,
+        type: 'sentence'
+      };
+    }
+    // fallback to word mode
+  }
+  
+  // 文法例句模式
+  if (actualQType === 'grammar') {
+    var gData2 = (typeof GRAMMAR_DATA !== 'undefined') ? GRAMMAR_DATA : null;
+    if (gData2 && gData2.length > 0) {
+      var gPool2 = gData2;
+      var gLevel2 = level.toLowerCase().replace('n','');
+      if (gLevel2) {
+        var gFiltered2 = gPool2.filter(function(g) { return (g.level || '').toLowerCase() === gLevel2; });
+        if (gFiltered2.length > 0) gPool2 = gFiltered2;
+      }
+      var gItem2 = gPool2[Math.floor(Math.random() * gPool2.length)];
+      if (gItem2 && gItem2.ex_jp) {
+        var gSent2 = gItem2.ex_jp;
+        var gPat2 = gItem2.pattern || '';
+        var gSearch2 = gPat2.replace(/〜/g, '');
+        var gIdx2_2 = gSent2.indexOf(gSearch2);
+        var gBlankedSent2 = gSent2;
+        if (gIdx2_2 >= 0) {
+          gBlankedSent2 = gSent2.slice(0, gIdx2_2) + '＿＿' + gSent2.slice(gIdx2_2 + gSearch2.length);
+        } else {
+          gBlankedSent2 = '＿＿（' + gItem2.desc + '）';
+        }
+        // 干扰项
+        var gWrongPool2 = gData2.filter(function(g) { return g.pattern !== gItem2.pattern; });
+        var gShuffled2 = gWrongPool2.sort(function() { return Math.random() - 0.5; });
+        var gWrong2 = [];
+        for (var gi2 = 0; gi2 < gShuffled2.length && gWrong2.length < 2; gi2++) {
+          if (gWrong2.indexOf(gShuffled2[gi2].pattern) === -1) gWrong2.push(gShuffled2[gi2].pattern);
+        }
+        var gOpts2 = [{ text: gItem2.pattern, correct: true }];
+        gWrong2.forEach(function(p) { gOpts2.push({ text: p, correct: false }); });
+        shuffle(gOpts2);
+        speak(gSent2);
+        return {
+          word: { word: gItem2.pattern, meaning: gItem2.meaning, reading: '', level: gItem2.level },
+          options: gOpts2,
+          displayWord: gBlankedSent2,
+          displayReading: '',
+          displaySentence: gSent2,
+          displayMeaning: gItem2.meaning || '',
+          timeLimit: diff.time + 2000,
+          level: (gItem2.level || '').toUpperCase(),
+          type: 'grammar',
+        };
+      }
+    }
+    // fallback to word mode
+  }
+  
+  // 单词模式：显示释义
+  options = [
     { text: word.meaning || word.word, correct: true },
-    ...distractors.map(w => ({ text: w.meaning || w.word, correct: false })),
+    ...distractors.map(function(w) { return { text: w.meaning || w.word, correct: false }; }),
   ];
   shuffle(options);
 
+  var gm = JSON.parse(localStorage.getItem('game_settings') || '{}');
+  var displayMode = gm.displayMode !== undefined ? gm.displayMode : 0;
+  var dw, dr;
+  if (displayMode === 0) {
+    dw = word.word; dr = word.reading || '';
+  } else if (displayMode === 1) {
+    dw = word.reading || word.word; dr = word.word;
+  } else {
+    dw = word.reading || word.word; dr = '';
+  }
+  
   speak(word.word);
 
   return {
     word, options,
-    displayWord: word.word,
-    displayReading: word.reading || '',
+    displayWord: dw,
+    displayReading: dr,
     displaySentence: word.ex_jp || '',
     displayMeaning: word.meaning || '',
     timeLimit: diff.time,
@@ -339,6 +438,10 @@ function renderRing() {
   
   const opp = state.currentOpponent || { icon: '😤', name: '???', color: '#888', hitFace: '😵', koFace: '💀' };
   const oppHpPct = state.opponentHp / state.opponentMaxHp * 100;
+  const _dmS = JSON.parse(localStorage.getItem('game_settings') || '{}');
+  const _dmR = _dmS.displayMode !== undefined ? _dmS.displayMode : 0;
+  const _wordColor = ['#e2e8f0', '#fbbf24', '#4ade80'][_dmR];
+  const _wordShadow = ['0 0 20px rgba(168,85,247,0.2)', '0 0 20px rgba(251,191,36,0.2)', '0 0 20px rgba(52,211,153,0.2)'][_dmR];
   
   container.innerHTML = `
     <style>
@@ -417,6 +520,7 @@ function renderRing() {
       <div style="display:flex;justify-content:space-between;padding:8px 14px;flex-shrink:0;z-index:10">
         <div>
           <div style="font-size:11px;color:#94a3b8;font-weight:600">ROUND ${state.round}</div>
+          <div style="font-size:11px;color:#64748b;font-weight:600">${({word:'📖单词',sentence:'💬例句',grammar:'📐文法',mock:'📋模拟'})[_dmS.quizType||'word'] || '📖单词'}</div>
           <div style="font-size:17px;letter-spacing:1px" id="bx-hp">
             ${'❤️'.repeat(state.hp)}${'🖤'.repeat(state.maxHp - state.hp)}
           </div>
@@ -454,10 +558,10 @@ function renderRing() {
       
       <!-- 问题区 -->
       <div style="flex-shrink:0;text-align:center;padding:0 16px 10px">
-        <div style="font-size:28px;font-weight:700;color:#e2e8f0;letter-spacing:2px;margin-bottom:10px;text-shadow:0 0 20px rgba(168,85,247,0.2)" id="bx-word">
+        <div style="font-size:28px;font-weight:700;color:${_wordColor};letter-spacing:2px;margin-bottom:10px;text-shadow:${_wordShadow}" id="bx-word">
           ${currentQuestion ? currentQuestion.displayWord : '🥊 准备战斗'}
         </div>
-        <div style="font-size:12px;color:#64748b;margin-bottom:8px" id="bx-level">
+        <div style="font-size:12px;color:#64748b;margin-bottom:8px;${_dmR === 2 ? 'display:none' : ''}" id="bx-level">
           ${currentQuestion ? currentQuestion.level + ' · ' + currentQuestion.displayReading : ''}
         </div>
         
@@ -830,8 +934,21 @@ function nextRound() {
   
   const wordEl = document.getElementById('bx-word');
   const levelEl = document.getElementById('bx-level');
-  if (wordEl) wordEl.textContent = currentQuestion ? currentQuestion.displayWord : '---';
-  if (levelEl) levelEl.textContent = currentQuestion ? currentQuestion.level + ' · ' + currentQuestion.displayReading : '';
+  if (wordEl) {
+    const _gm2 = JSON.parse(localStorage.getItem('game_settings') || '{}');
+    const _dm2 = _gm2.displayMode !== undefined ? _gm2.displayMode : 0;
+    wordEl.textContent = currentQuestion ? currentQuestion.displayWord : '---';
+    wordEl.style.color = ['#e2e8f0', '#fbbf24', '#4ade80'][_dm2];
+    wordEl.style.textShadow = ['0 0 20px rgba(168,85,247,0.2)', '0 0 20px rgba(251,191,36,0.2)', '0 0 20px rgba(52,211,153,0.2)'][_dm2];
+  }
+  if (levelEl) {
+    const _gm3 = JSON.parse(localStorage.getItem('game_settings') || '{}');
+    const _dm3 = _gm3.displayMode !== undefined ? _gm3.displayMode : 0;
+    levelEl.textContent = currentQuestion
+      ? currentQuestion.level + ' · ' + currentQuestion.displayReading
+      : '';
+    levelEl.style.display = (_dm3 === 2 && (!currentQuestion || !currentQuestion.displayReading)) ? 'none' : '';
+  }
   
   renderOptions();
   updateHUD();
@@ -1061,6 +1178,7 @@ function start() {
     ? gm.selLvls.map(function(l){return l.toUpperCase().replace(/^N/,'N')})
     : ['N5','N4','N3','N2','N1'];
   state.selectedCategories = gm.catOn && gm.selCats && gm.selCats.length ? gm.selCats : [];
+  state.quizType = gm.quizType || 'word';
   
   state.round = 1;
   state.opponentIndex = 0;
