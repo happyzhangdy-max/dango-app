@@ -1204,7 +1204,7 @@ function startTimer() {
 // 游戏菜单（替换原先直接显示爬塔的 init）
 // ============================================================
 // 游戏选择菜单（含单词分类选择）
-// ============================================================
+// 这些函数需要暴露到 window，因为 onclick 在全局作用域执行
 function _gmLoadSettings() {
   var s = JSON.parse(localStorage.getItem('game_settings') || '{}');
   return {
@@ -1218,14 +1218,14 @@ function _gmSaveSettings(settings) {
   localStorage.setItem('game_settings', JSON.stringify(settings));
 }
 // 切换考级分类展开/收起
-function _gmToggle(el, bodyId) {
+window._gmToggle = function(el, bodyId) {
   var body = document.getElementById(bodyId);
   if (!body) return;
   var isHidden = body.style.display === 'none';
   body.style.display = isHidden ? 'block' : 'none';
   if (el) el.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
-}
-function _gmToggleLvlSection() {
+};
+window._gmToggleLvlSection = function() {
   var cb = document.getElementById('gm-cb-lvl');
   var body = document.getElementById('gm-lvl-body');
   if (!cb) return;
@@ -1235,8 +1235,8 @@ function _gmToggleLvlSection() {
   body.style.opacity = on ? '1' : '0.35';
   body.style.pointerEvents = on ? '' : 'none';
   var s = _gmLoadSettings(); s.lvlOn = on; _gmSaveSettings(s);
-}
-function _gmToggleCatSection() {
+};
+window._gmToggleCatSection = function() {
   var cb = document.getElementById('gm-cb-cat');
   var body = document.getElementById('gm-cat-body');
   if (!cb) return;
@@ -1246,8 +1246,8 @@ function _gmToggleCatSection() {
   body.style.opacity = on ? '1' : '0.35';
   body.style.pointerEvents = on ? '' : 'none';
   var s = _gmLoadSettings(); s.catOn = on; _gmSaveSettings(s);
-}
-function _gmToggleLvl(el, lvl) {
+};
+window._gmToggleLvl = function(el, lvl) {
   var s = _gmLoadSettings();
   var idx = s.selLvls.indexOf(lvl);
   if (idx >= 0) { s.selLvls.splice(idx, 1); } else { s.selLvls.push(lvl); }
@@ -1258,8 +1258,8 @@ function _gmToggleLvl(el, lvl) {
     ? 'linear-gradient(135deg,#e94560,#ff6b9d)'
     : 'rgba(255,255,255,0.06)';
   el.style.color = el.classList.contains('ap-tag-on') ? '#fff' : '#64748b';
-}
-function _gmToggleCat(el, cat) {
+};
+window._gmToggleCat = function(el, cat) {
   var s = _gmLoadSettings();
   var idx = s.selCats.indexOf(cat);
   if (idx >= 0) { s.selCats.splice(idx, 1); } else { s.selCats.push(cat); }
@@ -1269,7 +1269,7 @@ function _gmToggleCat(el, cat) {
     ? 'linear-gradient(135deg,#e94560,#ff6b9d)'
     : 'rgba(255,255,255,0.06)';
   el.style.color = el.classList.contains('ap-tag-on') ? '#fff' : '#64748b';
-}
+};
 
 function init() {
   cacheByLevel();
