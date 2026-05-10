@@ -1,1 +1,0 @@
-function rate(q){const v=q[ci];const p=lp();const cur=p[v.id]||{};const r=sm2(cur,q);p[v.id]={...r,word:v.word};sp(p);ci++;if(ci<q.length)setTimeout(showC,200);else showComp()}

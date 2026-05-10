@@ -1,5 +1,0 @@
-OLD_BM:
-function apToggleBook(){var v=_apQueue[_apIdx];if(!v)return;toggleBook(v.id);apSyncMarks()}
-
-NEW_BM:
-function apToggleBook(){var v=_apQueue[_apIdx];if(!v)return;toggleBook(v.id);apSyncMarks();clearTimeout(_apTimer);speechSynthesis.cancel();_apIdx--;apShowCard()}

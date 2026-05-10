@@ -1,1 +1,0 @@
-function apToggleBook(){var v=_apQueue[_apIdx];if(!v)return;toggleBook(v.id);apSyncMarks()}

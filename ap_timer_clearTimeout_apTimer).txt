@@ -1,2 +1,0 @@
-uchend=function(){window._apDragging=false};_apTimer=setTimeout(apShowCard,500)}
-function apSeek(e){clearTimeout(_apTimer);_apTimer=null;var bar=document.querySelector('#apScreen .ap-progress');var rect=bar.getBoundingClientRect();var pct=Math.max(0,Math.min(1,(e.clientX-rect.left)/rect.width));_apI

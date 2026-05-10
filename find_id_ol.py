@@ -1,8 +1,0 @@
-with open('index.html', 'r', encoding='utf-8', errors='replace') as f:
-    c = f.read()
-idx = c.find('id="ol"')
-if idx >= 0:
-    ctx = c[max(0,idx-50):idx+300]
-    with open('id_ol_ctx.txt', 'w', encoding='utf-8') as out:
-        out.write(ctx)
-    print('Wrote id_ol_ctx.txt, len=', len(ctx))

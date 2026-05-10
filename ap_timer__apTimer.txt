@@ -1,5 +1,0 @@
-;document.ontouchend=null}}
-
-// === 自动播放 ===
-var _apInterval=2000,_apBoth=true,_apQueue=[],_apIdx=0,_apTimer=null,_apPaused=false,_apStop=false;
-function showAutoPlayOptions(){document.getElementById('autoPlayModal').classList.add('open');document.getElementById('autoPlayOverlay').classList.add('ope
