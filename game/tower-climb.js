@@ -1061,6 +1061,10 @@ function gameOver() {
   }
   localStorage.setItem('towerWrongWords', JSON.stringify(saved));
   
+  // 保存最高楼层
+  const prev = parseInt(localStorage.getItem('tower_high_floor') || '0');
+  if (state.floor > prev) localStorage.setItem('tower_high_floor', state.floor);
+  
   const world = document.getElementById('gh-world');
   if (world) {
     const wrongList = state.wrongWords.slice(0, 20);
@@ -1179,9 +1183,62 @@ function startTimer() {
 // ============================================================
 // 初始化
 // ============================================================
+// ============================================================
+// 游戏菜单（替换原先直接显示爬塔的 init）
+// ============================================================
 function init() {
   cacheByLevel();
-  initVoice(); // 提前加载日语声线（iOS Safari 需要）
+  initVoice();
+  const container = document.getElementById('p-game');
+  if (!container) return;
+  
+  container.innerHTML = `
+    <style>
+      @keyframes gmFadeIn { from { opacity:0; transform:translateY(12px) } to { opacity:1; transform:translateY(0) } }
+      .gm-title { font-size:22px; font-weight:800; letter-spacing:2px; margin-bottom:4px; }
+      .gm-sub { font-size:12px; color:#64748b; margin-bottom:20px; }
+      .gm-card {
+        background:linear-gradient(135deg,#1a1a3e,#0f3460); border-radius:16px; padding:24px 16px;
+        cursor:pointer; text-align:center; transition:all 0.3s; position:relative; overflow:hidden;
+        border:1px solid rgba(255,255,255,0.06);
+      }
+      .gm-card:hover { transform:translateY(-4px); box-shadow:0 8px 30px rgba(168,85,247,0.15); }
+      .gm-card-icon { font-size:42px; display:block; margin-bottom:8px; }
+      .gm-card-title { font-size:18px; font-weight:700; margin-bottom:4px; }
+      .gm-card-desc { font-size:11px; color:#64748b; line-height:1.6; }
+      .gm-card-climb { border-color:rgba(168,85,247,0.3); }
+      .gm-card-climb .gm-card-title { background:linear-gradient(135deg,#a855f7,#ec4899); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+      .gm-card-boxing { border-color:rgba(239,68,68,0.3); }
+      .gm-card-boxing .gm-card-title { background:linear-gradient(135deg,#ef4444,#fbbf24); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    </style>
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:30px;text-align:center;background:#0a0a18">
+      <div style="font-size:38px;margin-bottom:6px;animation:bounceIn 0.6s cubic-bezier(0.34,1.56,0.64,1) both">🎮</div>
+      <div class="gm-title" style="background:linear-gradient(135deg,#e94560,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent">游戏模式</div>
+      <div class="gm-sub">选一个模式开始学习</div>
+      
+      <div style="display:flex;flex-direction:column;gap:12px;width:100%;max-width:320px;animation:gmFadeIn 0.4s ease-out 0.2s both">
+        <div class="gm-card gm-card-climb" onclick="Game.start()">
+          <div class="gm-card-icon">🏔️</div>
+          <div class="gm-card-title">爬塔闯关</div>
+          <div class="gm-card-desc">答对向上跳 · 答错摔下来<br>老师/家长/同事/课长 Boss 战</div>
+        </div>
+        <div class="gm-card gm-card-boxing" onclick="window.GameBoxing.start()">
+          <div class="gm-card-icon">🥊</div>
+          <div class="gm-card-title">单词拳击</div>
+          <div class="gm-card-desc">第一人称视角 · 出拳KO对手<br>连击越高伤害越高</div>
+        </div>
+      </div>
+      
+      <div style="margin-top:18px;font-size:10px;color:#3a3a5a">
+        爬塔最高层: ${localStorage.getItem('tower_high_floor') || '无'} |
+        拳击最高分: ${localStorage.getItem('bx_high_score') || '无'}
+      </div>
+    </div>
+  `;
+}
+
+// 爬塔原有初始化内容移到 showTowerClimb
+function showTowerClimb() {
   const container = document.getElementById('p-game');
   if (!container) return;
   
@@ -1426,6 +1483,10 @@ function init() {
 
 function start() {
   try {
+  // 如果还没渲染爬塔界面（从游戏菜单启动），先渲染
+  if (!document.getElementById('gh-world')) {
+    showTowerClimb();
+  }
   // 重置所有状态
   state.floor = 1; state.hp = MAX_HP; state.maxHp = MAX_HP;
   state.combo = 0; state.maxCombo = 0; state.score = 0;
