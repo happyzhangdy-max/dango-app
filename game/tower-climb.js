@@ -3,7 +3,7 @@
  * 
  * 参考：「是男人就上100层」平台跳跃核心体验
  * 
- * 剧情：1~50F 是背书包的学生，Boss 是老师/校长
+ * 剧情：1~50F 是背书包的学生，Boss 是老师/家长
  *       51~100F 是穿西装的社畜，Boss 是同事/课长/社长
  */
 ;(function() {
@@ -24,13 +24,13 @@ const PHASE_OFFICE = 'office';     // 51~100F
 // Boss 配置：每阶段出现次数 + 可用 Boss 类型
 const BOSS_CONFIG = [
   { phase: PHASE_STUDENT, count: 1, minFloor: 15, maxFloor: 48, bosses: [
-    { id: 'teacher', icon: '👨‍🏫', name: '老师', color: '#3b82f6' },
-    { id: 'principal', icon: '👨‍🎓', name: '校长', color: '#8b5cf6' },
+    { id: 'teacher', icon: '👨‍🏫', name: '老师', color: '#3b82f6', lines: ['不准看其他同学的卷子！', '上课不准睡觉！', '这道题这么简单都不会？'] },
+    { id: 'parent', icon: '👪', name: '家长', color: '#8b5cf6', lines: ['赶紧去学习！', '作业写了吗？', '考了多少分？'] },
   ]},
   { phase: PHASE_OFFICE, count: 3, minFloor: 55, maxFloor: 98, bosses: [
-    { id: 'colleague', icon: '👔', name: '同事', color: '#f59e0b' },
-    { id: 'kacho', icon: '👨‍💼', name: '课长', color: '#ef4444' },
-    { id: 'shacho', icon: '👑', name: '社长', color: '#ec4899' },
+    { id: 'colleague', icon: '👔', name: '同事', color: '#f59e0b', lines: ['又在摸鱼？帮我看一下这个Excel……', '今天加班到几点？我陪你。', '中午吃什么？随便，我想不出来……'] },
+    { id: 'kacho', icon: '👨‍💼', name: '课长', color: '#ef4444', lines: ['这个方案，今天下班前能改好吗？', '辛苦了——下周一之前再出一版。', '上个月的加班申请，还没批下来……'] },
+    { id: 'shacho', icon: '👑', name: '社长', color: '#ec4899', lines: ['年轻人，有梦想是好事。不过先把PPT做完。', '今年不涨薪了，公司很难。你要理解。', '团建就是加班，换了个地方而已。'] },
   ]},
 ];
 
@@ -552,7 +552,14 @@ function onCorrect() {
       state.animating = false;
       // Boss 出现浮字
       showFloatText(`${bossHere.boss.icon} ${bossHere.boss.name} 出现！`, bossHere.boss.color, 36);
-      setTimeout(nextRound, 1200);
+      // Boss 说随机台词
+      if (bossHere.boss.lines && bossHere.boss.lines.length > 0) {
+        const line = bossHere.boss.lines[Math.floor(Math.random() * bossHere.boss.lines.length)];
+        setTimeout(() => {
+          showFloatText(`💬 "${line}"`, '#f5f5f5', 28);
+        }, 700);
+      }
+      setTimeout(nextRound, 1400);
     }, 500);
     return;
   }
@@ -1232,12 +1239,12 @@ function init() {
       <div id="gh-world" style="flex:1;overflow:hidden;min-height:0">
         <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:20px">
           <div style="font-size:40px;margin-bottom:8px;animation:bounceIn 0.8s cubic-bezier(0.34,1.56,0.64,1)">🏔️</div>
-          <div style="font-size:18px;font-weight:700;color:#e2e8f0">爬塔挑战</div>
+          <div style="font-size:18px;font-weight:700;color:#e2e8f0">爬塔挑战 · 是男人就上100层</div>
           <div style="font-size:12px;color:#94a3b8;margin:8px 0;text-align:center;line-height:1.9">
             答对 <span style="color:#22c55e">⬆ 向上跳</span> · 答错 <span style="color:#ef4444">⬇ 摔落</span><br>
             <span style="color:#4ade80">💊 4~8 连击触发回血机会</span><br>
             <span style="color:#60a5fa">👨‍🎓 1~50F 学生时代</span> · <span style="color:#475569">👔 51~100F 社畜时代</span><br>
-            <span style="color:#ef4444">👨‍🏫 遇到老师/校长 · 同事/课长/社长</span>
+            <span style="color:#ef4444">👨‍🏫 遇到老师/家长 · 同事/课长/社长</span>
           </div>
           <div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;justify-content:center">
             <span style="font-size:10px;padding:3px 10px;border-radius:10px;background:rgba(168,85,247,0.1);color:#a78bfa">N5→N1</span>
