@@ -740,13 +740,16 @@ function vApShowCard(){
   vApSyncMarks(w);
   // 自动发音
   vApSpeak(w,showSent);
-  // 自动下一词
+  // 计算下一词时间：基础展示 + 间隔
   clearTimeout(_vApTimer);_vApTimer=null;
+  var baseTime=showSent?3500:2000; // 单词展示时间(ms)
+  var gap=_vApSpeed*1000;           // 间隔(ms)
+  var delay=baseTime+gap;
   if(!_vApPaused&&_vApIdx<_vApQueue.length-1){
-    _vApTimer=setTimeout(function(){if(!_vApPaused&&_vApActive){_vApIdx++;vApShowCard()}},_vApSpeed*1000);
+    _vApTimer=setTimeout(function(){if(!_vApPaused&&_vApActive){_vApIdx++;vApShowCard()}},delay);
   }else if(!_vApPaused&&_vApIdx>=_vApQueue.length-1){
-    // 最后一个词停留后结束
-    _vApTimer=setTimeout(function(){if(_vApActive)vApStop()},_vApSpeed*1000+1000);
+    // 最后一个词展示完后结束
+    _vApTimer=setTimeout(function(){if(_vApActive)vApStop()},delay+1000);
   }
 }
 
@@ -776,8 +779,12 @@ function vApTogglePause(){
   if(_vApPaused){
     clearTimeout(_vApTimer);_vApTimer=null;
   }else{
+    var saved=JSON.parse(localStorage.getItem('ap_settings')||'{}');
+    var format=saved.format||'word';
+    var baseTime=format==='word_sent'?3500:2000;
+    var gap=_vApSpeed*1000;
     if(_vApIdx<_vApQueue.length-1){
-      _vApTimer=setTimeout(function(){if(!_vApPaused&&_vApActive){_vApIdx++;vApShowCard()}},_vApSpeed*1000);
+      _vApTimer=setTimeout(function(){if(!_vApPaused&&_vApActive){_vApIdx++;vApShowCard()}},baseTime+gap);
     }else{
       vApShowCard();
     }
