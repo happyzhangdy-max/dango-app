@@ -613,7 +613,7 @@ function nextOpponent() {
 
 function nextRound() {
   if (!state.isPlaying) return;
-  state.animating = true;
+  // 不设置 animating = true，让 handleAnswer / onTimeout 管理动画锁
   currentQuestion = generateQuestion();
   
   const wordEl = document.getElementById('bx-word');
