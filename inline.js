@@ -1023,7 +1023,13 @@ function doAISearch(q,localResults){
     '- 中文翻译写简洁的中文释义\n'+
     '- 说明写简单备注（如语境、常用搭配），没有就不写\n\n'+
     '日文：'+q;
-  callAI(_scanConfig.apiUrl,'deepseek-ai/DeepSeek-V4-Flash',[{role:'user',content:prompt}],512).then(function(txt){
+  // 检查 OpenRouter API Key
+  if(!_searchConfig.apiKey){
+    var k=prompt('🔑 请输入 OpenRouter API Key\n(可在 G:\\hermes\\.hermes\\.env 中找到)');
+    if(k&&k.trim()){_searchConfig.apiKey=k.trim();localStorage.setItem('or_key',k.trim())}
+    else{showT('⚠️ 未配置 API Key，AI 搜索不可用');return}
+  }
+  callAI(_searchConfig.apiUrl,_searchConfig.model,[{role:'user',content:prompt}],512,_searchConfig.apiKey).then(function(txt){
     // 解析 AI 返回的字段
     var cn='',src='',kanji='',note='';
     txt.split('\n').forEach(function(line){
@@ -1298,6 +1304,21 @@ var _scanConfig={
   apiKey:'sk-tjhjahjojrwrmfzoqktyugyefrwhdxnovdyivttypdlpuimu'
 };
 
+// ── AI 搜索专用配置（OpenRouter，快且便宜）──
+var _searchConfig={
+  // DeepSeek-V4-Flash: $0.14/M in, $0.28/M out, 0.05s 平均延迟（硅基流动 1.28s）
+  // 速度快 ~25x，价格低 ~20%
+  // 备用选择：google/gemini-2.5-flash-lite ($0.10/$0.40) 或 qwen/qwen3-14b ($0.06/$0.24)
+  // API Key 存于 localStorage('or_key')，首次使用由用户输入
+  apiUrl:'https://openrouter.ai/api/v1/chat/completions',
+  model:'deepseek/deepseek-v4-flash'
+};
+// 从 localStorage 读取 OpenRouter Key
+(function(){
+  var k=localStorage.getItem('or_key');
+  if(k)_searchConfig.apiKey=k;
+})();
+
 function doScan(){
   if(!_scanImageData){showT('请先选择一张图片');return}
   if(!_scanConfig.apiKey){
@@ -1356,12 +1377,13 @@ function callOCRandTranslate(imageBase64){
   });
 }
 
-function callAI(url,model,messages,maxTokens){
+function callAI(url,model,messages,maxTokens,apiKey){
+  if(!apiKey) apiKey=_scanConfig.apiKey;
   return new Promise(function(resolve,reject){
     var xhr=new XMLHttpRequest();
     xhr.open('POST',url);
     xhr.setRequestHeader('Content-Type','application/json');
-    xhr.setRequestHeader('Authorization','Bearer '+_scanConfig.apiKey);
+    xhr.setRequestHeader('Authorization','Bearer '+apiKey);
     xhr.onload=function(){
       try{
         var r=JSON.parse(xhr.responseText);
