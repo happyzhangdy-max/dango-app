@@ -1039,24 +1039,30 @@ function doAISearch(q,localResults){
     if(kanji==='无'||kanji==='なし')kanji='';
     if(note==='无'||note==='なし')note='';
     
-    var aiHtml='<div class="search-result-item search-ai-item" style="background:#fffbe6;border:1px solid #ffe58f;border-radius:8px;margin-bottom:6px;cursor:default">'+
+    // 检查收藏状态
+    var book = getBook();
+    var alreadyInBook = book.some(function(x){ return x.type==='ai' && x.word===q; });
+    
+    // 确定显示用词：优先用AI返回的汉字形式，否则用搜索词
+    var displayWord = (kanji && kanji!=='无' && kanji!=='なし') ? kanji : q;
+    var displayReading = (kanji && kanji!==q && kanji!=='无' && kanji!=='なし') ? q : '';
+    
+    var aiHtml='<div class="search-result-item" style="cursor:default">'+
       '<div class="search-result-info" style="flex:1;min-width:0">'+
-      '<div class="search-result-wordrow"><span class="search-result-word" style="font-size:15px;color:#d46b08">🔍 AI 搜索</span></div>'+
-      '<div class="search-result-wordrow" style="margin-top:6px">'+
-      '<span style="font-size:18px;color:#333;font-weight:600">'+escHtml(q)+'</span>';
-    // 如果有汉字
-    if(kanji)aiHtml+=' <span style="font-size:14px;color:#999;margin-left:8px">【'+escHtml(kanji)+'】</span>';
-    aiHtml+='</div>'+
-      '<div class="search-result-meaning" style="font-size:16px;color:#d46b08;margin-top:4px">→ '+escHtml(cn||'')+'</div>';
-    // 如果有外来语原词
-    if(src)aiHtml+='<div style="font-size:12px;color:#888;margin-top:3px">语源：'+escHtml(src)+'</div>';
-    // 如果有说明
-    if(note)aiHtml+='<div style="font-size:12px;color:#888;margin-top:2px">说明：'+escHtml(note)+'</div>';
-    aiHtml+='</div>'+
-      // 右侧操作按钮
-      '<div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;align-items:center">'+
+      '<div class="search-result-wordrow">'+
+      '<span class="search-result-word">'+escHtml(displayWord)+'</span>'+
+      (displayReading ? '<span class="search-result-reading">'+escHtml(displayReading)+'</span>' : '')+
+      '<span class="search-result-level sl-ai" style="background:#e6f7ff;color:#1890ff;border:1px solid #91d5ff;font-size:10px;padding:1px 6px;border-radius:3px;font-weight:500">AI</span>'+
+      '</div>'+
+      '<div class="search-result-meaning" style="color:#d46b08">→ '+escHtml(cn||'')+'</div>'+
+      '<div class="search-result-tags">'+
+      (src ? '<span class="search-result-tag">语源：'+escHtml(src)+'</span>' : '')+
+      (note ? '<span class="search-result-tag">💡 '+escHtml(note)+'</span>' : '')+
+      '</div>'+
+      '</div>'+
+      '<div class="search-result-actions" style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;align-items:center">'+
       '<button onclick="event.stopPropagation();speak(\''+escHtml(q)+'\')" style="background:none;border:none;cursor:pointer;font-size:18px;padding:4px;color:#888" title="发音">🔊</button>'+
-      '<span onclick="event.stopPropagation();showT(\'💡 搜索收藏仅支持词库词汇\')" style="cursor:pointer;font-size:18px;opacity:0.3" title="AI搜索结果暂不支持收藏">☆</span>'+
+      '<span class="search-book-btn" onclick="event.stopPropagation();toggleBook({type:\'ai\', word:\''+escHtml(q)+'\', reading:\''+escHtml(kanji||'')+'\', meaning:\''+escHtml(cn||'')+'\', level:\'\'});this.textContent=this.textContent==\'★\'?\'☆\':\'★\';return false" style="cursor:pointer;font-size:18px;opacity:0.4;transition:opacity 0.2s" title="收藏到生词本">'+(alreadyInBook?'★':'☆')+'</span>'+
       '</div>'+
       '</div>';
     
@@ -1068,8 +1074,6 @@ function doAISearch(q,localResults){
     }
     
     // 自动加入生词本（仅当未在词库中且未已收藏时）
-    var book = getBook();
-    var alreadyInBook = book.some(function(x){ return x.type==='ai' && x.word===q; });
     if (!alreadyInBook && !VOCAB.some(function(x){ return x.word===q; })) {
       toggleBook({type:'ai', word:q, reading:kanji||'', meaning:cn||'', level:''});
     }
