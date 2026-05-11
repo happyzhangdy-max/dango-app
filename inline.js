@@ -897,22 +897,56 @@ function clearSearchResults(){
 }
 
 function doAISearch(q,localResults){
-  // 未找到本地结果时，用 AI 翻译
+  // 未找到本地结果时，用 AI 翻译 + 补充语源信息
   var el=document.getElementById('searchResults');
-  var messages=[{role:'user',content:'将以下日文翻译成中文。只输出翻译结果，简短直接，不要解释。\n\n日文：'+q+'\n\n中文翻译：'}];
-  callAI(_scanConfig.apiUrl,'deepseek-ai/DeepSeek-V4-Flash',messages,512).then(function(txt){
-    // 追加到搜索结果顶部
+  var prompt='分析以下日文并输出信息，格式严格如下（每行一个字段，没有就写「无」）：\n'+
+    '中文翻译：\n'+
+    '外来语原词：\n'+
+    '日文汉字：\n'+
+    '说明：\n\n'+
+    '规则：\n'+
+    '- 如果是片假名词汇 → 外来语原词写出对应的外语原词（如 switch on）\n'+
+    '- 如果是平假名词汇有对应的日文汉字 → 日文汉字写出汉字形式（如 おいしい→美味しい）\n'+
+    '- 中文翻译写简洁的中文释义\n'+
+    '- 说明写简单备注（如语境、常用搭配），没有就不写\n\n'+
+    '日文：'+q;
+  callAI(_scanConfig.apiUrl,'deepseek-ai/DeepSeek-V4-Flash',[{role:'user',content:prompt}],512).then(function(txt){
+    // 解析 AI 返回的字段
+    var cn='',src='',kanji='',note='';
+    txt.split('\n').forEach(function(line){
+      var m=line.match(/^中文翻译[：:]?\s*(.*)/);if(m)cn=m[1];
+      m=line.match(/^外来语原词[：:]?\s*(.*)/);if(m)src=m[1];
+      m=line.match(/^日文汉字[：:]?\s*(.*)/);if(m)kanji=m[1];
+      m=line.match(/^说明[：:]?\s*(.*)/);if(m)note=m[1];
+    });
+    // 容错：如果解析没命中但内容不为空，整段当翻译
+    if(!cn&&txt.trim())cn=txt.trim();
+    // 去掉"无"值
+    if(src==='无'||src==='なし')src='';
+    if(kanji==='无'||kanji==='なし')kanji='';
+    if(note==='无'||note==='なし')note='';
+    
     var aiHtml='<div class="search-result-item search-ai-item" style="background:#fffbe6;border:1px solid #ffe58f;border-radius:8px;margin-bottom:6px">'+
       '<div class="search-result-info">'+
-      '<div class="search-result-wordrow"><span class="search-result-word" style="font-size:15px;color:#d46b08">🔍 AI 翻译</span></div>'+
-      '<div class="search-result-wordrow" style="margin-top:6px"><span style="font-size:16px;color:#333;font-weight:500">'+escHtml(q)+'</span></div>'+
-      '<div class="search-result-meaning" style="font-size:16px;color:#d46b08;margin-top:4px">→ '+escHtml(txt.trim())+'</div>'+
-      '</div></div>';
+      '<div class="search-result-wordrow"><span class="search-result-word" style="font-size:15px;color:#d46b08">🔍 AI 搜索</span></div>'+
+      '<div class="search-result-wordrow" style="margin-top:6px">'+
+      '<span style="font-size:18px;color:#333;font-weight:600">'+escHtml(q)+'</span>';
+    // 如果有汉字
+    if(kanji)aiHtml+=' <span style="font-size:14px;color:#999;margin-left:8px">【'+escHtml(kanji)+'】</span>';
+    aiHtml+='</div>'+
+      '<div class="search-result-meaning" style="font-size:16px;color:#d46b08;margin-top:4px">→ '+escHtml(cn||'')+'</div>';
+    // 如果有外来语原词
+    if(src)aiHtml+='<div style="font-size:12px;color:#888;margin-top:3px">语源：'+escHtml(src)+'</div>';
+    // 如果有说明
+    if(note)aiHtml+='<div style="font-size:12px;color:#888;margin-top:2px">说明：'+escHtml(note)+'</div>';
+    aiHtml+='</div></div>';
+    
     // 插入到现有结果前面
     if(!localResults||localResults.length===0){
       el.innerHTML=aiHtml;
     }else{
       el.innerHTML=aiHtml+el.innerHTML;
+    }
     }
   }).catch(function(err){
     // AI 失败不影响本地结果
