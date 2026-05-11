@@ -159,21 +159,54 @@ function updateSearchBookUI(id){
   });
 }
 
-function getBook(){ try { return JSON.parse(localStorage.getItem(BOOK_KEY) || '[]'); } catch(e){ return []; } }
-function toggleBook(id){
-    var book = getBook();
-    var idx = book.indexOf(id);
-    if (idx >= 0) { book.splice(idx,1); showT('已从生词本移除'); }
-    else { book.push(id); showT('已加入生词本 ✅'); }
-    localStorage.setItem(BOOK_KEY, JSON.stringify(book));
-    updateBookBtn(id);
-    // 同步更新所有卡片上的星星
-    var inBook = book.indexOf(id) >= 0;
-    document.querySelectorAll('.vbf[data-id="'+id+'"],.ww-bm[data-id="'+id+'"]').forEach(function(el){ el.textContent = inBook ? '⭐' : '☆'; el.classList.toggle('act', inBook); });
+function getBook(){
+  var raw;
+  try { raw = JSON.parse(localStorage.getItem(BOOK_KEY)); } catch(e) { return []; }
+  if (!raw) return [];
+  // v2: 如果还是旧格式 [1,2,3]，升级为 [{type:'vocab',id:1},{type:'vocab',id:2}]
+  if (raw.length > 0 && typeof raw[0] === 'number') {
+    raw = raw.map(function(id){ return {type:'vocab', id:id}; });
+    localStorage.setItem(BOOK_KEY, JSON.stringify(raw));
+  }
+  return raw;
+}
+function saveBook(book){ localStorage.setItem(BOOK_KEY, JSON.stringify(book)); }
+function isInBook(item){
+  // item 可以是 {type:'vocab',id:123} 或 {type:'ai',word:'...'}
+  var book = getBook();
+  if (item.type === 'vocab') return book.some(function(x){ return x.type==='vocab' && x.id===item.id; });
+  return book.some(function(x){ return x.type==='ai' && x.word===item.word; });
+}
+function toggleBook(item){
+  // item: {type:'vocab',id:123} 或 {type:'ai', word, reading, meaning, level}
+  var book = getBook();
+  var idx = -1;
+  if (item.type === 'vocab') {
+    idx = book.findIndex(function(x){ return x.type==='vocab' && x.id===item.id; });
+  } else {
+    idx = book.findIndex(function(x){ return x.type==='ai' && x.word===item.word; });
+  }
+  if (idx >= 0) { book.splice(idx,1); showT('已从生词本移除'); }
+  else { book.unshift(item); showT('已加入生词本 ✅'); }
+  saveBook(book);
+  // 同步更新卡片星星（仅词库词）
+  if (item.type === 'vocab') {
+    var inB = book.some(function(x){ return x.type==='vocab' && x.id===item.id; });
+    document.querySelectorAll('.vbf[data-id="'+item.id+'"],.ww-bm[data-id="'+item.id+'"]').forEach(function(el){ el.textContent = inB ? '⭐' : '☆'; el.classList.toggle('act', inB); });
+  }
+  // 同步更新搜索结果页的收藏按钮
+  var idVal = item.type==='vocab' ? item.id : item.word;
+  document.querySelectorAll('.search-book-btn[data-id="'+idVal+'"]').forEach(function(btn){
+    var inB = item.type==='vocab'
+      ? book.some(function(x){ return x.type==='vocab' && x.id===item.id; })
+      : book.some(function(x){ return x.type==='ai' && x.word===item.word; });
+    btn.textContent = inB ? '⭐' : '☆';
+    btn.style.opacity = inB ? '1' : '0.4';
+  });
 }
 function updateBookBtn(id){
     var book = getBook();
-    var inBook = book.indexOf(id) >= 0;
+    var inBook = book.some(function(x){ return x.type==='vocab' && x.id===id; });
     var btn = document.getElementById('bookBtn');
     if (!btn) return;
     btn.textContent = inBook ? '📕 移出生词本' : '📗 加入生词本';
@@ -192,7 +225,7 @@ function renderBook(){
     var tabsHtml = '<div style="display:flex;gap:8px;margin-bottom:12px">'+
       '<button class="btn '+(curTab==='book'?'bp':'bs')+'" onclick="switchBookTab(\'book\')" style="font-size:12px">📖 收藏</button>'+
       '<button class="btn '+(curTab==='search'?'bp':'bs')+'" onclick="switchBookTab(\'search\')" style="font-size:12px">🔍 搜索收藏</button>'+
-      '<button onclick="clearSearchBook()" class="btn br" style="font-size:11px;padding:3px 10px;margin-left:auto">清空</button>'+
+      '<button onclick="'+(curTab==='book'?'clearBook':'clearSearchBook')+'()" class="btn br" style="font-size:11px;padding:3px 10px;margin-left:auto">清空</button>'+
       '</div>';
     
     if (curTab === 'search') {
@@ -221,20 +254,31 @@ function renderBook(){
       });
     } else {
       var book = getBook();
-      if (cnt) cnt.textContent = '共 '+book.length+' 个生词';
+      if (cnt) cnt.textContent = '共 '+book.length+' 个条目';
       if (book.length === 0) {
-        el.innerHTML = tabsHtml + '<div style="text-align:center;color:#666;padding:40px 0;font-size:14px">收藏为空<br><span style="font-size:12px">点击词汇卡片侧栏的「加入生词本」添加</span></div>';
+        el.innerHTML = tabsHtml + '<div style="text-align:center;color:#666;padding:40px 0;font-size:14px">生词本为空<br><span style="font-size:12px">从词汇卡、搜索、AI 搜索自动加入</span></div>';
         return;
       }
       el.innerHTML = tabsHtml;
-      book.forEach(function(id){
-        var v = VOCAB.find(function(x){ return x.id === id; });
-        if (!v) return;
+      book.forEach(function(item){
         var d = document.createElement('div');
         d.className = 'vc';
-        d.innerHTML = '<div class="vt"><span class="vl '+(v.level==='n3'?'l3':'l2')+'">'+(v.level||'N3').toUpperCase()+'</span></div>'
-          + '<div class="vw">'+v.word+'</div><div class="vr">'+v.reading+'</div><div class="vm">'+v.meaning+'</div>';
-        d.onclick = function(){ openD(v); };
+        d.style.cursor = 'pointer';
+        if (item.type === 'ai') {
+          // AI 搜索词
+          d.innerHTML = '<div class="vt"><span class="vl '+(item.level==='n3'?'l3':item.level==='n2'?'l2':'l1')+'">'+(item.level||'AI').toUpperCase()+'</span></div>'
+            + '<div class="vw">'+escHtml(item.word)+'</div>'
+            + '<div class="vr">'+escHtml(item.reading||'')+'</div>'
+            + '<div class="vm">'+escHtml(item.meaning||'')+' <span style="font-size:9px;color:#a855f7;margin-left:4px">AI搜</span></div>';
+          d.onclick = function(){ showT('🔍 "'+item.word+'" — '+item.meaning); };
+        } else {
+          // 词库词
+          var v = VOCAB.find(function(x){ return x.id === item.id; });
+          if (!v) return;
+          d.innerHTML = '<div class="vt"><span class="vl '+(v.level==='n3'?'l3':'l2')+'">'+(v.level||'N3').toUpperCase()+'</span></div>'
+            + '<div class="vw">'+v.word+'</div><div class="vr">'+v.reading+'</div><div class="vm">'+v.meaning+'</div>';
+          d.onclick = function(){ openD(v); };
+        }
         el.appendChild(d);
       });
     }
@@ -1022,6 +1066,13 @@ function doAISearch(q,localResults){
     }else{
       el.innerHTML=aiHtml+el.innerHTML;
     }
+    
+    // 自动加入生词本（仅当未在词库中且未已收藏时）
+    var book = getBook();
+    var alreadyInBook = book.some(function(x){ return x.type==='ai' && x.word===q; });
+    if (!alreadyInBook && !VOCAB.some(function(x){ return x.word===q; })) {
+      toggleBook({type:'ai', word:q, reading:kanji||'', meaning:cn||'', level:''});
+    }
   }).catch(function(err){
     // AI 失败不影响本地结果
     console.log('AI search error:',err);
@@ -1101,8 +1152,6 @@ function renderSearchResults(q,results){
     if(r.type==='vocab'){
       var v=r.data;
       var lv=(v.level||'n?').toLowerCase();
-      var inSb = isInSearchBook(v.id) ? '⭐' : '☆';
-      var sbOpacity = isInSearchBook(v.id) ? '1' : '0.4';
       html+='<div class="search-result-item" style="cursor:default">'+
         '<div class="search-result-info" onclick="goToVocab('+(v.id||0)+')" style="cursor:pointer;flex:1;min-width:0">'+
         '<div class="search-result-wordrow">'+
@@ -1118,7 +1167,7 @@ function renderSearchResults(q,results){
         '</div>'+
         '<div class="search-result-actions" style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;align-items:center">'+
         '<button onclick="event.stopPropagation();speak(\''+escHtml(v.word)+'\')" style="background:none;border:none;cursor:pointer;font-size:18px;padding:4px;color:#888" title="发音">🔊</button>'+
-        '<span class="search-book-btn" data-id="'+(v.id||0)+'" onclick="event.stopPropagation();toggleSearchBook({id:'+(v.id||0)+',word:\''+escHtml(v.word)+'\',reading:\''+escHtml(v.reading||'')+'\',meaning:\''+escHtml(v.meaning||'')+'\',level:\''+escHtml(v.level||'')+'\'});return false" style="cursor:pointer;font-size:18px;opacity:'+sbOpacity+';transition:opacity 0.2s" title="搜索收藏">'+inSb+'</span>'+
+        '<span class="search-book-btn" data-id="'+(v.id||0)+'" onclick="event.stopPropagation();toggleBook({type:\'vocab\',id:'+(v.id||0)+'});return false" style="cursor:pointer;font-size:18px;opacity:0.4;transition:opacity 0.2s" title="加入生词本">☆</span>'+
         '</div>'+
         '</div>';
     }else if(r.type==='grammar'){
