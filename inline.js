@@ -1087,14 +1087,18 @@ function escHtml(s){
 document.addEventListener('DOMContentLoaded',function(){
   var inp=document.getElementById('aiSearchInput');
   if(!inp)return;
+  var cl=document.getElementById('searchClear');
+  var btn=document.getElementById('searchBtn');
+  
   inp.addEventListener('input',function(){
     var v=this.value.trim();
-    var cl=document.getElementById('searchClear');
     if(v){cl.classList.add('visible')}else{cl.classList.remove('visible')}
   });
   inp.addEventListener('keydown',function(e){
     if(e.key==='Enter'){doSearch()}
   });
+  if(btn)btn.addEventListener('click',function(){doSearch()});
+  if(cl)cl.addEventListener('click',function(){clearSearch()});
 });
 
 // ===== 扫描识图翻译 =====
