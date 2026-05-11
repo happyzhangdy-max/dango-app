@@ -136,6 +136,29 @@ function updateMarkUI(id){
 }
 // --- 新增结束 ---
 
+// ── 搜索收藏（独立于生词本）──
+const SEARCH_BOOK_KEY = 'jp_search_book';
+function getSearchBook(){ try { return JSON.parse(localStorage.getItem(SEARCH_BOOK_KEY) || '[]'); } catch(e){ return []; } }
+function saveSearchBook(list){ localStorage.setItem(SEARCH_BOOK_KEY, JSON.stringify(list)); }
+function toggleSearchBook(item){
+  var list = getSearchBook();
+  var idx = list.findIndex(function(x){ return x.id === item.id; });
+  if (idx >= 0) { list.splice(idx,1); showT('已从搜索收藏移除'); }
+  else { list.unshift({id:item.id, word:item.word, reading:item.reading||'', meaning:item.meaning||'', level:item.level||'', time:Date.now()}); showT('已加入搜索收藏 ✅'); }
+  saveSearchBook(list);
+  updateSearchBookUI(item.id);
+}
+function isInSearchBook(id){
+  return getSearchBook().some(function(x){ return x.id === id; });
+}
+function updateSearchBookUI(id){
+  var inSb = isInSearchBook(id);
+  document.querySelectorAll('.search-book-btn[data-id="'+id+'"]').forEach(function(btn){
+    btn.textContent = inSb ? '⭐' : '☆';
+    btn.style.opacity = inSb ? '1' : '0.4';
+  });
+}
+
 function getBook(){ try { return JSON.parse(localStorage.getItem(BOOK_KEY) || '[]'); } catch(e){ return []; } }
 function toggleBook(id){
     var book = getBook();
@@ -157,32 +180,80 @@ function updateBookBtn(id){
     btn.className = 'btn ' + (inBook ? 'br' : 'bg');
 }
 function renderBook(){
-    var book = getBook();
-    var c = document.getElementById('bookC');
+    var el = document.getElementById('bookC');
     var cnt = document.getElementById('bookCount');
-    if (cnt) cnt.textContent = '共 '+book.length+' 个生词';
-    if (!c) return;
-    if (book.length === 0){
-        c.innerHTML = '<div style="text-align:center;color:#666;padding:40px 0;font-size:14px">生词本为空<br>点击词汇卡片侧栏的「加入生词本」添加</div>';
+    if (!el) return;
+    // Tab 状态
+    var tab = document.getElementById('bookTabState');
+    var curTab = tab ? tab.textContent : 'book';
+    if (!tab) { tab = document.createElement('span'); tab.id = 'bookTabState'; tab.style.display='none'; document.body.appendChild(tab); tab.textContent='book'; }
+    
+    // Tab 切换按钮
+    var tabsHtml = '<div style="display:flex;gap:8px;margin-bottom:12px">'+
+      '<button class="btn '+(curTab==='book'?'bp':'bs')+'" onclick="switchBookTab(\'book\')" style="font-size:12px">📖 收藏</button>'+
+      '<button class="btn '+(curTab==='search'?'bp':'bs')+'" onclick="switchBookTab(\'search\')" style="font-size:12px">🔍 搜索收藏</button>'+
+      '<button onclick="clearSearchBook()" class="btn br" style="font-size:11px;padding:3px 10px;margin-left:auto">清空</button>'+
+      '</div>';
+    
+    if (curTab === 'search') {
+      var sb = getSearchBook();
+      var total = sb.length;
+      if (cnt) cnt.textContent = '共 '+total+' 个搜索收藏';
+      if (total === 0) {
+        el.innerHTML = tabsHtml + '<div style="text-align:center;color:#666;padding:40px 0;font-size:14px">搜索收藏为空<br><span style="font-size:12px">在搜索页面点击 ☆ 收藏搜索结果</span></div>';
         return;
-    }
-    c.innerHTML = '';
-    book.forEach(function(id){
+      }
+      el.innerHTML = tabsHtml;
+      sb.forEach(function(item){
+        var d = document.createElement('div');
+        d.className = 'vc';
+        d.style.cursor = 'pointer';
+        d.innerHTML = '<div class="vt"><span class="vl '+(item.level==='n3'?'l3':item.level==='n2'?'l2':'l1')+'">'+(item.level||'N3').toUpperCase()+'</span></div>'
+          + '<div class="vw">'+escHtml(item.word)+'</div>'
+          + '<div class="vr">'+escHtml(item.reading)+'</div>'
+          + '<div class="vm">'+escHtml(item.meaning)+'</div>'
+          + '<div style="font-size:10px;color:#888;margin-top:4px">'+new Date(item.time).toLocaleDateString()+'</div>';
+        d.onclick = function(){
+          var v = VOCAB.find(function(x){ return x.id === item.id; });
+          if (v) { openD(v); } else { showT('该词未在词库中找到'); }
+        };
+        el.appendChild(d);
+      });
+    } else {
+      var book = getBook();
+      if (cnt) cnt.textContent = '共 '+book.length+' 个生词';
+      if (book.length === 0) {
+        el.innerHTML = tabsHtml + '<div style="text-align:center;color:#666;padding:40px 0;font-size:14px">收藏为空<br><span style="font-size:12px">点击词汇卡片侧栏的「加入生词本」添加</span></div>';
+        return;
+      }
+      el.innerHTML = tabsHtml;
+      book.forEach(function(id){
         var v = VOCAB.find(function(x){ return x.id === id; });
         if (!v) return;
         var d = document.createElement('div');
         d.className = 'vc';
         d.innerHTML = '<div class="vt"><span class="vl '+(v.level==='n3'?'l3':'l2')+'">'+(v.level||'N3').toUpperCase()+'</span></div>'
-            + '<div class="vw">'+v.word+'</div><div class="vr">'+v.reading+'</div><div class="vm">'+v.meaning+'</div>';
+          + '<div class="vw">'+v.word+'</div><div class="vr">'+v.reading+'</div><div class="vm">'+v.meaning+'</div>';
         d.onclick = function(){ openD(v); };
-        c.appendChild(d);
-    });
+        el.appendChild(d);
+      });
+    }
+}
+function switchBookTab(t){
+    document.getElementById('bookTabState').textContent = t;
+    renderBook();
+}
+function clearSearchBook(){
+    if (!confirm('确定清空搜索收藏？')) return;
+    localStorage.removeItem(SEARCH_BOOK_KEY);
+    renderBook();
+    showT('搜索收藏已清空');
 }
 function clearBook(){
-    if (!confirm('确定清空生词本？')) return;
+    if (!confirm('确定清空收藏？')) return;
     localStorage.removeItem(BOOK_KEY);
     renderBook();
-    showT('生词本已清空');
+    showT('收藏已清空');
 }
 
 // ── 错题本──────────
@@ -872,16 +943,12 @@ function doSearch(){
   if(!q){showSearchEmpty('输入关键词开始搜索');return}
   showSearchLoading();
   // 本地搜索（VOCAB + GRAMMAR）
-  var start=Date.now();
   var results=searchLocal(q);
-  var elapsed=Date.now()-start;
-  var delay=Math.max(0,300-elapsed);
-  // 判断是否需要 AI 翻译：结果少，且输入含日文
-  var needAI=(results.length===0&&/[\u3040-\u309f\u30a0-\u30ff\u4e00-\u9fff]/.test(q));
-  setTimeout(function(){
-    renderSearchResults(q,results);
-    if(needAI)doAISearch(q,results);
-  },delay);
+  // 始终触发 AI 搜索（补充翻译/语源）
+  renderSearchResults(q,results);
+  if(/[\u3040-\u309f\u30a0-\u30ff\u4e00-\u9fff]/.test(q)){
+    doAISearch(q,results);
+  }
 }
 
 function clearSearch(){
@@ -897,8 +964,10 @@ function clearSearchResults(){
 }
 
 function doAISearch(q,localResults){
-  // 未找到本地结果时，用 AI 翻译 + 补充语源信息
+  // AI 翻译 + 补充语源信息
   var el=document.getElementById('searchResults');
+  // 构建唯一 ID（发音用）
+  var aiId = '_ai_'+Date.now();
   var prompt='分析以下日文并输出信息，格式严格如下（每行一个字段，没有就写「无」）：\n'+
     '中文翻译：\n'+
     '外来语原词：\n'+
@@ -926,8 +995,8 @@ function doAISearch(q,localResults){
     if(kanji==='无'||kanji==='なし')kanji='';
     if(note==='无'||note==='なし')note='';
     
-    var aiHtml='<div class="search-result-item search-ai-item" style="background:#fffbe6;border:1px solid #ffe58f;border-radius:8px;margin-bottom:6px">'+
-      '<div class="search-result-info">'+
+    var aiHtml='<div class="search-result-item search-ai-item" style="background:#fffbe6;border:1px solid #ffe58f;border-radius:8px;margin-bottom:6px;cursor:default">'+
+      '<div class="search-result-info" style="flex:1;min-width:0">'+
       '<div class="search-result-wordrow"><span class="search-result-word" style="font-size:15px;color:#d46b08">🔍 AI 搜索</span></div>'+
       '<div class="search-result-wordrow" style="margin-top:6px">'+
       '<span style="font-size:18px;color:#333;font-weight:600">'+escHtml(q)+'</span>';
@@ -939,7 +1008,13 @@ function doAISearch(q,localResults){
     if(src)aiHtml+='<div style="font-size:12px;color:#888;margin-top:3px">语源：'+escHtml(src)+'</div>';
     // 如果有说明
     if(note)aiHtml+='<div style="font-size:12px;color:#888;margin-top:2px">说明：'+escHtml(note)+'</div>';
-    aiHtml+='</div></div>';
+    aiHtml+='</div>'+
+      // 右侧操作按钮
+      '<div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;align-items:center">'+
+      '<button onclick="event.stopPropagation();speak(\''+escHtml(q)+'\')" style="background:none;border:none;cursor:pointer;font-size:18px;padding:4px;color:#888" title="发音">🔊</button>'+
+      '<span onclick="event.stopPropagation();showT(\'💡 搜索收藏仅支持词库词汇\')" style="cursor:pointer;font-size:18px;opacity:0.3" title="AI搜索结果暂不支持收藏">☆</span>'+
+      '</div>'+
+      '</div>';
     
     // 插入到现有结果前面
     if(!localResults||localResults.length===0){
@@ -1017,17 +1092,19 @@ function renderSearchResults(q,results){
   var el=document.getElementById('searchResults');
   el.innerHTML='';
   if(results.length===0){
-    showSearchEmpty('未找到相关结果，试试其他关键词');
+    showSearchEmpty('未找到本地词库结果，正在 AI 搜索…');
     return;
   }
-  var html='';
+  var html='<div style="font-size:11px;color:#666;margin-bottom:4px;padding:0 4px">词库结果：</div>';
   for(var i=0;i<results.length;i++){
     var r=results[i];
     if(r.type==='vocab'){
       var v=r.data;
       var lv=(v.level||'n?').toLowerCase();
-      html+='<div class="search-result-item" onclick="goToVocab('+(v.id||0)+')">'+
-        '<div class="search-result-info">'+
+      var inSb = isInSearchBook(v.id) ? '⭐' : '☆';
+      var sbOpacity = isInSearchBook(v.id) ? '1' : '0.4';
+      html+='<div class="search-result-item" style="cursor:default">'+
+        '<div class="search-result-info" onclick="goToVocab('+(v.id||0)+')" style="cursor:pointer;flex:1;min-width:0">'+
         '<div class="search-result-wordrow">'+
         '<span class="search-result-word">'+escHtml(v.word||'')+'</span>'+
         '<span class="search-result-reading">'+escHtml(v.reading||'')+'</span>'+
@@ -1038,6 +1115,10 @@ function renderSearchResults(q,results){
         (v.type?'<span class="search-result-tag">'+escHtml(v.type)+'</span>':'')+
         (v.category?'<span class="search-result-tag">'+escHtml(v.category)+'</span>':'')+
         '</div>'+
+        '</div>'+
+        '<div class="search-result-actions" style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;align-items:center">'+
+        '<button onclick="event.stopPropagation();speak(\''+escHtml(v.word)+'\')" style="background:none;border:none;cursor:pointer;font-size:18px;padding:4px;color:#888" title="发音">🔊</button>'+
+        '<span class="search-book-btn" data-id="'+(v.id||0)+'" onclick="event.stopPropagation();toggleSearchBook({id:'+(v.id||0)+',word:\''+escHtml(v.word)+'\',reading:\''+escHtml(v.reading||'')+'\',meaning:\''+escHtml(v.meaning||'')+'\',level:\''+escHtml(v.level||'')+'\'});return false" style="cursor:pointer;font-size:18px;opacity:'+sbOpacity+';transition:opacity 0.2s" title="搜索收藏">'+inSb+'</span>'+
         '</div>'+
         '</div>';
     }else if(r.type==='grammar'){
@@ -1054,8 +1135,6 @@ function renderSearchResults(q,results){
         '</div>';
     }
   }
-  // 添加 AI 提醒
-  html+='<div class="search-tip-text">💡 搜不到时自动切换 AI 翻译（日文→中文）</div>';
   el.innerHTML=html;
   el.classList.add('visible');
 }
