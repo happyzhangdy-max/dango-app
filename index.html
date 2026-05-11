@@ -106,6 +106,49 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
 .h-entry-small .h-sub { font-size:11px; margin-top:4px; }
 .h-entry-vocab { border-color:rgba(233,69,96,0.3); }
 .h-entry-vocab:hover { border-color:#e94560; box-shadow:0 8px 30px rgba(233,69,96,0.2); }
+/* AI 搜索栏 */
+.search-bar-wrap { margin-bottom: 16px; position: relative; }
+.search-bar { display:flex; align-items:center; background:linear-gradient(135deg,#1a1a3e,#0f3460); border:1px solid rgba(168,85,247,0.2); border-radius:12px; padding:4px 16px; transition:all 0.3s; }
+.search-bar:focus-within { border-color:#a855f7; box-shadow:0 0 20px rgba(168,85,247,0.15); }
+.search-icon { font-size:18px; margin-right:12px; opacity:0.6; flex-shrink:0; }
+.search-input { flex:1; background:transparent; border:none; outline:none; color:#eaeaea; font-size:14px; padding:12px 0; font-family:inherit; }
+.search-input::placeholder { color:#555; font-size:13px; }
+.search-clear { opacity:0; transition:opacity 0.2s; cursor:pointer; font-size:16px; padding:4px 8px; color:#888; flex-shrink:0; user-select:none; }
+.search-clear.visible { opacity:1; }
+.search-clear:hover { color:#eaeaea; }
+.search-btn { background:linear-gradient(135deg,#a855f7,#7c3aed); border:none; color:#fff; padding:8px 18px; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; transition:all 0.2s; margin-left:8px; flex-shrink:0; }
+.search-btn:hover { transform:translateY(-1px); box-shadow:0 4px 15px rgba(168,85,247,0.3); }
+.search-btn:active { transform:translateY(0); }
+.search-results { margin-top:8px; display:none; }
+.search-results.visible { display:block; }
+.search-result-item { background:#1a1a2e; border:1px solid rgba(255,255,255,0.06); border-radius:10px; padding:12px 16px; margin-bottom:6px; cursor:pointer; transition:all 0.15s; display:flex; align-items:center; gap:10px; }
+.search-result-item:hover { background:#1e1e3a; border-color:rgba(168,85,247,0.3); }
+.search-result-info { flex:1; min-width:0; }
+.search-result-wordrow { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.search-result-word { font-size:16px; font-weight:700; color:#eaeaea; }
+.search-result-reading { font-size:12px; color:#888; }
+.search-result-meaning { font-size:12px; color:#6b7280; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.search-result-level { display:inline-block; padding:1px 6px; border-radius:4px; font-size:10px; font-weight:600; }
+.sl-n5 { background:rgba(16,185,129,0.2); color:#10b981; }
+.sl-n4 { background:rgba(59,130,242,0.2); color:#60a5fa; }
+.sl-n3 { background:rgba(245,158,11,0.2); color:#f59e0b; }
+.sl-n2 { background:rgba(239,68,68,0.2); color:#ef4444; }
+.sl-n1 { background:rgba(168,85,247,0.2); color:#a78bfa; }
+.search-result-tags { display:flex; gap:4px; flex-wrap:wrap; margin-top:2px; }
+.search-result-tag { font-size:9px; padding:1px 6px; border-radius:4px; color:#6b7280; background:rgba(255,255,255,0.04); }
+.search-result-ai-row { border-left:3px solid #a855f7; }
+.search-result-ai-row .search-result-word { color:#a78bfa; }
+.search-empty { text-align:center; color:#555; padding:20px 0; font-size:13px; }
+.search-tip-text { text-align:center; color:#444; padding:6px 0; font-size:11px; }
+.search-ai-badge { font-size:10px; background:rgba(168,85,247,0.12); color:#a78bfa; padding:2px 8px; border-radius:99px; font-weight:500; white-space:nowrap; }
+
+@media(max-width:768px) {
+  .search-bar { padding:2px 12px; }
+  .search-input { font-size:13px; padding:10px 0; }
+  .search-btn { padding:6px 14px; font-size:12px; }
+  .search-result-item { padding:10px 14px; }
+  .search-result-word { font-size:14px; }
+}
 .h-entry-grammar { border-color:rgba(245,166,35,0.3); }
 .h-entry-grammar:hover { border-color:#f5a623; box-shadow:0 8px 30px rgba(245,166,35,0.2); }
 .h-entry-review { border-color:rgba(78,204,163,0.3); }
@@ -388,6 +431,97 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
 .ap-section{ transition:border-color 0.2s; }
 .ap-section:hover{ border-color:rgba(255,255,255,0.12) !important; }
 #ap-cat-body, #ap-lvl-body{ display:flex; gap:6px; flex-wrap:wrap; }
+
+/* ── 首页扫描入口 ───────────── */
+.scan-entry {
+  display:flex; align-items:center; gap:14px;
+  background:linear-gradient(135deg,rgba(16,185,129,0.08),rgba(16,185,129,0.02));
+  border:1px solid rgba(16,185,129,0.2); border-radius:12px;
+  padding:14px 18px; margin-bottom:16px; cursor:pointer;
+  transition:all 0.3s; position:relative; overflow:hidden;
+}
+.scan-entry:hover { border-color:#10b981; transform:translateY(-1px); box-shadow:0 4px 20px rgba(16,185,129,0.15); }
+.scan-entry-icon { font-size:28px; flex-shrink:0; }
+.scan-entry-text { flex:1; min-width:0; }
+.scan-entry-title { font-size:15px; font-weight:700; color:#eaeaea; }
+.scan-entry-sub { font-size:11px; color:#6b7280; margin-top:2px; }
+.scan-entry-arrow { font-size:18px; color:#10b981; flex-shrink:0; opacity:0.6; }
+
+/* ── 扫描页面 ───────────────── */
+.scan-header { text-align:center; padding:20px 0 16px; }
+.scan-header-icon { font-size:36px; margin-bottom:6px; }
+.scan-header-title { font-size:18px; font-weight:700; }
+.scan-header-sub { font-size:12px; color:#6b7280; margin-top:4px; }
+
+.scan-upload-area {
+  border:2px dashed rgba(255,255,255,0.12); border-radius:16px;
+  padding:40px 20px; text-align:center; cursor:pointer;
+  transition:all 0.3s; margin-bottom:12px;
+}
+.scan-upload-area:hover { border-color:rgba(16,185,129,0.4); background:rgba(16,185,129,0.03); }
+.scan-upload-icon { font-size:48px; margin-bottom:12px; opacity:0.6; }
+.scan-upload-text { font-size:14px; color:#888; margin-bottom:16px; }
+.scan-upload-actions { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+
+.scan-btn {
+  padding:8px 18px; border-radius:8px; border:1px solid rgba(255,255,255,0.1);
+  background:#1a1a2e; color:#eaeaea; font-size:12px; font-weight:600;
+  cursor:pointer; transition:all 0.2s; font-family:inherit;
+}
+.scan-btn:hover { border-color:rgba(16,185,129,0.4); transform:translateY(-1px); }
+.scan-btn-primary { background:linear-gradient(135deg,#10b981,#059669); border-color:transparent; color:#fff; }
+.scan-btn-primary:hover { box-shadow:0 4px 15px rgba(16,185,129,0.3); }
+.scan-btn-lg { padding:10px 24px; font-size:14px; }
+
+.scan-img-wrap { position:relative; margin-bottom:12px; border-radius:12px; overflow:hidden; }
+.scan-img { width:100%; max-height:400px; object-fit:contain; border-radius:12px; background:#1a1a2e; }
+.scan-img-clear {
+  position:absolute; top:8px; right:8px; width:28px; height:28px;
+  border-radius:50%; border:none; background:rgba(0,0,0,0.6); color:#fff;
+  font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center;
+  transition:all 0.2s;
+}
+.scan-img-clear:hover { background:rgba(239,68,68,0.8); }
+
+.scan-actions { display:flex; gap:10px; justify-content:center; margin-bottom:16px; flex-wrap:wrap; }
+
+.scan-loading { text-align:center; padding:40px 0; }
+.scan-loading-spinner {
+  width:40px; height:40px; border:3px solid rgba(168,85,247,0.15);
+  border-top-color:#10b981; border-radius:50%;
+  animation:scanSpin 0.8s linear infinite; margin:0 auto 14px;
+}
+@keyframes scanSpin { to { transform:rotate(360deg); } }
+.scan-loading-text { font-size:13px; color:#888; }
+
+.scan-result-tabs { display:flex; gap:6px; margin-bottom:12px; }
+.scan-result-tab {
+  padding:6px 14px; border-radius:8px; border:1px solid rgba(255,255,255,0.08);
+  background:transparent; color:#888; font-size:12px; cursor:pointer; transition:all 0.2s; font-family:inherit;
+}
+.scan-result-tab:hover { color:#eaeaea; border-color:rgba(255,255,255,0.15); }
+.scan-result-tab.active { background:#1a1a3e; border-color:rgba(16,185,129,0.3); color:#10b981; }
+
+.scan-columns { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.scan-col { background:#1a1a2e; border-radius:10px; border:1px solid rgba(255,255,255,0.06); padding:14px; min-height:100px; }
+.scan-col-title { font-size:11px; font-weight:600; color:#6b7280; margin-bottom:8px; letter-spacing:1px; }
+.scan-col-content { font-size:13px; line-height:1.9; white-space:pre-wrap; word-break:break-word; color:#d1d5db; }
+.scan-col-content .jp-highlight { color:#34d399; }
+.scan-col-content .cn-highlight { color:#60a5fa; }
+
+.scan-full { display:none; background:#1a1a2e; border-radius:10px; border:1px solid rgba(255,255,255,0.06); padding:14px; min-height:60px; }
+
+.scan-result-actions { display:flex; gap:8px; justify-content:center; margin-top:12px; flex-wrap:wrap; }
+
+@media(max-width:768px) {
+  .scan-columns { grid-template-columns:1fr; }
+  .scan-upload-area { padding:30px 14px; }
+  .scan-upload-icon { font-size:36px; }
+  .scan-header-icon { font-size:28px; }
+}
+
+/* ── 粘贴图片 ───────────────── */
+.scan-paste-hint { font-size:11px; color:#555; text-align:center; margin-top:8px; }
 </style>
 </head>
 <body>
@@ -402,6 +536,7 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
     <button class="tab" onclick="go('quiz')">真题模拟训练</button>
     <button class="tab" onclick="go('wrong')">错题本</button>
     <button class="tab" onclick="go('game')" style="background:linear-gradient(135deg,rgba(168,85,247,0.15),rgba(233,69,96,0.1));border:1px solid rgba(168,85,247,0.2);color:#a78bfa">🎮 闯关</button>
+    <button class="tab" onclick="go('scan')" style="background:linear-gradient(135deg,rgba(16,185,129,0.12),rgba(52,211,153,0.08));border:1px solid rgba(16,185,129,0.2);color:#34d399">📸 扫描</button>
   </div>
 </nav>
 <div class="toast" id="toast"></div>
@@ -414,6 +549,25 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
     <div class="sc"><div class="sn" id="s1">0</div><div class="sl">已学词汇</div></div>
     <div class="sc"><div class="sn" id="s2">0</div><div class="sl">今日待复习</div></div>
     <div class="sc"><div class="sn" id="s3">0</div><div class="sl">已掌握语法</div></div>
+  </div>
+  <!-- AI 搜索栏 -->
+  <div class="search-bar-wrap">
+    <div class="search-bar">
+      <span class="search-icon">🔍</span>
+      <input class="search-input" id="aiSearchInput" type="text" placeholder="搜索单词、语法... 试试「N3 天气语法」「難しい的例句」" maxlength="200" autocomplete="off">
+      <span class="search-clear" id="searchClear" onclick="clearSearch()">✕</span>
+      <button class="search-btn" onclick="doSearch()">搜索</button>
+    </div>
+    <div class="search-results" id="searchResults"></div>
+  </div>
+  <!-- 扫描入口 -->
+  <div class="scan-entry" onclick="go('scan')">
+    <div class="scan-entry-icon">📸</div>
+    <div class="scan-entry-text">
+      <div class="scan-entry-title">拍试卷 · 识图翻译</div>
+      <div class="scan-entry-sub">拍照上传日文试卷 → 自动识别 + 中文翻译</div>
+    </div>
+    <div class="scan-entry-arrow">→</div>
   </div>
   <!-- 核心入口 -->
   <div class="h-entries">
@@ -666,6 +820,84 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
 <!-- ===== 自动播放 ===== -->
 <div class="page" id="p-autoplay"></div>
 
+<!-- ===== 扫描识图 ===== -->
+<div class="page" id="p-scan">
+  <div class="scan-header">
+    <div class="scan-header-icon">📸</div>
+    <div class="scan-header-title">日文试卷识图翻译</div>
+    <div class="scan-header-sub">拍照或选择图片 → 自动识别日文 → 翻译成中文</div>
+  </div>
+  <!-- 无图片时显示上传区 -->
+  <div id="scanEmpty">
+    <div class="scan-upload-area" id="scanUploadArea">
+      <div class="scan-upload-icon">🖼️</div>
+      <div class="scan-upload-text">点击选择图片，或直接粘贴截图</div>
+      <div class="scan-upload-actions">
+        <button class="scan-btn scan-btn-primary" onclick="triggerUpload()">📁 从相册选择</button>
+        <button class="scan-btn" onclick="triggerCamera()">📷 拍照</button>
+      </div>
+    </div>
+  </div>
+  <!-- 有图片时显示预览区 -->
+  <div id="scanPreview" style="display:none">
+    <div class="scan-img-wrap">
+      <img id="scanImage" class="scan-img" alt="试卷预览">
+      <button class="scan-img-clear" onclick="clearScanImage()">✕</button>
+    </div>
+    <div class="scan-actions">
+      <button class="scan-btn scan-btn-primary scan-btn-lg" id="scanDoBtn" onclick="doScan()">
+        🔍 识别并翻译
+      </button>
+      <button class="scan-btn scan-btn-lg" onclick="clearScanImage()">🔄 重新选择</button>
+    </div>
+  </div>
+  <!-- 识别中 -->
+  <div id="scanLoading" style="display:none">
+    <div class="scan-loading">
+      <div class="scan-loading-spinner"></div>
+      <div class="scan-loading-text" id="scanLoadingText">正在识别图片中的日文...</div>
+    </div>
+  </div>
+  <!-- 结果区 -->
+  <div id="scanResult" style="display:none">
+    <div class="scan-result-tabs">
+      <button class="scan-result-tab active" onclick="switchScanView('parallel',this)">📄 对照</button>
+      <button class="scan-result-tab" onclick="switchScanView('orig',this)">🈸 原文</button>
+      <button class="scan-result-tab" onclick="switchScanView('trans',this)">🀄 译文</button>
+    </div>
+    <div class="scan-result-body" id="scanResultBody">
+      <div class="scan-columns" id="scanParallel">
+        <div class="scan-col">
+          <div class="scan-col-title">🈸 日文原文</div>
+          <div class="scan-col-content" id="scanJpText"></div>
+        </div>
+        <div class="scan-col">
+          <div class="scan-col-title">🀄 中文译文</div>
+          <div class="scan-col-content" id="scanCnText"></div>
+        </div>
+      </div>
+      <div class="scan-full" id="scanFullOrig" style="display:none">
+        <div class="scan-col-content" id="scanFullJp"></div>
+      </div>
+      <div class="scan-full" id="scanFullTrans" style="display:none">
+        <div class="scan-col-content" id="scanFullCn"></div>
+      </div>
+    </div>
+    <div class="scan-result-actions">
+      <button class="scan-btn" onclick="clearScanImage()">🔄 识别下一张</button>
+      <button class="scan-btn" onclick="copyScanResult()">📋 复制译文</button>
+    </div>
+  </div>
+  <!-- 历史记录 -->
+  <div id="scanHistory" style="display:none;margin-top:16px">
+    <div class="sect" style="font-size:13px">📜 历史记录</div>
+    <div id="scanHistoryList"></div>
+  </div>
+  <!-- 隐藏的文件输入 -->
+  <input type="file" id="scanFileInput" accept="image/*" style="display:none" onchange="handleScanFile(this)">
+  <input type="file" id="scanCameraInput" accept="image/*" capture="environment" style="display:none" onchange="handleScanFile(this)">
+</div>
+
 </div><!-- /main -->
 
 <!-- 抽屉 -->
@@ -821,7 +1053,7 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
 <script src="quiz_data_high.js?v=3"></script>
 <script src="quiz_data_real.js?v=3"></script>
 <script src="quiz_data_normal.js?v=3"></script>
-<script src="inline.js?v=36"></script>
+<script src="inline.js?v=39"></script>
 <script src="game/tower-climb.js?v=1778430785734"></script>
 <script>
 // 诊断：检查 tower-climb 版本
