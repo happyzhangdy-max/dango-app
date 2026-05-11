@@ -13,7 +13,7 @@ body { font-family:'Segoe UI','Microsoft YaHei',sans-serif; background:#0f0f1a; 
 body::before { content:''; position:fixed; inset:0; background:url('bg.jpg') center top/cover no-repeat; opacity:0.55; z-index:0; pointer-events:none; }
 body::after { content:''; position:fixed; inset:0; background:linear-gradient(180deg, rgba(15,15,26,0.25) 0%, rgba(15,15,26,0.75) 35%, #0f0f1a 100%); z-index:0; pointer-events:none; }
 .main,.nav { position:relative; z-index:1; }
-.hero { position:relative; margin:-16px -16px 18px -16px; height:200px; overflow:hidden; padding-top:50px; }
+.hero { position:relative; width:calc(100% + 32px); margin-left:-16px; margin-bottom:18px; height:200px; overflow:hidden; padding-top:50px; }
 .hero::before { content:''; position:absolute; inset:0; background:url('bg.jpg') center 15%/cover no-repeat; opacity:1; }
 .hero::after { content:''; position:absolute; inset:0; background:linear-gradient(180deg, transparent 60%, #0f0f1a 100%); }
 
@@ -364,7 +364,7 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
   #p-vocab .st2, #p-vocab .st3{ flex-wrap:wrap; gap:4px; }
   #p-vocab .st2 .tab, #p-vocab .st3 .tab{ font-size:11px; padding:5px 8px; }
   /* 单词卡片全宽 */
-  .vg{ grid-template-columns:1fr 1fr !important; gap:6px; }
+  .vg{ grid-template-columns:1fr 1fr; gap:6px; }
   .vg .vc{ padding:10px 8px; }
   .vg .vc .vw{ font-size:24px; margin-top:6px; }
   .vg .vc .vr{ font-size:18px; }
@@ -372,7 +372,7 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
   .vg .vc .vb-freq{ font-size:9px; }
   .vg .vc{ padding:10px 55px 38px 8px; }
   /* 首页卡片 */
-  .qg{ grid-template-columns:1fr 1fr !important; gap:8px; }
+  .qg{ grid-template-columns:1fr 1fr; gap:8px; }
   .h-entries{ grid-template-columns:1fr 1fr; gap:8px; }
   .h-entry-large{ grid-column:span 2; padding:24px 14px; }
   .h-entry-large .h-icon{ font-size:36px; }
@@ -396,7 +396,7 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
   .sc .sl{ font-size:11px; }
   /* 详情弹窗 → 底部 3/5 上滑 */
   .dw{ width:100vw !important; max-width:100vw !important; height:60vh !important; top:auto !important; bottom:-60vh; right:0 !important; border-radius:16px 16px 0 0; transition:bottom 0.35s cubic-bezier(0.4,0,0.2,1); }
-  .dw.open{ bottom:0; right:0 !important; }
+  .dw.open{ bottom:0; }
   /* 弹性滚动+防滑 */
   .dw .db{ -webkit-overflow-scrolling:touch; }
   .ol.open{ touch-action:none; }
@@ -412,7 +412,7 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
 @media(max-width:480px){
   .tabs .tab{ font-size:11px; padding:6px 8px; }
   #p-vocab .st2 .tab, #p-vocab .st3 .tab{ font-size:10px; padding:4px 6px; }
-  .qg{ grid-template-columns:1fr !important; }
+  .qg{ grid-template-columns:1fr; }
   .stats .sc{ padding:8px; }
   .sc .sn{ font-size:20px; }
   .hero{ min-height:40px; }
@@ -436,7 +436,7 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
 .ap-tag{ user-select:none; }
 .ap-tag:hover{ opacity:0.85; transform:scale(0.97); }
 .ap-section{ transition:border-color 0.2s; }
-.ap-section:hover{ border-color:rgba(255,255,255,0.12) !important; }
+.ap-section:hover{ border-color:rgba(255,255,255,0.12); }
 #ap-cat-body, #ap-lvl-body{ display:flex; gap:6px; flex-wrap:wrap; }
 
 /* ── 首页扫描入口 ───────────── */
@@ -542,6 +542,7 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
     <button class="tab" onclick="go('book')">生词本</button>
     <button class="tab" onclick="go('quiz')">真题模拟训练</button>
     <button class="tab" onclick="go('wrong')">错题本</button>
+    <button class="tab" onclick="go('autoplay')" style="background:linear-gradient(135deg,rgba(233,69,96,0.12),rgba(255,107,157,0.08));border:1px solid rgba(233,69,96,0.2);color:#ff6b9d">🔊 自动播放</button>
     <button class="tab" onclick="go('game')" style="background:linear-gradient(135deg,rgba(168,85,247,0.15),rgba(233,69,96,0.1));border:1px solid rgba(168,85,247,0.2);color:#a78bfa">🎮 闯关</button>
     <button class="tab" onclick="go('scan')" style="background:linear-gradient(135deg,rgba(16,185,129,0.12),rgba(52,211,153,0.08));border:1px solid rgba(16,185,129,0.2);color:#34d399">📸 扫描</button>
   </div>
@@ -1094,8 +1095,6 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
 <!-- 底部版权信息 -->
 <div style="text-align:center;padding:20px;color:#64748b;font-size:11px;margin-top:30px;border-top:1px solid rgba(106,130,175,0.1);background:rgba(10,10,26,0.5);">
     <p>© 2026 行小之的外语角 · All Rights Reserved</p>
-    <p>本应用及其内容（包括但不限于词汇库、游戏设计、代码实现）受版权保护</p>
-    <p>未经许可，任何形式的复制、分发、修改均为侵权行为</p>
 </div>
 <script>
 (function(){
