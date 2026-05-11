@@ -5,3 +5,4 @@ Thumbs.db
 *.py
 verify_*.png
 cf-worker/
+*.bak
