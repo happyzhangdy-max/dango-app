@@ -947,7 +947,6 @@ function doAISearch(q,localResults){
     }else{
       el.innerHTML=aiHtml+el.innerHTML;
     }
-    }
   }).catch(function(err){
     // AI 失败不影响本地结果
     console.log('AI search error:',err);
