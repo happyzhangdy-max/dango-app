@@ -1371,8 +1371,8 @@ var _searchConfig={
 };
 
 var _scanConfig={
-  // 硅基流动直连
-  apiUrl:_scanWorkerUrl || 'https://api.siliconflow.cn/v1/chat/completions',
+  // 硅基流动（通过 Worker 代理，Key 藏服务端）
+  apiUrl:_scanWorkerUrl ? (_scanWorkerUrl + '/v1/chat/completions') : 'https://api.siliconflow.cn/v1/chat/completions',
   model:'Qwen/Qwen3-VL-8B-Instruct',
   apiKey:_scanWorkerUrl ? '' : 'sk-tjhjahjojrwrmfzoqktyugyefrwhdxnovdyivttypdlpuimu'
 };
