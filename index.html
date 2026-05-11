@@ -544,12 +544,6 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
 <!-- 首页 -->
 <div class="main"><div class="page active" id="p-home">
   <div class="hero"></div>
-  <!-- 统计信息 -->
-  <div class="stats">
-    <div class="sc"><div class="sn" id="s1">0</div><div class="sl">已学词汇</div></div>
-    <div class="sc"><div class="sn" id="s2">0</div><div class="sl">今日待复习</div></div>
-    <div class="sc"><div class="sn" id="s3">0</div><div class="sl">已掌握语法</div></div>
-  </div>
   <!-- AI 搜索栏 -->
   <div class="search-bar-wrap">
     <div class="search-bar">
@@ -560,7 +554,7 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
     </div>
     <div class="search-results" id="searchResults"></div>
   </div>
-  <!-- 扫描入口 -->
+  <!-- 拍照栏 -->
   <div class="scan-entry" onclick="go('scan')">
     <div class="scan-entry-icon">📸</div>
     <div class="scan-entry-text">
@@ -569,13 +563,19 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
     </div>
     <div class="scan-entry-arrow">→</div>
   </div>
-  <!-- 核心入口 -->
+  <!-- 统计：已学习 + 今日待复习 -->
+  <div class="stats">
+    <div class="sc"><div class="sn" id="s1">0</div><div class="sl">已学习</div></div>
+    <div class="sc"><div class="sn" id="s2">0</div><div class="sl">今日待复习</div></div>
+  </div>
+  <!-- 自动背单词 -->
+  <div class="h-entry h-entry-large h-entry-autoplay" onclick="go('autoplay')" style="margin-bottom:10px">
+    <div class="h-icon">📚</div>
+    <div class="h-title">自动背单词</div>
+    <div class="h-sub">考级分类 · 场景分类 · 自动播放</div>
+  </div>
+  <!-- 更多功能 -->
   <div class="h-entries">
-    <div class="h-entry h-entry-large h-entry-autoplay" onclick="go('autoplay')">
-      <div class="h-icon">📚</div>
-      <div class="h-title">背单词</div>
-      <div class="h-sub">考级分类 · 场景分类 · 自动播放</div>
-    </div>
     <div class="h-entry h-entry-large h-entry-game" onclick="go('game')">
       <div class="h-icon">🎮</div>
       <div class="h-title">单词闯关</div>
