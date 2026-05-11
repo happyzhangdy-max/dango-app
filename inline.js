@@ -1023,19 +1023,6 @@ function doAISearch(q,localResults){
     '- 中文翻译写简洁的中文释义\n'+
     '- 说明写简单备注（如语境、常用搭配），没有就不写\n\n'+
     '日文：'+q;
-  // 检查 OpenRouter API Key
-  if(!_searchConfig.apiKey){
-    // 弹窗被浏览器拦截时，显示交互式提示
-    var el=document.getElementById('searchResults');
-    el.innerHTML='<div class="search-result-item" style="background:#fff3e0;border:1px solid #ffb74d;cursor:default;text-align:center;padding:20px">'+
-      '<div style="font-size:14px;color:#e65100;margin-bottom:8px">⚠️ 需要配置 OpenRouter API Key</div>'+
-      '<div style="font-size:12px;color:#888;margin-bottom:12px">AI 搜索使用 OpenRouter 服务，首次使用需输入 API Key</div>'+
-      '<button onclick="configureAIKey()" class="btn bp" style="font-size:13px;padding:8px 20px">🔑 配置 API Key</button>'+
-      '</div>';
-    el.classList.add('visible');
-    showT('⚠️ 请先配置 OpenRouter API Key');
-    return;
-  }
   callAI(_searchConfig.apiUrl,_searchConfig.model,[{role:'user',content:prompt}],512,_searchConfig.apiKey).then(function(txt){
     // 解析 AI 返回的字段
     var cn='',src='',kanji='',note='';
@@ -1108,19 +1095,6 @@ function showSearchTip(txt,ai){
   var el=document.getElementById('searchResults');
   el.innerHTML='<div class="search-tip-text">'+txt+'</div>';
   el.classList.add('visible');
-}
-
-function configureAIKey(){
-  var k=prompt('🔑 请输入 OpenRouter API Key\n(可在 G:\\hermes\\.hermes\\.env 或 CREDENTIALS.md 中找到)\n\nKey 示例: sk-or-v1-xxxxxxxxxxxxxxxxxxxxxxxxxx');
-  if(k&&k.trim()){
-    _searchConfig.apiKey=k.trim();
-    localStorage.setItem('or_key',k.trim());
-    showT('✅ API Key 已配置，重新搜索试试');
-    // 清除提示
-    var el=document.getElementById('searchResults');
-    el.innerHTML='';
-    el.classList.remove('visible');
-  }
 }
 
 function searchLocal(q){
@@ -1313,31 +1287,22 @@ function compressImage(dataUrl,maxW){
   });
 }
 
-// ===== API 配置（等 Key 后修改这里） =====
-var _scanConfig={
-  // 端到端: Qwen3-VL-8B 一步完成 OCR + 翻译
-  // 输入 ¥0.5/M tokens, 输出 ¥2/M tokens
-  // 每张试卷约 ¥0.001
-  // 🔐 API Key 见 G:\workcraft\secrets\CREDENTIALS.md
-  apiUrl:'https://api.siliconflow.cn/v1/chat/completions',
-  model:'Qwen/Qwen3-VL-8B-Instruct',
-  apiKey:'sk-tjhjahjojrwrmfzoqktyugyefrwhdxnovdyivttypdlpuimu'
+// ===== API 配置 =====
+// Cloudflare Worker URL：部署后填这里，Key 就藏服务端了
+var _searchWorkerUrl=''; // 例如 'https://dango-api.xxxx.workers.dev'
+var _scanWorkerUrl='';
+
+var _searchConfig={
+  apiUrl:_searchWorkerUrl || 'https://api.siliconflow.cn/v1/chat/completions',
+  model:'deepseek-ai/DeepSeek-V4-Flash',
+  apiKey:_searchWorkerUrl ? '' : 'sk-tjhjahjojrwrmfzoqktyugyefrwhdxnovdyivttypdlpuimu'
 };
 
-// ── AI 搜索专用配置（OpenRouter，快且便宜）──
-var _searchConfig={
-  // DeepSeek-V4-Flash: $0.14/M in, $0.28/M out, 0.05s 平均延迟（硅基流动 1.28s）
-  // 速度快 ~25x，价格低 ~20%
-  // 备用选择：google/gemini-2.5-flash-lite ($0.10/$0.40) 或 qwen/qwen3-14b ($0.06/$0.24)
-  // API Key 存于 localStorage('or_key')，首次使用由用户输入
-  apiUrl:'https://openrouter.ai/api/v1/chat/completions',
-  model:'deepseek/deepseek-v4-flash'
+var _scanConfig={
+  apiUrl:_scanWorkerUrl || 'https://api.siliconflow.cn/v1/chat/completions',
+  model:'Qwen/Qwen3-VL-8B-Instruct',
+  apiKey:_scanWorkerUrl ? '' : 'sk-tjhjahjojrwrmfzoqktyugyefrwhdxnovdyivttypdlpuimu'
 };
-// 从 localStorage 读取 OpenRouter Key
-(function(){
-  var k=localStorage.getItem('or_key');
-  if(k)_searchConfig.apiKey=k;
-})();
 
 function doScan(){
   if(!_scanImageData){showT('请先选择一张图片');return}
