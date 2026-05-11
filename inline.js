@@ -1141,9 +1141,7 @@ function doAISearch(q,localResults){
         el.innerHTML=aiHtml+el.innerHTML;
       }
       
-      if (!alreadyInBook && !VOCAB.some(function(x){ return x.word===q; })) {
-        toggleBook({type:'ai', word:q, reading:kanji||'', meaning:cn||'', level:''});
-      }
+      // 不自动加生词本，用户可手动点收藏按钮
     }
   }).catch(function(err){
     console.log('AI search error:',err);
@@ -1340,6 +1338,24 @@ function clearScanImage(){
   document.getElementById('scanDoBtn').disabled=false;
   document.getElementById('scanDoBtn').textContent='🔍 识别并翻译';
 }
+
+// 监听粘贴事件：支持用户粘贴截图到扫描页
+document.addEventListener('paste',function(e){
+  if(document.getElementById('p-scan').style.display==='none')return;
+  var items=e.clipboardData&&e.clipboardData.items;
+  if(!items)return;
+  for(var i=0;i<items.length;i++){
+    if(items[i].type.indexOf('image')>=0){
+      var blob=items[i].getAsFile();
+      if(!blob)continue;
+      if(blob.size>20*1024*1024){showT('图片太大，请选择 20MB 以下的图片');return}
+      var reader=new FileReader();
+      reader.onload=function(ev){loadScanImage(ev.target.result)};
+      reader.readAsDataURL(blob);
+      break;
+    }
+  }
+});
 
 function compressImage(dataUrl,maxW){
   return new Promise(function(resolve){
@@ -1586,20 +1602,6 @@ document.addEventListener('DOMContentLoaded',function(){
     document.body.addEventListener('dragstart',function(e){
         e.preventDefault();
         return false;
-    });
-
-    // 禁用文本选择（可选，如果不想让用户选词）
-    document.body.style.webkitUserSelect = 'none';
-    document.body.style.mozUserSelect = 'none';
-    document.body.style.msUserSelect = 'none';
-    document.body.style.userSelect = 'none';
-
-    // 禁止 Ctrl+C/Ctrl+A
-    document.addEventListener('keydown',function(e){
-        if(e.ctrlKey && (e.key==='c' || e.key==='a')){
-            e.preventDefault();
-            return false;
-        }
     });
 })();
 
