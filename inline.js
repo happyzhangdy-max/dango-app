@@ -959,10 +959,7 @@ function vApNext(){
 function vApToggleBook(){
   var w=_vApQueue[_vApIdx-(_vApPaused?0:1)];
   if(!w)return;
-  var bk=JSON.parse(localStorage.getItem('bk')||'[]');
-  var i=bk.indexOf(w.id);
-  i>=0?bk.splice(i,1):bk.push(w.id);
-  localStorage.setItem('bk',JSON.stringify(bk));
+  toggleBook({type:'vocab',id:w.id});
   vApSyncMarks(w);
 }
 
@@ -977,8 +974,7 @@ function vApToggleMark(c){
 
 function vApSyncMarks(w){
   if(!w)return;
-  var bk=JSON.parse(localStorage.getItem('bk')||'[]');
-  var b=bk.indexOf(w.id)>=0;
+  var b=getBook().some(function(x){return x.type==='vocab'&&x.id===w.id});
   document.getElementById('gApBmk').textContent=b?'⭐':'☆';
   var mk=JSON.parse(localStorage.getItem('mk')||'{}')[w.id];
   document.querySelectorAll('#gApScreen .ap-marks .vm-btn').forEach(function(x){
@@ -1416,23 +1412,22 @@ function doScan(){
   document.getElementById('scanLoadingText').textContent='正在识别图片中的日文...';
   
   compressImage(_scanImageData,1200).then(function(compressed){
-    // 两步合一：用 Qwen3-VL 直接 OCR + 翻译
-    return callOCRandTranslate(compressed).then(function(result){
-      if(!result||!result.jp){
-        showT('未识别到日文文字，请换一张图片试试');
-        clearScanImage();
-        return;
-      }
-      showScanResult(result.jp,result.cn);
-    }).catch(function(err){
-      var msg=err.message||'';
-      if(msg.indexOf('balance')>=0||msg.indexOf('insufficient')>=0){
-        showT('⚠️ 硅基流动账户余额不足，请先充值或领取免费额度');
-      }else{
-        showT('识别失败：'+msg);
-      }
+    return callOCRandTranslate(compressed);
+  }).then(function(result){
+    if(!result||!result.jp){
+      showT('未识别到日文文字，请换一张图片试试');
       clearScanImage();
-    });
+      return;
+    }
+    showScanResult(result.jp,result.cn);
+  }).catch(function(err){
+    var msg=err.message||'';
+    if(msg.indexOf('balance')>=0||msg.indexOf('insufficient')>=0){
+      showT('⚠️ 硅基流动账户余额不足，请先充值或领取免费额度');
+    }else{
+      showT('识别失败：'+msg);
+    }
+    clearScanImage();
   });
 }
 
