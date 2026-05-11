@@ -561,9 +561,9 @@ function upP(){
     var total=plan.daily*plan.days;
     var pct=Math.min(100,plan.completedDays/plan.days*100);
     var realIdx=plans.indexOf(plan);
-    d.innerHTML='<div class="plan-level">'+ls+' · 每日 '+plan.daily+' 词</div>'
-      +'<div class="plan-meta">共 '+total+' 词 · '+plan.days+' 天 · 已完成 '+plan.completedDays+' 天</div>'
-      +'<div class="plan-bar"><div class="plan-fill" style="width:'+pct+'%"></div></div>'
+    d.innerHTML='<div class="plan-level" onclick="event.stopPropagation();startPlanStudy('+realIdx+')" style="cursor:pointer">'+ls+' · 每日 '+plan.daily+' 词</div>'
+      +'<div class="plan-meta" onclick="event.stopPropagation();startPlanStudy('+realIdx+')" style="cursor:pointer">共 '+total+' 词 · '+plan.days+' 天 · 已完成 '+plan.completedDays+' 天</div>'
+      +'<div class="plan-bar" onclick="event.stopPropagation();startPlanStudy('+realIdx+')" style="cursor:pointer"><div class="plan-fill" style="width:'+pct+'%"></div></div>'
       +'<div class="plan-actions">'
       +'<button class="btn bs" style="font-size:10px;padding:3px 8px" onclick="event.stopPropagation();startPlanStudy('+realIdx+')">▶ 今日学习</button>'
       +'<button class="btn br" style="font-size:10px;padding:3px 8px" onclick="event.stopPropagation();deletePlan('+realIdx+')">🗑 删除</button>'
@@ -598,14 +598,28 @@ function deletePlan(idx){
 function startPlanStudy(idx){
   var plans=getPlans();
   if(!plans[idx])return;
-  go('vocab');
-  setTimeout(function(){curF=plans[idx].levels[0];renderV();setTimeout(function(){startStudy(plans[idx].levels[0])},100)},100)}
+  var plan=plans[idx];
+  // 将计划设置同步到自动播放
+  var saved=JSON.parse(localStorage.getItem('ap_settings')||'{}');
+  saved.levels=plan.levels;
+  saved.count=plan.daily;
+  saved.lvlOn=true;
+  localStorage.setItem('ap_settings',JSON.stringify(saved));
+  go('autoplay');
+}
 function resumeLastSession(){
   var session=null;
   try{session=JSON.parse(localStorage.getItem('jp_session'))}catch(e){}
   if(!session){showT('没有保存的学习进度');return}
-  go('vocab');
-  setTimeout(function(){curF=session.filter;renderV();setTimeout(function(){startStudy(session.filter)},100)},100)}
+  if(session.filter){
+    var saved=JSON.parse(localStorage.getItem('ap_settings')||'{}');
+    saved.levels=[session.filter];
+    saved.count=50;
+    saved.lvlOn=true;
+    localStorage.setItem('ap_settings',JSON.stringify(saved));
+  }
+  go('autoplay');
+}
 
 // ── 语法随机排序 ───────────
 function setGSort(mode,el){
