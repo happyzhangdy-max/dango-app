@@ -1288,17 +1288,19 @@ function compressImage(dataUrl,maxW){
 }
 
 // ===== API 配置 =====
-// Cloudflare Worker URL：部署后填这里，Key 就藏服务端了
-var _searchWorkerUrl=''; // 例如 'https://dango-api.xxxx.workers.dev'
-var _scanWorkerUrl='';
+// Cloudflare Worker URL
+var _searchWorkerUrl='https://damp-cell-c1f2.happyzhangdy.workers.dev';
+var _scanWorkerUrl=''; // 扫描识图暂不走代理
 
 var _searchConfig={
-  apiUrl:_searchWorkerUrl || 'https://api.siliconflow.cn/v1/chat/completions',
-  model:'deepseek-ai/DeepSeek-V4-Flash',
+  // OpenRouter（通过 Worker 代理，Key 藏服务端）
+  apiUrl:_searchWorkerUrl + '/v1/or/chat/completions',
+  model:'deepseek/deepseek-v4-flash',
   apiKey:_searchWorkerUrl ? '' : 'sk-tjhjahjojrwrmfzoqktyugyefrwhdxnovdyivttypdlpuimu'
 };
 
 var _scanConfig={
+  // 硅基流动直连
   apiUrl:_scanWorkerUrl || 'https://api.siliconflow.cn/v1/chat/completions',
   model:'Qwen/Qwen3-VL-8B-Instruct',
   apiKey:_scanWorkerUrl ? '' : 'sk-tjhjahjojrwrmfzoqktyugyefrwhdxnovdyivttypdlpuimu'
