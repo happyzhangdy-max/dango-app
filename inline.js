@@ -645,7 +645,7 @@ function renderAutoPlayOptions(){
   var selLvls=saved.levels||['n5','n4','n3'];
   var selCats=saved.categories||[];
   var speed=saved.speed||1;
-  var count=saved.count||50;
+  var count=typeof saved.count==='number' ? saved.count : 50;
   var lvlOn=saved.lvlOn!==false; // 默认开启
   var catOn=saved.catOn||false;   // 默认关闭（需要显式开启）
   c.innerHTML='<div style="padding:20px;max-width:600px;margin:0 auto">'
@@ -806,7 +806,7 @@ function startVocabAutoPlay(){
   var selLvls=saved.levels||['n5','n4','n3'];
   var selCats=saved.categories||[];
   var speed=saved.speed||1;
-  var count=saved.count||50;
+  var count=typeof saved.count==='number' ? saved.count : 50;
   var lvlOn=saved.lvlOn!==false;
   var catOn=saved.catOn||false;
   var format=saved.format||'word';
