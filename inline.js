@@ -1149,7 +1149,7 @@ function doAISearch(q,localResults){
 
 function showSearchLoading(){
   var el=document.getElementById('searchResults');
-  el.innerHTML='<div class="search-tip-text" style="color:#888;padding:12px 0;font-size:14px">🧑‍🌾 AI全力拉磨中<span class="dot-anim"><span>.</span><span>.</span><span>.</span></span></div>';
+  el.innerHTML='<div class="search-tip-text" style="color:#888;padding:12px 0;font-size:14px">🐴 AI全力拉磨中<span class="dot-anim"><span>.</span><span>.</span><span>.</span></span></div>';
   el.classList.add('visible');
 }
 
