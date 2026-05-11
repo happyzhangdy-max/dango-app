@@ -140,6 +140,13 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
 .search-result-ai-row .search-result-word { color:#a78bfa; }
 .search-empty { text-align:center; color:#555; padding:20px 0; font-size:13px; }
 .search-tip-text { text-align:center; color:#444; padding:6px 0; font-size:11px; }
+/* AI 拉磨动效 */
+.dot-anim { display:inline-flex; margin-left:2px; }
+.dot-anim span { opacity:0; animation:dotFade 1.4s infinite; font-size:14px; }
+.dot-anim span:nth-child(1) { animation-delay:0s; }
+.dot-anim span:nth-child(2) { animation-delay:0.2s; }
+.dot-anim span:nth-child(3) { animation-delay:0.4s; }
+@keyframes dotFade { 0%,60%,100% { opacity:0; } 30% { opacity:1; } }
 .search-ai-badge { font-size:10px; background:rgba(168,85,247,0.12); color:#a78bfa; padding:2px 8px; border-radius:99px; font-weight:500; white-space:nowrap; }
 
 @media(max-width:768px) {
