@@ -876,7 +876,12 @@ function doSearch(){
   var results=searchLocal(q);
   var elapsed=Date.now()-start;
   var delay=Math.max(0,300-elapsed);
-  setTimeout(function(){renderSearchResults(q,results)},delay);
+  // 判断是否需要 AI 翻译：结果少，且输入含日文
+  var needAI=(results.length===0&&/[\u3040-\u309f\u30a0-\u30ff\u4e00-\u9fff]/.test(q));
+  setTimeout(function(){
+    renderSearchResults(q,results);
+    if(needAI)doAISearch(q,results);
+  },delay);
 }
 
 function clearSearch(){
@@ -889,6 +894,30 @@ function clearSearchResults(){
   var el=document.getElementById('searchResults');
   el.innerHTML='';
   el.classList.remove('visible');
+}
+
+function doAISearch(q,localResults){
+  // 未找到本地结果时，用 AI 翻译
+  var el=document.getElementById('searchResults');
+  var messages=[{role:'user',content:'将以下日文翻译成中文。只输出翻译结果，简短直接，不要解释。\n\n日文：'+q+'\n\n中文翻译：'}];
+  callAI(_scanConfig.apiUrl,'deepseek-ai/DeepSeek-V4-Flash',messages,512).then(function(txt){
+    // 追加到搜索结果顶部
+    var aiHtml='<div class="search-result-item search-ai-item" style="background:#fffbe6;border:1px solid #ffe58f;border-radius:8px;margin-bottom:6px">'+
+      '<div class="search-result-info">'+
+      '<div class="search-result-wordrow"><span class="search-result-word" style="font-size:15px;color:#d46b08">🔍 AI 翻译</span></div>'+
+      '<div class="search-result-wordrow" style="margin-top:6px"><span style="font-size:16px;color:#333;font-weight:500">'+escHtml(q)+'</span></div>'+
+      '<div class="search-result-meaning" style="font-size:16px;color:#d46b08;margin-top:4px">→ '+escHtml(txt.trim())+'</div>'+
+      '</div></div>';
+    // 插入到现有结果前面
+    if(!localResults||localResults.length===0){
+      el.innerHTML=aiHtml;
+    }else{
+      el.innerHTML=aiHtml+el.innerHTML;
+    }
+  }).catch(function(err){
+    // AI 失败不影响本地结果
+    console.log('AI search error:',err);
+  });
 }
 
 function showSearchLoading(){
@@ -993,7 +1022,7 @@ function renderSearchResults(q,results){
     }
   }
   // 添加 AI 提醒
-  html+='<div class="search-tip-text">💡 输入自然语言问题（如「关于天气的语法」），AI 搜索即将上线</div>';
+  html+='<div class="search-tip-text">💡 搜不到时自动切换 AI 翻译（日文→中文）</div>';
   el.innerHTML=html;
   el.classList.add('visible');
 }
