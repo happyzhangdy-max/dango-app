@@ -1025,9 +1025,16 @@ function doAISearch(q,localResults){
     '日文：'+q;
   // 检查 OpenRouter API Key
   if(!_searchConfig.apiKey){
-    var k=prompt('🔑 请输入 OpenRouter API Key\n(可在 G:\\hermes\\.hermes\\.env 中找到)');
-    if(k&&k.trim()){_searchConfig.apiKey=k.trim();localStorage.setItem('or_key',k.trim())}
-    else{showT('⚠️ 未配置 API Key，AI 搜索不可用');return}
+    // 弹窗被浏览器拦截时，显示交互式提示
+    var el=document.getElementById('searchResults');
+    el.innerHTML='<div class="search-result-item" style="background:#fff3e0;border:1px solid #ffb74d;cursor:default;text-align:center;padding:20px">'+
+      '<div style="font-size:14px;color:#e65100;margin-bottom:8px">⚠️ 需要配置 OpenRouter API Key</div>'+
+      '<div style="font-size:12px;color:#888;margin-bottom:12px">AI 搜索使用 OpenRouter 服务，首次使用需输入 API Key</div>'+
+      '<button onclick="configureAIKey()" class="btn bp" style="font-size:13px;padding:8px 20px">🔑 配置 API Key</button>'+
+      '</div>';
+    el.classList.add('visible');
+    showT('⚠️ 请先配置 OpenRouter API Key');
+    return;
   }
   callAI(_searchConfig.apiUrl,_searchConfig.model,[{role:'user',content:prompt}],512,_searchConfig.apiKey).then(function(txt){
     // 解析 AI 返回的字段
@@ -1101,6 +1108,19 @@ function showSearchTip(txt,ai){
   var el=document.getElementById('searchResults');
   el.innerHTML='<div class="search-tip-text">'+txt+'</div>';
   el.classList.add('visible');
+}
+
+function configureAIKey(){
+  var k=prompt('🔑 请输入 OpenRouter API Key\n(可在 G:\\hermes\\.hermes\\.env 或 CREDENTIALS.md 中找到)\n\nKey 示例: sk-or-v1-xxxxxxxxxxxxxxxxxxxxxxxxxx');
+  if(k&&k.trim()){
+    _searchConfig.apiKey=k.trim();
+    localStorage.setItem('or_key',k.trim());
+    showT('✅ API Key 已配置，重新搜索试试');
+    // 清除提示
+    var el=document.getElementById('searchResults');
+    el.innerHTML='';
+    el.classList.remove('visible');
+  }
 }
 
 function searchLocal(q){
@@ -1502,6 +1522,48 @@ document.addEventListener('DOMContentLoaded',function(){
   var ua=document.getElementById('scanUploadArea');
   if(ua){ua.addEventListener('click',function(){triggerUpload()})}
 });
+
+// =====================
+// 防盗取 - 禁止右键/复制
+// =====================
+(function(){
+    // 禁用右键
+    document.addEventListener('contextmenu',function(e){
+        e.preventDefault();
+        return false;
+    });
+
+    // 禁用快捷键（F12, Ctrl+U, Ctrl+Shift+I, Ctrl+Shift+J）
+    document.addEventListener('keydown',function(e){
+        if(e.key==='F12' || 
+           (e.ctrlKey && e.shiftKey && e.key==='I') || 
+           (e.ctrlKey && e.shiftKey && e.key==='J') || 
+           (e.ctrlKey && e.key==='U')){
+            e.preventDefault();
+            return false;
+        }
+    });
+
+    // 禁用拖拽
+    document.body.addEventListener('dragstart',function(e){
+        e.preventDefault();
+        return false;
+    });
+
+    // 禁用文本选择（可选，如果不想让用户选词）
+    document.body.style.webkitUserSelect = 'none';
+    document.body.style.mozUserSelect = 'none';
+    document.body.style.msUserSelect = 'none';
+    document.body.style.userSelect = 'none';
+
+    // 禁止 Ctrl+C/Ctrl+A
+    document.addEventListener('keydown',function(e){
+        if(e.ctrlKey && (e.key==='c' || e.key==='a')){
+            e.preventDefault();
+            return false;
+        }
+    });
+})();
 
 // Init
 upH();renderV();renderG();

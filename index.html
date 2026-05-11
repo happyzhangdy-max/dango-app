@@ -1078,6 +1078,27 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
   }
 })();
 </script>
+
+<!-- 版权水印 -->
+<div id="wm-watermark" style="position:fixed;left:0;bottom:10px;font-size:10px;color:rgba(168,85,247,0.3);pointer-events:none;z-index:9999;user-select:none;background:rgba(10,10,26,0.9);padding:4px 8px;border-radius:4px;font-family:'Microsoft YaHei',sans-serif;">
+    © 2026 行小之的外语角 · <span id="wm-user-id">Loading...</span>
+</div>
+
+<!-- 底部版权信息 -->
+<div style="text-align:center;padding:20px;color:#64748b;font-size:11px;margin-top:30px;border-top:1px solid rgba(106,130,175,0.1);background:rgba(10,10,26,0.5);">
+    <p>© 2026 行小之的外语角 · All Rights Reserved</p>
+    <p>本应用及其内容（包括但不限于词汇库、游戏设计、代码实现）受版权保护</p>
+    <p>未经许可，任何形式的复制、分发、修改均为侵权行为</p>
+</div>
+<script>
+(function(){
+    const uid = localStorage.getItem('wm_uid') || 
+        (localStorage.setItem('wm_uid', (Date.now().toString(36) + Math.random().toString(36).substr(2, 8)).toUpperCase()),
+        (Date.now().toString(36) + Math.random().toString(36).substr(2, 8)).toUpperCase());
+    document.getElementById('wm-user-id').textContent = uid;
+})();
+</script>
+
 <script src="game/boxing.js?v=1778430787050"></script>
 </body>
 </html>
