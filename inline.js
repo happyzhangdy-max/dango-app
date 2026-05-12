@@ -257,7 +257,7 @@ function renderBook(){
       var total = sb.length;
       if (cnt) cnt.textContent = '共 '+total+' 个搜索收藏';
       if (total === 0) {
-        el.innerHTML = tabsHtml + '<div style="text-align:center;color:#666;padding:40px 0;font-size:14px">搜索收藏为空<br><span style="font-size:12px">在搜索页面点击 ☆ 收藏搜索结果</span></div>';
+        el.innerHTML = tabsHtml + '<div style="text-align:center;color:#999;padding:40px 0;font-size:14px">搜索收藏为空<br><span style="font-size:12px">在搜索页面点击 ☆ 收藏搜索结果</span></div>';
         return;
       }
       el.innerHTML = tabsHtml;
@@ -280,7 +280,7 @@ function renderBook(){
       var book = getBook();
       if (cnt) cnt.textContent = '共 '+book.length+' 个条目';
       if (book.length === 0) {
-        el.innerHTML = tabsHtml + '<div style="text-align:center;color:#666;padding:40px 0;font-size:14px">生词本为空<br><span style="font-size:12px">从词汇卡、搜索、AI 搜索自动加入</span></div>';
+        el.innerHTML = tabsHtml + '<div style="text-align:center;color:#999;padding:40px 0;font-size:14px">生词本为空<br><span style="font-size:12px">从词汇卡、搜索、AI 搜索自动加入</span></div>';
         return;
       }
       el.innerHTML = tabsHtml;
@@ -355,7 +355,7 @@ function renderWrong(){
     if (cnt) cnt.textContent = '共 '+list.length+' 道错题';
     if (!c) return;
     if (list.length === 0){
-        c.innerHTML = '<div style="text-align:center;color:#666;padding:40px 0;font-size:14px">错题本为空<br><span style="font-size:12px">做真题时答错的题目会自动加入这里</span></div>';
+        c.innerHTML = '<div style="text-align:center;color:#999;padding:40px 0;font-size:14px">错题本为空<br><span style="font-size:12px">做真题时答错的题目会自动加入这里</span></div>';
         return;
     }
     c.innerHTML = '';
@@ -369,7 +369,7 @@ function renderWrong(){
         d.innerHTML = '<div class="gh">'
             +'<span style="font-size:11px;color:#e94560;font-weight:700">#'+(idx+1)+'</span>'
             +'<span class="gb" style="background:rgba(233,69,96,0.2);color:#e94560">'+(q.type==='grammar'?'文法':'語彙')+'</span>'
-            +'<span style="font-size:10px;color:#666">'+(q.source||'')+'</span>'
+            +'<span style="font-size:10px;color:#999">'+(q.source||'')+'</span>'
             +'<span style="margin-left:auto;font-size:10px;color:#555">'+new Date(q.wrongTime).toLocaleDateString()+'</span>'
             +'</div>'
             +'<div style="font-size:13px;line-height:1.7;margin-bottom:8px">'+q.question+'</div>'
@@ -1092,7 +1092,9 @@ function doAISearch(q,localResults){
   var cached = cacheData[cacheKey];
   if(cached && Date.now() - cached.ts < 1800000){ // 30 min TTL
     var _le=document.getElementById('aiSearchLoading');if(_le)_le.remove();
-    el.innerHTML=cached.html + el.innerHTML;
+    var ls=el.innerHTML;
+    if(ls){el.innerHTML=cached.html+'<div style="margin:6px 4px 2px;border-top:1px solid rgba(255,255,255,0.06)"></div>'+ls;}
+    else{el.innerHTML=cached.html;}
     return;
   }
   
@@ -1149,7 +1151,7 @@ function doAISearch(q,localResults){
       if(!localResults||localResults.length===0){
         el.innerHTML=aiHtml;
       }else{
-        el.innerHTML=aiHtml+el.innerHTML;
+        el.innerHTML=aiHtml+'<div style="margin:6px 4px 2px;border-top:1px solid rgba(255,255,255,0.06)"></div>'+el.innerHTML;
       }
       // 缓存 AI 结果
       try{var _c=JSON.parse(localStorage.getItem('_search_cache')||'{}');_c[cacheKey]={html:aiHtml,ts:Date.now()};localStorage.setItem('_search_cache',JSON.stringify(_c))}catch(e){}
@@ -1306,7 +1308,7 @@ function renderSearchResults(q,results){
     showSearchEmpty('未找到本地词库结果，正在 AI 搜索…');
     return;
   }
-  var html='<div style="font-size:11px;color:#666;margin-bottom:4px;padding:0 4px">词库结果：</div>';
+  var html='<div style="font-size:11px;color:#999;margin-bottom:6px;padding:0 4px">词库结果：</div>';
   for(var i=0;i<results.length;i++){
     var r=results[i];
     if(r.type==='vocab'){
