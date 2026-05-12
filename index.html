@@ -6,68 +6,16 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>日语角 · JLPT 学习助手</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&family=Noto+Sans+JP:wght@300;400;500;700;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<title>日语角</title>
 <style>
-:root {
-  /* 🎨 颜色系统 — 文森特设计 */
-  --bg-deep: #0A0A12;
-  --bg-surface: #12121E;
-  --bg-surface-2: #1A1A2E;
-  --bg-surface-3: #222238;
-  --accent-amber: #F59E0B;
-  --accent-coral: #E94560;
-  --accent-purple: #A855F7;
-  --accent-teal: #4ECCA3;
-  --accent-navy: #0F3460;
-  --text-primary: #EAEAEA;
-  --text-secondary: #999;
-  --text-muted: #666;
-  
-  /* 🔤 字体体系 */
-  --font-sc: 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
-  --font-jp: 'Noto Sans JP', 'Yu Gothic', sans-serif;
-  --font-en: 'Inter', 'Segoe UI', sans-serif;
-  
-  /* 📐 间距 4px 网格 */
-  --space-xs: 4px;
-  --space-sm: 8px;
-  --space-md: 16px;
-  --space-lg: 24px;
-  --space-xl: 32px;
-  
-  /* 🟣 圆角体系 */
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
-  --radius-full: 50%;
-  
-  /* 🌑 阴影 */
-  --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
-  --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
-  --shadow-lg: 0 8px 32px rgba(168,85,247,0.2);
-  
-  /* ✅ 字号收敛 */
-  --fs-xs: 12px;
-  --fs-sm: 14px;
-  --fs-md: 16px;
-  --fs-lg: 20px;
-  --fs-xl: 24px;
-  --fs-xxl: 32px;
-}
 * { margin:0; padding:0; box-sizing:border-box; }
-body { font-family:var(--font-sc); background:var(--bg-deep); color:var(--text-primary); min-height:100vh; position:relative; scroll-padding-top:60px; }
+body { font-family:'Segoe UI','Microsoft YaHei',sans-serif; background:#0f0f1a; color:#eaeaea; min-height:100vh; position:relative; scroll-padding-top:60px; }
 body::before { content:''; position:fixed; inset:0; background:url('bg.jpg') center top/cover no-repeat; opacity:0.55; z-index:0; pointer-events:none; }
 body::after { content:''; position:fixed; inset:0; background:linear-gradient(180deg, rgba(15,15,26,0.25) 0%, rgba(15,15,26,0.75) 35%, #0f0f1a 100%); z-index:0; pointer-events:none; }
 .main,.nav { position:relative; z-index:1; }
-
-/* ── 今日学习打卡 ───────────────── */
-.today-header { position:relative; overflow:hidden; }
-.today-header::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,var(--accent-amber),var(--accent-coral),var(--accent-purple)); opacity:0.6; }
-.today-stat-item:hover { background:rgba(255,255,255,0.06) !important; }
-.today-progress-bar::after { content:''; position:absolute; inset:0; border-radius:2px; box-shadow:0 0 6px rgba(233,69,96,0.3); opacity:0; transition:opacity 0.3s; }
-.today-progress-bar:hover::after { opacity:1; }
+.hero { position:relative; width:calc(100% + 32px); margin-left:-16px; margin-bottom:18px; height:200px; overflow:hidden; padding-top:50px; }
+.hero::before { content:''; position:absolute; inset:0; background:url('bg.jpg') center 15%/cover no-repeat; opacity:1; }
+.hero::after { content:''; position:absolute; inset:0; background:linear-gradient(180deg, transparent 60%, #0f0f1a 100%); }
 
 .vwb { display:block; background:linear-gradient(135deg,#1a1a3e,#0f3460); border:1px solid rgba(168,85,247,0.3); border-radius:14px; padding:28px 20px; margin-bottom:16px; cursor:pointer; text-align:center; transition:opacity 0.3s,transform 0.3s,background 0.3s,border-color 0.3s; position:relative; overflow:hidden; }
 .vwb:hover { border-color:#a855f7; transform:translateY(-2px); box-shadow:0 8px 30px rgba(168,85,247,0.2); }
@@ -145,7 +93,7 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
 .main { max-width:960px; margin:0 auto; padding:16px; }
 .page { display:none; max-width:960px; margin:0 auto; padding:16px; }
 .page.active { display:block; }
-@media(max-width:600px){ .page,.main{ padding:12px; padding-top:60px; } .tab{ font-size:11px; padding:4px 10px; } .vwb{ padding:20px 14px; } }
+@media(max-width:600px){ .page,.main{ padding:12px; padding-top:60px; } .tab{ font-size:11px; padding:4px 10px; } .vwb{ padding:20px 14px; } .hero{ height:160px; } }
 .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:8px; margin-bottom:16px; }
 .sc { background:linear-gradient(135deg,#1a1a3e,#16213e); border:1px solid rgba(168,85,247,0.2); border-radius:10px; padding:14px; text-align:center; cursor:pointer; transition:opacity 0.2s,transform 0.2s,background 0.2s,border-color 0.2s; }
 .sc:hover { border-color:rgba(168,85,247,0.5); transform:translateY(-2px); box-shadow:0 4px 15px rgba(0,0,0,0.2); }
@@ -503,6 +451,7 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
   /* 弹性滚动+防滑 */
   .dw .db{ -webkit-overflow-scrolling:touch; }
   .ol.open{ touch-action:none; }
+  .hero{ min-height:60px; }
   /* 学习模式 */
   .cs{ max-width:100%; }
   .sp .st{ gap:6px; }
@@ -517,6 +466,7 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
   .qg{ grid-template-columns:1fr; }
   .stats .sc{ padding:8px; }
   .sc .sn{ font-size:20px; }
+  .hero{ min-height:40px; }
   .sect{ font-size:13px; padding:8px 0; }
   .legend{ font-size:10px; }
   .review-tabs{ flex-direction:column; gap:6px; }
@@ -622,7 +572,7 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
 </head>
 <body>
 <nav class="nav">
-  <div class="logo"><span class="logo-main">日语角</span><span class="logo-sub">JLPT 学习助手</span></div>
+  <div class="logo"><span class="logo-main">日语角</span><span class="logo-sub">日语突击版</span></div>
   <div class="tabs">
     <button class="tab active" onclick="go('home')">首页</button>
     <button class="tab" onclick="go('vocab')">单词墙</button>
@@ -645,7 +595,8 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
 
 <!-- 首页 -->
 <div class="main"><div class="page active" id="p-home">
-  <!-- 🔍 搜索框 -->
+  <div class="hero"></div>
+  <!-- 🔍 搜索框 C位：placeholder 随机轮播 -->
   <div class="search-bar-wrap" style="margin-bottom:14px">
     <div class="search-bar">
       <span class="search-icon">🔍</span>
@@ -654,38 +605,6 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
       <button class="search-btn" id="searchBtn">搜索</button>
     </div>
     <div class="search-results" id="searchResults"></div>
-  </div>
-  <!-- 🔥 Today View：连续打卡 + 今日进度 -->
-  <div class="today-header" style="margin-bottom:14px;padding:16px 18px;background:var(--bg-surface);border:1px solid rgba(255,255,255,0.06);border-radius:var(--radius-lg);">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-      <div style="display:flex;align-items:center;gap:6px;">
-        <span id="todayStreakEmoji" style="font-size:22px;">🔥</span>
-        <span class="today-streak-count" id="todayStreakCount" style="font-size:18px;font-weight:700;color:var(--accent-amber);">0</span>
-        <span style="font-size:13px;color:var(--text-secondary);">天连续学习</span>
-      </div>
-      <div id="todayDate" style="font-size:12px;color:var(--text-muted);"></div>
-    </div>
-    <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
-      <span style="font-size:13px;color:var(--text-secondary);">今日学习</span>
-      <span style="font-size:13px;color:var(--text-secondary);"><span id="todayLearned" style="color:var(--accent-teal);font-weight:600;">0</span> / <span id="todayGoal" style="color:var(--text-muted);">30</span> 词</span>
-    </div>
-    <div class="today-progress-bar" style="height:4px;background:rgba(255,255,255,0.08);border-radius:2px;overflow:hidden;">
-      <div id="todayProgressFill" style="height:100%;width:0%;background:linear-gradient(90deg,var(--accent-amber),var(--accent-coral));border-radius:2px;transition:width 0.6s ease;"></div>
-    </div>
-    <div style="display:flex;gap:14px;margin-top:12px;">
-      <div class="today-stat-item" onclick="resumeLastSession()" style="flex:1;text-align:center;padding:8px 4px;background:rgba(255,255,255,0.03);border-radius:var(--radius-sm);cursor:pointer;">
-        <div class="today-stat-num" id="t1" style="font-size:20px;font-weight:700;color:var(--accent-purple);">0</div>
-        <div class="today-stat-label" style="font-size:11px;color:var(--text-muted);">学习中 ▶</div>
-      </div>
-      <div class="today-stat-item" onclick="go('review')" style="flex:1;text-align:center;padding:8px 4px;background:rgba(255,255,255,0.03);border-radius:var(--radius-sm);cursor:pointer;">
-        <div class="today-stat-num" id="t2" style="font-size:20px;font-weight:700;color:var(--accent-amber);">0</div>
-        <div class="today-stat-label" style="font-size:11px;color:var(--text-muted);">今日待复习 →</div>
-      </div>
-      <div class="today-stat-item" onclick="go('plan')" style="flex:1;text-align:center;padding:8px 4px;background:rgba(255,255,255,0.03);border-radius:var(--radius-sm);cursor:pointer;">
-        <div class="today-stat-num" id="t3" style="font-size:20px;font-weight:700;color:var(--accent-teal);">0</div>
-        <div class="today-stat-label" style="font-size:11px;color:var(--text-muted);">已掌握 →</div>
-      </div>
-    </div>
   </div>
   <!-- 🎯 两大王牌入口 -->
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
@@ -700,7 +619,12 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
       <div class="vwb-sub">考级分类 · 场景分类 · 自动播放</div>
     </div>
   </div>
-  <!-- 🎮 快捷入口 -->
+  <!-- 📊 学习概览紧凑条 -->
+  <div class="stats" style="margin-bottom:12px">
+    <div class="sc" onclick="resumeLastSession()"><div class="sn" id="s1">0</div><div class="sl">学习中 ▶</div></div>
+    <div class="sc" onclick="go('review')"><div class="sn" id="s2">0</div><div class="sl">今日待复习 →</div></div>
+  </div>
+  <!-- 🎮 更多功能 -->
   <div class="h-entries" style="grid-template-columns:repeat(3,1fr)">
     <div class="h-entry h-entry-game" onclick="go('game')">
       <div class="h-icon">🎮</div>
@@ -1169,12 +1093,12 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
   </div>
 </div>
 
-<script src="data.js?v=7"></script>
+<script src="data.js?v=19"></script>
 <script src="grammar_data.js?v=3"></script>
 <script src="quiz_data_high.js?v=3"></script>
 <script src="quiz_data_real.js?v=3"></script>
 <script src="quiz_data_normal.js?v=3"></script>
-<script src="inline.js?v=80"></script>
+<script src="inline.js?v=76"></script>
 <script src="game/tower-climb.js?v=1778500000001"></script>
 
 
@@ -1187,6 +1111,9 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
 <!-- 底部版权信息 -->
 <div style="text-align:center;padding:20px;color:#64748b;font-size:11px;margin-top:30px;border-top:1px solid rgba(106,130,175,0.1);background:rgba(10,10,26,0.5);">
     <p>© 2026 日语角 · All Rights Reserved</p>
+    <div style="margin-top:10px;font-size:10px;opacity:0.4;">
+        <span onclick="if(confirm('确定要清空所有学习记录吗？\n(SM-2进度/学习计划/生词本/错题本/搜索缓存)')){['jp','jp_plans','jp_book','jp_wrong','jp_mark','jp_search_book','jp_session','gc','gm','gb','ap_settings','_search_cache','scanHist','mk'].forEach(function(k){localStorage.removeItem(k)});showT('✅ 学习记录已清空');location.reload()}" style="cursor:pointer;text-decoration:underline;">🗑 清空学习记录</span>
+    </div>
 </div>
 <script>
 (function(){
