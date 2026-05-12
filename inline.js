@@ -1000,12 +1000,31 @@ function doSearch(){
   var q=document.getElementById('aiSearchInput').value.trim();
   clearSearchResults();
   if(!q){showSearchEmpty('输入关键词开始搜索');return}
-  showSearchLoading();
-  // 本地搜索（VOCAB + GRAMMAR）
+  // 本地搜索（VOCAB + GRAMMAR）瞬时返回
   var results=searchLocal(q);
   // 渲染本地结果
   renderSearchResults(q,results);
-  // 始终触发 AI 搜索（日翻中 + 中翻日）
+  // 在本地结果下方追加 AI 加载骨架屏
+  var el=document.getElementById('searchResults');
+  var aiLoadEl=document.createElement('div');
+  aiLoadEl.id='aiSearchLoading';
+  aiLoadEl.innerHTML='<div class="search-ai-loading">'
+    +'<div class="search-spinner"></div>'
+    +'<div class="skeleton-title">🤖 AI 搜索中</div>'
+    +'<div class="skeleton-card">'
+    +'<div class="skeleton-line skeleton-word"></div>'
+    +'<div class="skeleton-line skeleton-reading"></div>'
+    +'<div class="skeleton-line skeleton-meaning"></div>'
+    +'<div class="skeleton-line skeleton-note"></div>'
+    +'</div>'
+    +'<div class="skeleton-card">'
+    +'<div class="skeleton-line skeleton-word" style="width:45%"></div>'
+    +'<div class="skeleton-line skeleton-reading" style="width:25%"></div>'
+    +'<div class="skeleton-line skeleton-meaning" style="width:65%"></div>'
+    +'</div>'
+    +'</div>';
+  el.appendChild(aiLoadEl);
+  // 始终触发 AI 搜索
   doAISearch(q,results);
 }
 
@@ -1059,11 +1078,15 @@ function doAISearch(q,localResults){
   var cacheData = JSON.parse(localStorage.getItem('_search_cache')||'{}');
   var cached = cacheData[cacheKey];
   if(cached && Date.now() - cached.ts < 1800000){ // 30 min TTL
+    var _le=document.getElementById('aiSearchLoading');if(_le)_le.remove();
     el.innerHTML=cached.html + el.innerHTML;
     return;
   }
   
   callAI(_searchConfig.apiUrl,_searchConfig.model,[{role:'user',content:prompt}],256,_searchConfig.apiKey).then(function(txt){
+    // 移除 AI 加载骨架屏
+    var _le=document.getElementById('aiSearchLoading');if(_le)_le.remove();
+    // 解析 AI 返回的字段
     // 解析 AI 返回的字段
     var cn='',src='',kanji='',note='';
     
