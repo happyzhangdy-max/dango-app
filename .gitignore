@@ -1,8 +1,26 @@
-*.pyc
-__pycache__/
-.DS_Store
-Thumbs.db
-*.py
-verify_*.png
-cf-worker/
+# Development artifacts
+_batch_*.json
+_n1_batches/
+_n2_batches/
+_n3_batches/
+_n4_batches/
+_n5_batches/
+_anki_*.csv
+_extract_*.mjs
+_english_meanings_to_translate.json
+_index.json
+backup/
 *.bak
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Logs
+*.log
