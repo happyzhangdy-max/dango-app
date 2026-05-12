@@ -942,8 +942,8 @@ function vApStop(){
   _vApActive=false;_vApPaused=false;
   clearTimeout(_vApTimer);_vApTimer=null;
   clearSpeechQueue();
-  // 操作词汇自动播放屏幕（非语法 gApScreen）（Bug #4）
-  document.getElementById('apScreen').classList.remove('show');
+  // vAp 使用 gApScreen 显示（见 vAp 启动代码），应清除 gApScreen 的 show 类
+  document.getElementById('gApScreen').classList.remove('show');
   showT('🎉 自动播放完成！共 '+_vApQueue.length+' 词');
   _vApQueue=[];_vApIdx=0;
 }
