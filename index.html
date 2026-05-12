@@ -1167,93 +1167,74 @@ document.addEventListener('click',function(e){
     m.classList.remove('show');
   }
 });
-// 团团链路增强：功能间交叉链接
+// // 团团链路增强：功能间交叉链接
 (function(){
-  var _prevEnhancePage='';
-  function enhanceLinks(){
+  function doEnhanceVocab(){
     var page=document.querySelector('.page.active');
-    if(!page||page.id===_prevEnhancePage)return;
-    _prevEnhancePage=page.id;
-    // 单词墙 → "➕今日复习"按钮
-    if(page.id==='p-vocab'){
-      setTimeout(function(){
-        document.querySelectorAll('#p-vocab .vc').forEach(function(el){
-          if(el.querySelector('.al-link'))return;
-          var wordEl=el.querySelector('.vw');
-          if(!wordEl)return;
-          var wordText=wordEl.textContent.trim();
-          var link=document.createElement('span');
-          link.className='al-link';
-          link.textContent='➕今日复习';
-          link.style.cssText='display:inline-block;font-size:10px;color:#4ecca3;cursor:pointer;margin-left:8px;padding:1px 8px;border:1px solid rgba(78,204,163,0.3);border-radius:6px;background:rgba(78,204,163,0.08)';
-          link.title='将此词加入今日复习队列';
-          link.onclick=function(e){
-            e.stopPropagation();
-            // find the word in VOCAB and add to lp/due
-            var w=VOCAB.find(function(v){return v.word===wordText||v.reading===wordText||(v.id&&v.id===wordText)});
-            if(w){
-              // mark as learned today via lp()
-              var p=lp();
-              if(!p[w.id])p[w.id]={id:w.id,count:0,nextDate:new Date().toISOString().split('T')[0]};
-              p[w.id].nextDate=new Date().toISOString().split('T')[0];
-              try{lp(p,1)}catch(e){}
-              link.textContent='✅已加入';
-              link.style.borderColor='rgba(78,204,163,0.6)';
-              link.style.color='#6ee7b7';
-              setTimeout(function(){link.textContent='✅已加'},2000);
-            }
-          };
-          // Insert after the word element
-          var stack=el.querySelector('.va-stack');
-          if(!stack){
-            wordEl.parentNode.insertBefore(link, wordEl.nextSibling);
-          }else{
-            stack.parentNode.insertBefore(link, stack);
-          }
-        });
-      },200);
-    }
-    // 语法页 → "去真题看看" 链接
-    if(page.id==='p-grammar'){
-      setTimeout(function(){
-        document.querySelectorAll('#p-grammar [class*="g-"], #p-grammar > div > div').forEach(function(el){
-          if(el.querySelector('.al-quiz-link'))return;
-          var title=el.querySelector('.vwb-title,.gt,.g-title');
-          if(!title)return;
-          var gTitle=title.textContent.trim();
-          if(gTitle.length<2)return;
-          var link=document.createElement('span');
-          link.className='al-quiz-link';
-          link.textContent='📋 去真题';
-          link.style.cssText='display:inline-block;font-size:10px;color:#f5a623;cursor:pointer;margin-left:8px;padding:1px 8px;border:1px solid rgba(245,166,35,0.3);border-radius:6px;background:rgba(245,166,35,0.08)';
-          link.title='去真题看看这个语法点怎么考';
-          link.onclick=function(e){
-            e.stopPropagation();
-            go('quiz');
-          };
-          // Insert after the word element
-          var stack=el.querySelector('.va-stack');
-          if(!stack){
-            wordEl.parentNode.insertBefore(link, wordEl.nextSibling);
-          }else{
-            stack.parentNode.insertBefore(link, stack);
-          }
-        });
-      },200);
-    }
+    if(!page||page.id!=='p-vocab')return;
+    document.querySelectorAll('#p-vocab .vc').forEach(function(el){
+      if(el.querySelector('.al-link'))return;
+      var wordEl=el.querySelector('.vw');
+      if(!wordEl)return;
+      var wordText=wordEl.textContent.trim();
+      var link=document.createElement('span');
+      link.className='al-link';
+      link.textContent='➕今日复习';
+      link.style.cssText='display:inline-block;font-size:9px;color:#4ecca3;cursor:pointer;margin-left:4px;padding:0 5px;border:1px solid rgba(78,204,163,0.3);border-radius:4px;background:rgba(78,204,163,0.08);vertical-align:middle;line-height:1.6';
+      link.title='将此词加入今日复习';
+      link.onclick=function(e){
+        e.stopPropagation();
+        var w=VOCAB.find(function(v){return v.word===wordText||v.reading===wordText});
+        if(w){
+          var p=lp();
+          if(!p[w.id])p[w.id]={id:w.id,count:0,nextDate:new Date().toISOString().split('T')[0]};
+          p[w.id].nextDate=new Date().toISOString().split('T')[0];
+          try{lp(p,1)}catch(e){}
+          link.textContent='✅';
+          link.style.borderColor='rgba(78,204,163,0.6)';
+          link.style.color='#6ee7b7';
+        }
+      };
+      // put link before .va-stack
+      var stack=el.querySelector('.va-stack');
+      if(stack)stack.parentNode.insertBefore(link,stack);
+      else wordEl.parentNode.insertBefore(link,wordEl.nextSibling);
+    });
   }
-  // 监听页面切换
-  var _origGo=window.go;
-  if(_origGo){
-    window.go=function(p){
-      _origGo(p);
-      setTimeout(enhanceLinks,100);
-    };
+  function doEnhanceGrammar(){
+    var page=document.querySelector('.page.active');
+    if(!page||page.id!=='p-grammar')return;
+    document.querySelectorAll('#p-grammar .vwb').forEach(function(el){
+      if(el.querySelector('.al-quiz-link'))return;
+      var title=el.querySelector('.vwb-title');
+      if(!title)return;
+      var link=document.createElement('span');
+      link.className='al-quiz-link';
+      link.textContent='📋去真题';
+      link.style.cssText='display:inline-block;font-size:10px;color:#f5a623;cursor:pointer;margin-left:6px;padding:1px 6px;border:1px solid rgba(245,166,35,0.3);border-radius:4px;background:rgba(245,166,35,0.08)';
+      link.title='去真题看看这个语法点';
+      link.onclick=function(e){e.stopPropagation();go('quiz')};
+      title.parentNode.insertBefore(link,title.nextSibling);
+    });
   }
-  // 初始执行
-  setTimeout(enhanceLinks,500);
-  // 定时检测（兜底）
-  setInterval(enhanceLinks,2000);
+  // 周期性检查（最可靠的方式）
+  setInterval(function(){
+    var page=document.querySelector('.page.active');
+    if(!page)return;
+    if(page.id==='p-vocab')doEnhanceVocab();
+    if(page.id==='p-grammar')doEnhanceGrammar();
+  },1500);
+  // MutationObserver 辅助
+  var obs=new MutationObserver(function(){
+    var page=document.querySelector('.page.active');
+    if(!page)return;
+    if(page.id==='p-vocab')setTimeout(doEnhanceVocab,300);
+    if(page.id==='p-grammar')setTimeout(doEnhanceGrammar,300);
+  });
+  setTimeout(function(){
+    var t=document.getElementById('p-vocab')||document.getElementById('p-grammar')||document.body;
+    if(t)obs.observe(t,{childList:true,subtree:true});
+  },500);
 })();
 </script>
 </body>
