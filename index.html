@@ -1177,12 +1177,11 @@ document.addEventListener('click',function(e){
     // 单词墙 → "➕今日复习"按钮
     if(page.id==='p-vocab'){
       setTimeout(function(){
-        document.querySelectorAll('#p-vocab .vwb').forEach(function(el){
+        document.querySelectorAll('#p-vocab .vc').forEach(function(el){
           if(el.querySelector('.al-link'))return;
-          // extract word info from the card
-          var title=el.querySelector('.vwb-title');
-          if(!title)return;
-          var wordText=title.textContent.trim();
+          var wordEl=el.querySelector('.vw');
+          if(!wordEl)return;
+          var wordText=wordEl.textContent.trim();
           var link=document.createElement('span');
           link.className='al-link';
           link.textContent='➕今日复习';
@@ -1204,18 +1203,25 @@ document.addEventListener('click',function(e){
               setTimeout(function(){link.textContent='✅已加'},2000);
             }
           };
-          title.parentNode.insertBefore(link,title.nextSibling);
+          // Insert after the word element
+          var stack=el.querySelector('.va-stack');
+          if(!stack){
+            wordEl.parentNode.insertBefore(link, wordEl.nextSibling);
+          }else{
+            stack.parentNode.insertBefore(link, stack);
+          }
         });
       },200);
     }
     // 语法页 → "去真题看看" 链接
     if(page.id==='p-grammar'){
       setTimeout(function(){
-        document.querySelectorAll('#p-grammar .vwb').forEach(function(el){
+        document.querySelectorAll('#p-grammar [class*="g-"], #p-grammar > div > div').forEach(function(el){
           if(el.querySelector('.al-quiz-link'))return;
-          var title=el.querySelector('.vwb-title');
+          var title=el.querySelector('.vwb-title,.gt,.g-title');
           if(!title)return;
           var gTitle=title.textContent.trim();
+          if(gTitle.length<2)return;
           var link=document.createElement('span');
           link.className='al-quiz-link';
           link.textContent='📋 去真题';
@@ -1225,7 +1231,13 @@ document.addEventListener('click',function(e){
             e.stopPropagation();
             go('quiz');
           };
-          title.parentNode.insertBefore(link,title.nextSibling);
+          // Insert after the word element
+          var stack=el.querySelector('.va-stack');
+          if(!stack){
+            wordEl.parentNode.insertBefore(link, wordEl.nextSibling);
+          }else{
+            stack.parentNode.insertBefore(link, stack);
+          }
         });
       },200);
     }
