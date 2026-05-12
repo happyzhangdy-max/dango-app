@@ -1096,7 +1096,7 @@ function doAISearch(q,localResults){
     return;
   }
   
-  callAI(_searchConfig.apiUrl,_searchConfig.model,[{role:'user',content:prompt}],256,_searchConfig.apiKey).then(function(txt){
+  callAI(_searchConfig.apiUrl,_searchConfig.model,[{role:'user',content:prompt}],maxTk,_searchConfig.apiKey).then(function(txt){
     // 移除 AI 加载骨架屏
     var _le=document.getElementById('aiSearchLoading');if(_le)_le.remove();
     // 解析 AI 返回的字段
@@ -1130,11 +1130,11 @@ function doAISearch(q,localResults){
         '<div class="search-result-info" style="flex:1;min-width:0">'+
         '<div class="search-result-wordrow">'+
         '<span class="search-result-word">'+escHtml(jpText)+'</span>'+
-        '<span class="search-result-level sl-ai" style="background:#e6f7ff;color:#1890ff;border:1px solid #91d5ff;font-size:10px;padding:1px 6px;border-radius:3px;font-weight:500">中→日</span>'+
+        '<span class="search-result-level sl-ai" style="background:#e6f7ff;color:#1890ff;border:1px solid #91d5ff;font-size:11px;padding:2px 8px;border-radius:4px;font-weight:600">中→日</span>'+
         '</div>'+
-        '<div class="search-result-meaning" style="color:#d46b08">→ '+escHtml(meaningText)+'</div>'+
-        '<div class="search-result-tags">'+
-        (note ? '<span class="search-result-tag">💡 '+escHtml(note)+'</span>' : '')+
+        '<div class="search-result-meaning" style="color:#d46b08;font-size:15px;margin-top:6px">→ '+escHtml(meaningText)+'</div>'+
+        '<div class="search-result-tags" style="margin-top:6px">'+
+        (note ? '<span class="search-result-tag" style="font-size:13px;padding:3px 10px">💡 '+escHtml(note)+'</span>' : '')+
         '</div>'+
         (breakdown ? '<div class="search-result-breakdown" style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.06);font-size:12px;line-height:1.6"><div style="color:#a78bfa;font-weight:600;margin-bottom:4px">📝 单词解析</div><div style="color:#cbd5e1;white-space:pre-wrap">'+escHtml(breakdown)+'</div></div>' : '')+
         (grammar ? '<div class="search-result-grammar" style="margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.06);font-size:12px;line-height:1.6"><div style="color:#4ecca3;font-weight:600;margin-bottom:4px">🔧 语法点</div><div style="color:#cbd5e1;white-space:pre-wrap">'+escHtml(grammar)+'</div></div>' : '')+
@@ -1194,15 +1194,15 @@ function doAISearch(q,localResults){
         '<div class="search-result-wordrow">'+
         '<span class="search-result-word">'+escHtml(displayWord)+'</span>'+
         (displayReading ? '<span class="search-result-reading">'+escHtml(displayReading)+'</span>' : '')+
-        '<span class="search-result-level sl-ai" style="background:#e6f7ff;color:#1890ff;border:1px solid #91d5ff;font-size:10px;padding:1px 6px;border-radius:3px;font-weight:500">AI</span>'+
+        '<span class="search-result-level sl-ai" style="background:#e6f7ff;color:#1890ff;border:1px solid #91d5ff;font-size:11px;padding:2px 8px;border-radius:4px;font-weight:600">AI</span>'+
         '</div>'+
-        '<div class="search-result-meaning" style="color:#d46b08">→ '+escHtml(cn||'')+'</div>'+
-        '<div class="search-result-tags">'+
-        (src ? '<span class="search-result-tag">语源：'+escHtml(src)+'</span>' : '')+
-        (note ? '<span class="search-result-tag">💡 '+escHtml(note)+'</span>' : '')+
+        '<div class="search-result-meaning" style="color:#d46b08;font-size:15px;margin-top:6px">→ '+escHtml(cn||'')+'</div>'+
+        '<div class="search-result-tags" style="margin-top:6px">'+
+        (src ? '<span class="search-result-tag" style="font-size:13px;padding:3px 10px">语源：'+escHtml(src)+'</span>' : '')+
+        (note ? '<span class="search-result-tag" style="font-size:13px;padding:3px 10px">💡 '+escHtml(note)+'</span>' : '')+
         '</div>'+
-        (breakdown ? '<div class="search-result-breakdown" style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.06);font-size:12px;line-height:1.6"><div style="color:#a78bfa;font-weight:600;margin-bottom:4px">📝 单词解析</div><div style="color:#cbd5e1;white-space:pre-wrap">'+escHtml(breakdown)+'</div></div>' : '')+
-        (grammar ? '<div class="search-result-grammar" style="margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.06);font-size:12px;line-height:1.6"><div style="color:#4ecca3;font-weight:600;margin-bottom:4px">🔧 语法点</div><div style="color:#cbd5e1;white-space:pre-wrap">'+escHtml(grammar)+'</div></div>' : '')+
+        (breakdown ? '<div class="search-result-breakdown" style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.06);font-size:14px;line-height:1.8"><div style="color:#a78bfa;font-weight:700;margin-bottom:6px;font-size:15px">📝 单词解析</div><div style="color:#cbd5e1;white-space:pre-wrap">'+escHtml(breakdown)+'</div></div>' : '')+
+        (grammar ? '<div class="search-result-grammar" style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.06);font-size:14px;line-height:1.8"><div style="color:#4ecca3;font-weight:700;margin-bottom:6px;font-size:15px">🔧 语法点</div><div style="color:#cbd5e1;white-space:pre-wrap">'+escHtml(grammar)+'</div></div>' : '')+
         '</div>'+
         '<div class="search-result-actions" style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;align-items:center">'+
         '<button onclick="event.stopPropagation();speak(\''+escHtml(q)+'\')" style="background:none;border:none;cursor:pointer;font-size:18px;padding:4px;color:#888" title="发音">🔊</button>'+
