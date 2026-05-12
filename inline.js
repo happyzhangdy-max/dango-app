@@ -214,8 +214,6 @@ function isInBook(item){
 }
 function toggleBook(item){
   // item: {type:'vocab',id:123} 或 {type:'ai', word, reading, meaning, level}
-  // 修复：内联 onclick 生成的 id 可能为字符串，归一化到 number
-  if(typeof item.id==='string')item.id=Number(item.id);
   var book = getBook();
   var idx = -1;
   if (item.type === 'vocab') {
@@ -570,15 +568,11 @@ function upP(){
   try{session=JSON.parse(localStorage.getItem('jp_session'))}catch(e){}
   if(session&&cont){
     cont.style.display='block';
-    requestAnimationFrame(function(){ cont.classList.add('show'); });
     var info=document.getElementById('continueInfo');
     if(info){
       var lv={n1:'N1',n2:'N2',n3:'N3',n4:'N4',n5:'N5'}[session.filter]||session.filter;
       info.textContent=lv+' · 进度 '+(session.ci+1)+'/'+session.total;}
-  }else if(cont){
-    cont.classList.remove('show');
-    setTimeout(function(){ cont.style.display='none'; }, 400);
-  }
+  }else if(cont){cont.style.display='none'}
   // 计划列表
   var list=document.getElementById('planList');
   if(!list)return;
@@ -1748,4 +1742,4 @@ document.addEventListener('click', function(e) {
   }
 });
 
-
+

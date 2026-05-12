@@ -100,38 +100,19 @@
 * { margin:0; padding:0; box-sizing:border-box; }
 body { font-family:var(--font-sc); background:var(--bg-primary); color:var(--text-primary); min-height:100vh; position:relative; scroll-padding-top:52px; }
 body::before { content:''; position:fixed; inset:0; background:url('bg.jpg') center top/cover no-repeat; opacity:0.55; z-index:0; pointer-events:none; }
-body::after { content:''; position:fixed; inset:0; background:linear-gradient(180deg, rgba(10,10,18,0.15) 0%, rgba(10,10,18,0.55) 40%, var(--bg-primary) 100%); z-index:0; pointer-events:none; }
-
-/* ===== Ambient Glow — Warm Night Atmosphere ===== */
-.ambient-glow { position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden; }
-.ambient-glow .glow-amber { position:absolute; top:-15%; right:-8%; width:600px; height:600px; border-radius:50%; background:radial-gradient(circle,rgba(245,158,11,0.15),transparent 60%); }
-.ambient-glow .glow-coral { position:absolute; bottom:-10%; left:-8%; width:500px; height:500px; border-radius:50%; background:radial-gradient(circle,rgba(233,69,96,0.10),transparent 60%); }
-.ambient-glow .glow-purple { position:absolute; bottom:15%; right:-3%; width:400px; height:400px; border-radius:50%; background:radial-gradient(circle,rgba(168,85,247,0.08),transparent 60%); }
-.ambient-glow .glow-navy { position:absolute; top:30%; left:-5%; width:350px; height:350px; border-radius:50%; background:radial-gradient(circle,rgba(15,52,96,0.15),transparent 60%); }
-
+body::after { content:''; position:fixed; inset:0; background:linear-gradient(180deg, rgba(10,10,18,0.25) 0%, rgba(10,10,18,0.75) 35%, var(--bg-primary) 100%); z-index:0; pointer-events:none; }
 .main,.nav { position:relative; z-index:1; }
-.hero { position:relative; width:calc(100% + 32px); margin-left:-16px; margin-bottom:24px; height:240px; overflow:hidden; padding-top:0; display:flex; align-items:center; justify-content:center; }
+.hero { position:relative; width:calc(100% + 32px); margin-left:-16px; margin-bottom:18px; height:200px; overflow:hidden; padding-top:0; }
 .hero::before { content:''; position:absolute; inset:0; background:url('bg.jpg') center 15%/cover no-repeat; opacity:1; }
-.hero::after { content:''; position:absolute; inset:0; background:linear-gradient(180deg, transparent 30%, rgba(10,10,18,0.45) 75%, #0f0f1a 100%); }
-.hero-content { position:relative; z-index:2; text-align:center; padding:0 20px; }
-.hero-badge { display:inline-block; font-family:var(--font-jp); font-size:13px; font-weight:500; color:var(--amber); background:rgba(245,158,11,0.12); border:1px solid rgba(245,158,11,0.2); padding:4px 14px; border-radius:var(--radius-full); letter-spacing:2px; margin-bottom:12px; backdrop-filter:blur(4px); }
-.hero-title { font-size:36px; font-weight:900; color:var(--text-primary); letter-spacing:4px; margin-bottom:6px; text-shadow:0 2px 20px rgba(0,0,0,0.3); }
-.hero-subtitle { font-size:15px; color:var(--text-secondary); letter-spacing:1px; font-weight:400; }
-.hero-subtitle em { font-style:normal; color:var(--amber); font-weight:500; }
-.continue-section { transition:opacity 0.4s ease, transform 0.4s ease; opacity:0; transform:translateY(-8px); }
-.continue-section.show { opacity:1; transform:translateY(0); }
+.hero::after { content:''; position:absolute; inset:0; background:linear-gradient(180deg, transparent 60%, #0f0f1a 100%); }
 
-.vwb { display:block; background:linear-gradient(135deg,#12121e,#1a1a2e); border:1px solid rgba(255,255,255,0.06); border-radius:14px; padding:28px 20px; margin-bottom:16px; cursor:pointer; text-align:center; position:relative; overflow:hidden; transition:all 0.3s ease; }
-.vwb:active { transform:translateY(-1px) scale(0.98); }
-.vwb:hover { border-color:rgba(245,158,11,0.25); transform:translateY(-2px); box-shadow:0 12px 40px rgba(0,0,0,0.3),0 0 20px rgba(245,158,11,0.06); }
-/* vwb common glow */
-.vwb::before { content:''; position:absolute; top:-40%; right:-15%; width:140px; height:140px; border-radius:50%; background:radial-gradient(circle,rgba(168,85,247,0.06),transparent 70%); pointer-events:none; transition:all 0.4s ease; }
-.vwb:hover::before { transform:scale(1.4); opacity:0.8; }
-.vwb-scan::before { background:radial-gradient(circle,rgba(78,204,163,0.07),transparent 70%); }
-.vwb-autoplay::before { background:radial-gradient(circle,rgba(233,69,96,0.07),transparent 70%); }
-.vwb-icon { font-size:36px; display:block; margin-bottom:8px; position:relative; z-index:1; }
-.vwb-title { font-size:20px; font-weight:800; background:linear-gradient(135deg,#f59e0b,#e94560); -webkit-background-clip:text; -webkit-text-fill-color:transparent; letter-spacing:2px; position:relative; z-index:1; }
-.vwb-sub { font-size:12px; color:var(--text-tertiary); margin-top:6px; letter-spacing:0.5px; position:relative; z-index:1; }
+.vwb { display:block; background:linear-gradient(135deg,#1a1a3e,#0f3460); border:1px solid rgba(168,85,247,0.3); border-radius:14px; padding:28px 20px; margin-bottom:16px; cursor:pointer; text-align:center; transition:opacity 0.3s,transform 0.3s,background 0.3s,border-color 0.3s; position:relative; overflow:hidden; }
+.vwb:hover { border-color:#a855f7; transform:translateY(-2px); box-shadow:0 8px 30px rgba(168,85,247,0.2); }
+.vwb::after { content:''; position:absolute; top:-50%; right:-50%; width:100%; height:200%; background:linear-gradient(45deg,transparent 40%,rgba(168,85,247,0.05) 50%,transparent 60%); transition:opacity 0.6s,transform 0.6s,background 0.6s; }
+.vwb:hover::after { transform:translateX(30px); }
+.vwb-icon { font-size:36px; display:block; margin-bottom:6px; }
+.vwb-title { font-size:20px; font-weight:800; background:linear-gradient(135deg,#e94560,#a855f7); -webkit-background-clip:text; -webkit-text-fill-color:transparent; letter-spacing:2px; }
+.vwb-sub { font-size:12px; color:#888; margin-top:6px; letter-spacing:1px; }
 
 
 
@@ -202,32 +183,20 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
 .page { display:none; max-width:960px; margin:0 auto; padding:16px; }
 .page.active { display:block; }
 @media(max-width:600px){ .page,.main{ padding:12px; padding-top:60px; } .tab{ font-size:11px; padding:4px 10px; } .vwb{ padding:20px 14px; } .hero{ height:160px; } }
-.stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:10px; margin-bottom:16px; }
-.sc { background:linear-gradient(135deg,#12121e,#1a1a2e); border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:16px 14px; text-align:center; cursor:pointer; position:relative; overflow:hidden; transition:all 0.3s ease; }
-.sc::before { content:''; position:absolute; top:-50%; right:-30%; width:120px; height:120px; border-radius:50%; background:radial-gradient(circle,rgba(245,158,11,0.07),transparent 70%); pointer-events:none; transition:all 0.4s ease; }
-.sc:hover { border-color:rgba(245,158,11,0.25); transform:translateY(-2px); box-shadow:0 8px 30px rgba(0,0,0,0.3),0 0 20px rgba(245,158,11,0.06); }
-.sc:hover::before { transform:scale(1.5); opacity:0.5; }
-.sc:active { transform:translateY(0) scale(0.97); }
-.sn { font-size:26px; font-weight:800; background:linear-gradient(135deg,#f59e0b,#e94560); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-family:var(--font-en); position:relative; z-index:1; filter:drop-shadow(0 0 8px rgba(245,158,11,0.15)); }
-.sl { font-size:11px; color:var(--text-tertiary); margin-top:4px; font-weight:500; letter-spacing:0.5px; position:relative; z-index:1; }
+.stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:8px; margin-bottom:16px; }
+.sc { background:linear-gradient(135deg,#1a1a3e,#16213e); border:1px solid rgba(168,85,247,0.2); border-radius:10px; padding:14px; text-align:center; cursor:pointer; transition:opacity 0.2s,transform 0.2s,background 0.2s,border-color 0.2s; }
+.sc:hover { border-color:rgba(168,85,247,0.5); transform:translateY(-2px); box-shadow:0 4px 15px rgba(0,0,0,0.2); }
+.sn { font-size:22px; font-weight:700; color:#a78bfa; }
+.sl { font-size:11px; color:#999; margin-top:3px; }
 .h-entries { display:grid; grid-template-columns:repeat(6,1fr); gap:10px; margin-bottom:16px; }
-.h-entry { background:linear-gradient(135deg,#12121e,#1a1a2e); border:1px solid rgba(255,255,255,0.06); border-radius:14px; padding:24px 14px; cursor:pointer; text-align:center; position:relative; overflow:hidden; transition:all 0.3s ease; }
-.h-entry:hover { transform:translateY(-3px); box-shadow:0 12px 40px rgba(0,0,0,0.3); }
-.h-entry:active { transform:translateY(-1px) scale(0.97); }
-.h-entry:hover { border-color:rgba(245,158,11,0.25); }
-.h-entry .h-icon { position:relative; z-index:1; font-size:28px; display:block; margin-bottom:8px; }
-.h-entry .h-title { position:relative; z-index:1; font-size:15px; font-weight:700; color:var(--text-primary); margin-bottom:4px; }
-.h-entry .h-sub { position:relative; z-index:1; font-size:11px; color:var(--text-tertiary); }
-/* info-card radial glow per card */
-.h-entry::before { content:''; position:absolute; top:-40%; right:-15%; width:120px; height:120px; border-radius:50%; background:radial-gradient(circle,rgba(168,85,247,0.06),transparent 70%); pointer-events:none; transition:all 0.4s ease; }
-.h-entry:hover::before { transform:scale(1.4); opacity:0.8; }
-.h-entry::after { content:''; position:absolute; bottom:-40%; left:-15%; width:100px; height:100px; border-radius:50%; background:radial-gradient(circle,rgba(245,158,11,0.03),transparent 70%); pointer-events:none; }
-.h-entry-game::before { background:radial-gradient(circle,rgba(168,85,247,0.08),transparent 70%); }
-.h-entry-game::after { background:radial-gradient(circle,rgba(233,69,96,0.04),transparent 70%); }
-.h-entry-review::before { background:radial-gradient(circle,rgba(78,204,163,0.08),transparent 70%); }
-.h-entry-review::after { background:radial-gradient(circle,rgba(245,158,11,0.04),transparent 70%); }
-.h-entry-quiz::before { background:radial-gradient(circle,rgba(245,158,11,0.08),transparent 70%); }
-.h-entry-quiz::after { background:radial-gradient(circle,rgba(233,69,96,0.04),transparent 70%); }
+.h-entry { background:linear-gradient(135deg,#1a1a3e,#0f3460); border:1px solid rgba(168,85,247,0.3); border-radius:14px; padding:24px 14px; cursor:pointer; text-align:center; transition:opacity 0.3s,transform 0.3s,background 0.3s,border-color 0.3s; position:relative; overflow:hidden; }
+.h-entry:hover { transform:translateY(-3px); box-shadow:0 8px 30px rgba(168,85,247,0.2); }
+.h-entry .h-icon { position:relative; z-index:1; }
+.h-entry::before { content:''; position:absolute; top:-30%; right:-20%; width:80px; height:80px; border-radius:50%; background:radial-gradient(circle,rgba(168,85,247,0.06),transparent 70%); pointer-events:none; }
+.h-entry-vocab::before { background:radial-gradient(circle,rgba(233,69,96,0.06),transparent 70%); }
+.h-entry-grammar::before { background:radial-gradient(circle,rgba(245,166,35,0.06),transparent 70%); }
+.h-entry-review::before { background:radial-gradient(circle,rgba(78,204,163,0.06),transparent 70%); }
+.h-entry-game::before { background:radial-gradient(circle,rgba(168,85,247,0.06),transparent 70%); }
 .h-entry-autoplay::before { background:radial-gradient(circle,rgba(233,69,96,0.06),transparent 70%); }
 .h-entry-large { grid-column:span 3; padding:30px 18px; }
 .h-entry-small { grid-column:span 2; padding:18px 10px; }
@@ -255,6 +224,8 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
 /* 通用微交互动画：按钮点击收缩，卡片点击下沉 */
 .search-result-item:active { transform:scale(0.99); }
 .btn:active { transform:scale(0.96); }
+.vwb:active { transform:translateY(0); }
+.h-entry:active { transform:translateY(-1px); }
 .search-results { margin-top:12px; display:none; background:#1a1a2e; border-radius:10px; padding:4px 0; box-shadow:0 4px 20px rgba(0,0,0,0.2); }
 .search-results.visible { display:block; }
 .search-result-item { background:#1a1a2e; border:1px solid rgba(255,255,255,0.06); border-radius:10px; padding:16px 20px; margin-bottom:10px; cursor:pointer; transition:opacity 0.15s,transform 0.15s,background 0.15s,border-color 0.15s; display:flex; align-items:flex-start; gap:14px; }
@@ -505,43 +476,62 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
   #p-vocab .st2 .tab, #p-vocab .st3 .tab{ font-size:11px; padding:5px 8px; }
   /* 单词卡片全宽 */
   .vg{ grid-template-columns:1fr 1fr; gap:6px; }
-  .vg /* ═══ Word Card (Glassmorphism) ═══ */
-.vc{--card-tint:rgba(18,18,30,0.60);--card-glow:transparent;position:relative;padding:20px 22px;border-radius:var(--radius-lg);background:linear-gradient(135deg,var(--card-tint),rgba(18,18,30,0.40));backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.08);box-shadow:var(--shadow-card);transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);cursor:pointer;display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;overflow:hidden}
-.vc::before{content:'';position:absolute;top:-60%;right:-20%;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,var(--card-glow,rgba(168,85,247,0.04)),transparent 70%);pointer-events:none;transition:all 0.5s ease}
-.vc:hover{transform:translateY(-4px);border-color:var(--border-hover);box-shadow:var(--shadow-elevated),0 0 30px rgba(245,158,11,0.08)}
-.vc:hover::before{opacity:0.6;transform:scale(1.2)}
-.vc .vl,.vc .vt .vl{display:inline-flex;align-items:center;font-size:10px;font-weight:700;letter-spacing:0.5px;padding:3px 10px;border-radius:4px;font-family:var(--font-en);order:0;flex-shrink:0;text-transform:uppercase}
-.vc .vl.l3{background:var(--teal-light);color:var(--teal);border:1px solid rgba(78,204,163,0.2)}
-.vc .vl.l2{background:var(--amber-light);color:var(--amber);border:1px solid rgba(245,158,11,0.2)}
-.vc .vl.l1{background:linear-gradient(135deg,rgba(245,158,11,0.12),rgba(233,69,96,0.12));color:var(--coral);border:1px solid rgba(233,69,96,0.2)}
-.vc .vb-freq{font-size:10px;padding:2px 9px;border-radius:4px;background:rgba(255,255,255,0.04);color:var(--text-tertiary);flex-shrink:0;order:1;font-family:var(--font-en)}
-.vc .vb-freq.fb-s{color:var(--coral);background:rgba(233,69,96,0.10)}
-.vc .vb-freq.fb-a{color:var(--amber);background:rgba(245,158,11,0.08)}
-.vc .vb-freq.fb-b{color:var(--teal);background:rgba(78,204,163,0.08)}
-.vc .vb-freq.fb-c{color:var(--text-tertiary)}
-.vc .vw{font-family:var(--font-jp);font-size:24px;font-weight:700;color:var(--text-primary);line-height:1.3;order:2;flex:1 1 auto;min-width:60px;margin:4px 0 2px}
-.vc .vr{font-family:var(--font-jp);font-size:14px;color:var(--text-secondary);order:3;width:100%;margin-bottom:2px}
-.vc .vm{font-size:14px;color:var(--text-secondary);order:4;width:100%;opacity:0.85}
-.vc .va-stack{display:flex;gap:4px;align-items:center;order:5;margin-left:auto;flex-shrink:0}
-.vc .va-stack .vb{width:28px;height:28px;border-radius:50%;border:1px solid var(--border-subtle);background:rgba(255,255,255,0.03);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all 0.2s ease;color:var(--text-tertiary)}
-.vc .va-stack .vb:hover{background:var(--amber-light);border-color:var(--border-hover);color:var(--text-primary);transform:scale(1.1)}
-.vc .vf{display:flex;align-items:center;gap:8px;order:6;width:100%;margin-top:4px}
-.vc .vbf{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;border:1px solid var(--border-subtle);background:rgba(255,255,255,0.03);cursor:pointer;font-size:13px;transition:all 0.2s ease;color:var(--text-quaternary)}
-.vc .vbf:hover{background:var(--coral-light);border-color:rgba(233,69,96,0.3);color:var(--coral);transform:scale(1.15)}
-.vc .vm-btn-group{display:flex;gap:3px;margin-left:auto}
-.vc .vm-btn{width:24px;height:24px;border-radius:50%;border:none;cursor:pointer;font-size:11px;line-height:1;transition:all 0.2s ease;opacity:0.5;display:flex;align-items:center;justify-content:center}
-.vc .vm-btn:hover{opacity:1;transform:scale(1.2)}
-.vc .vm-btn-red{background:rgba(233,69,96,0.2);color:var(--coral)}
-.vc .vm-btn-yellow{background:rgba(245,158,11,0.2);color:var(--amber)}
-.vc .vm-btn-green{background:rgba(78,204,163,0.2);color:var(--teal)}
-.vc.vc-fold .vw{font-size:18px;order:0;flex:0 1 auto;width:auto}
-.vc.vc-fold .vr{display:none}
-.vc.vc-fold .vm{display:none}
-.vc.vc-fold .vb-freq{display:none}
-.vc.vc-fold .vf{display:none}
-.vc.vc-fold .va-stack{display:none}
-.vh1,.vh2{display:flex;align-items:center;gap:6px;padding:6px 0;font-size:12px;color:var(--text-tertiary)}
-.vc-h{display:flex;align-items:center;gap:4px;padding:4px 0;font-size:11px;color:var(--text-quaternary);border-bottom:1px solid var(--border-subtle);margin-bottom:6px}
+  .vg .vc{ padding:10px 8px; }
+  .vg .vc .vw{ font-size:24px; margin-top:6px; }
+  .vg .vc .vr{ font-size:18px; }
+  .vg .vc .vm{ font-size:15px; }
+  .vg .vc .vb-freq{ font-size:9px; }
+  .vg .vc{ padding:10px 55px 38px 8px; }
+  /* 首页卡片 */
+  .qg{ grid-template-columns:1fr 1fr; gap:8px; }
+  .h-entries{ grid-template-columns:1fr 1fr; gap:8px; }
+  .h-entry-large{ grid-column:span 2; padding:24px 14px; }
+  .h-entry-large .h-icon{ font-size:36px; }
+  .h-entry-large .h-title{ font-size:20px; }
+  .h-entry-small{ grid-column:span 1; padding:16px 8px; }
+  .h-entry-small .h-icon{ font-size:24px; }
+  .h-entry-small .h-title{ font-size:13px; }
+  .h-entry-small .h-sub{ font-size:10px; }
+  .h-entry{ padding:18px 14px; }
+  .ac{ padding:12px; }
+  .ac .ai{ font-size:24px; }
+  .ac .at{ font-size:13px; }
+  .ac .ad{ font-size:11px; }
+  .vwb{ padding:14px; }
+  .vwb-icon{ font-size:28px; }
+  .vwb-title{ font-size:16px; }
+  /* 统计数字 */
+  .stats{ gap:8px; }
+  .sc{ padding:10px; }
+  .sc .sn{ font-size:22px; }
+  .sc .sl{ font-size:11px; }
+  /* 详情弹窗 → 底部 3/5 上滑 */
+  .dw{ width:100vw !important; max-width:100vw !important; height:60vh !important; top:auto !important; bottom:-60vh; right:0 !important; border-radius:14px 14px 0 0; transition:bottom 0.35s cubic-bezier(0.4,0,0.2,1); }
+  .dw.open{ bottom:0; }
+  /* 弹性滚动+防滑 */
+  .dw .db{ -webkit-overflow-scrolling:touch; }
+  .ol.open{ touch-action:none; }
+  .hero{ min-height:60px; }
+  /* 学习模式 */
+  .cs{ max-width:100%; }
+  .sp .st{ gap:6px; }
+  .sp .st .btn{ font-size:10px; padding:3px 8px; }
+  /* 复习页 */
+  .re{ padding:20px; }
+  .re .rem{ font-size:36px; }
+}
+@media(max-width:480px){
+  .tabs .tab{ font-size:11px; padding:6px 8px; }
+  #p-vocab .st2 .tab, #p-vocab .st3 .tab{ font-size:10px; padding:4px 6px; }
+  .qg{ grid-template-columns:1fr; }
+  .stats .sc{ padding:8px; }
+  .sc .sn{ font-size:20px; }
+  .hero{ min-height:40px; }
+  .sect{ font-size:13px; padding:8px 0; }
+  .legend{ font-size:10px; }
+  .review-tabs{ flex-direction:column; gap:6px; }
+}
+
 /* ── 学习计划 ─────────────── */
 .plan-card{ background:linear-gradient(135deg,#1a1a3e,#0f3460); border:1px solid rgba(168,85,247,0.2); border-radius:10px; padding:14px 16px; margin-bottom:10px; }
 .plan-card .plan-level{ font-size:14px; font-weight:700; margin-bottom:4px; }
@@ -1005,7 +995,6 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
 </style>
 </head>
 <body>
-<div class="ambient-glow"><div class="glow-amber"></div><div class="glow-coral"></div><div class="glow-purple"></div><div class="glow-navy"></div></div>
 <header class="topbar">
   <div class="topbar__logo">
     <span class="topbar__main">日语角</span>
@@ -1106,13 +1095,7 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
 
 <!-- 首页 -->
 <div class="main"><div class="page active" id="p-home">
-  <div class="hero">
-    <div class="hero-content">
-      <div class="hero-badge">🌸 日本語コーナー</div>
-      <div class="hero-title">日语角</div>
-      <div class="hero-subtitle">每天进步<em>一点点</em></div>
-    </div>
-  </div>
+  <div class="hero"></div>
   <!-- 🔍 搜索框 C位：placeholder 随机轮播 -->
   <div class="search-bar-wrap" style="margin-bottom:14px">
     <div class="search-bar">
@@ -1125,12 +1108,12 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
   </div>
   <!-- 🎯 两大王牌入口 -->
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
-    <div class="vwb vwb-scan" onclick="go('scan')" style="margin-bottom:0">
+    <div class="vwb" onclick="go('scan')" style="margin-bottom:0">
       <div class="vwb-icon">📸</div>
       <div class="vwb-title">拍照识图</div>
       <div class="vwb-sub">拍下即查 · 自动识别翻译</div>
     </div>
-    <div class="vwb vwb-autoplay" onclick="go('autoplay')" style="margin-bottom:0">
+    <div class="vwb" onclick="go('autoplay')" style="margin-bottom:0">
       <div class="vwb-icon">📚</div>
       <div class="vwb-title">自动背单词</div>
       <div class="vwb-sub">考级分类 · 场景分类 · 自动播放</div>
@@ -1160,7 +1143,7 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
     </div>
   </div>
   <!-- 继续学习 -->
-  <div id="continueSection" style="display:none" class="continue-section">
+  <div id="continueSection" style="display:none">
     <div class="vwb" id="continueBtn" onclick="resumeLastSession()" style="cursor:pointer;padding:20px 20px;margin-bottom:8px">
       <div class="vwb-icon" style="font-size:28px">▶️</div>
       <div class="vwb-title" style="font-size:16px">继续学习</div>
@@ -1486,7 +1469,7 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
   <div class="df" style="padding:10px 16px;border-top:1px solid rgba(255,255,255,0.06)">
     <button class="btn bs" style="padding:6px 12px;font-size:12px" onclick="speakDW()">🔊 朗读</button>
     <button class="btn bp" style="padding:6px 12px;font-size:12px" onclick="closeD();startStudyFromWall(dwId)">▶ 从本词学习</button>
-    <button class="btn bg" style="padding:6px 12px;font-size:12px" id="bookBtn" onclick="toggleBook({type:'vocab',id:dwId})">📗 生词本</button>
+    <button class="btn bg" style="padding:6px 12px;font-size:12px" id="bookBtn" onclick="toggleBook(dwId)">📗 生词本</button>
   </div>
 </div>
 
@@ -1627,6 +1610,15 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
         <span onclick="if(confirm('确定要清空所有学习记录吗？\n(SM-2进度/学习计划/生词本/错题本/搜索缓存)')){['jp','jp_plans','jp_book','jp_wrong','jp_mark','jp_search_book','jp_session','gc','gm','gb','ap_settings','_search_cache','scanHist','mk'].forEach(function(k){localStorage.removeItem(k)});showT('✅ 学习记录已清空');location.reload()}" style="cursor:pointer;text-decoration:underline;">🗑 清空学习记录</span>
     </div>
 </div>
+<script>
+(function(){
+    const uid = localStorage.getItem('wm_uid') || 
+        (localStorage.setItem('wm_uid', (Date.now().toString(36) + Math.random().toString(36).substr(2, 8)).toUpperCase()),
+        (Date.now().toString(36) + Math.random().toString(36).substr(2, 8)).toUpperCase());
+    document.getElementById('wm-user-id').textContent = uid;
+})();
+</script>
+
 <script src="game/boxing.js?v=1778500000002"></script>
 <script>
 // 搜索框 placeholder 随机轮播
@@ -1661,7 +1653,87 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
     inp.placeholder='搜单词、搜句子，'+PH[i];
   },6000);
 })();
-</script>
+// 导航更多下拉
+function toggleNavMore(){
+  var m=document.getElementById('navMore');
+  if(m)m.classList.toggle('show');
+}
+// 点击外部关闭下拉
+document.addEventListener('click',function(e){
+  var m=document.getElementById('navMore');
+  if(m&&m.classList.contains('show')&&!e.target.closest('.nav-dropdown')){
+    m.classList.remove('show');
+  }
+});
+// // 团团链路增强：功能间交叉链接
+(function(){
+  function doEnhanceVocab(){
+    var page=document.querySelector('.page.active');
+    if(!page||page.id!=='p-vocab')return;
+    document.querySelectorAll('#p-vocab .vc').forEach(function(el){
+      if(el.querySelector('.al-link'))return;
+      var wordEl=el.querySelector('.vw');
+      if(!wordEl)return;
+      var wordText=wordEl.textContent.trim();
+      var link=document.createElement('span');
+      link.className='al-link';
+      link.textContent='➕今日复习';
+      link.style.cssText='display:inline-block;font-size:9px;color:#4ecca3;cursor:pointer;margin-left:4px;padding:0 5px;border:1px solid rgba(78,204,163,0.3);border-radius:4px;background:rgba(78,204,163,0.08);vertical-align:middle;line-height:1.6';
+      link.title='将此词加入今日复习';
+      link.onclick=function(e){
+        e.stopPropagation();
+        var w=VOCAB.find(function(v){return v.word===wordText||v.reading===wordText});
+        if(w){
+          var p=lp();
+          if(!p[w.id])p[w.id]={id:w.id,count:0,nextDate:new Date().toISOString().split('T')[0]};
+          p[w.id].nextDate=new Date().toISOString().split('T')[0];
+          try{lp(p,1)}catch(e){}
+          link.textContent='✅';
+          link.style.borderColor='rgba(78,204,163,0.6)';
+          link.style.color='#6ee7b7';
+        }
+      };
+      // put link before .va-stack
+      var stack=el.querySelector('.va-stack');
+      if(stack)stack.parentNode.insertBefore(link,stack);
+      else wordEl.parentNode.insertBefore(link,wordEl.nextSibling);
+    });
+  }
+  function doEnhanceGrammar(){
+    var page=document.querySelector('.page.active');
+    if(!page||page.id!=='p-grammar')return;
+    document.querySelectorAll('#p-grammar .vwb').forEach(function(el){
+      if(el.querySelector('.al-quiz-link'))return;
+      var title=el.querySelector('.vwb-title');
+      if(!title)return;
+      var link=document.createElement('span');
+      link.className='al-quiz-link';
+      link.textContent='📋去真题';
+      link.style.cssText='display:inline-block;font-size:10px;color:#f5a623;cursor:pointer;margin-left:6px;padding:1px 6px;border:1px solid rgba(245,166,35,0.3);border-radius:4px;background:rgba(245,166,35,0.08)';
+      link.title='去真题看看这个语法点';
+      link.onclick=function(e){e.stopPropagation();go('quiz')};
+      title.parentNode.insertBefore(link,title.nextSibling);
+    });
+  }
+  // 周期性检查（最可靠的方式）
+  setInterval(function(){
+    var page=document.querySelector('.page.active');
+    if(!page)return;
+    if(page.id==='p-vocab')doEnhanceVocab();
+    if(page.id==='p-grammar')doEnhanceGrammar();
+  },1500);
+  // MutationObserver 辅助
+  var obs=new MutationObserver(function(){
+    var page=document.querySelector('.page.active');
+    if(!page)return;
+    if(page.id==='p-vocab')setTimeout(doEnhanceVocab,300);
+    if(page.id==='p-grammar')setTimeout(doEnhanceGrammar,300);
+  });
+  setTimeout(function(){
+    var t=document.getElementById('p-vocab')||document.getElementById('p-grammar')||document.body;
+    if(t)obs.observe(t,{childList:true,subtree:true});
+  },500);
+})();
 </script>
 </body>
 </html>
