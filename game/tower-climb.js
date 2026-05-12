@@ -1488,6 +1488,9 @@ function init() {
   html += '  .gm-card-desc { font-size:11px; color:#64748b; line-height:1.6; }';
   html += '  .gm-card-climb { border-color:rgba(168,85,247,0.3); }';
   html += '  .gm-card-climb .gm-card-title { background:linear-gradient(135deg,#a855f7,#ec4899); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }';
+  html += '  .gm-card-slogan { font-size:13px; font-weight:700; margin-bottom:4px; letter-spacing:1px; opacity:0.9; }';
+  html += '  .gm-card-climb .gm-card-slogan { color:#fbbf24; text-shadow:0 0 10px rgba(251,191,36,0.3); }';
+  html += '  .gm-card-boxing .gm-card-slogan { color:#ef4444; text-shadow:0 0 10px rgba(239,68,68,0.3); }';
   html += '  .gm-card-boxing { border-color:rgba(239,68,68,0.3); }';
   html += '  .gm-card-boxing .gm-card-title { background:linear-gradient(135deg,#ef4444,#fbbf24); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }';
   html += '  .gm-quickstart { display:flex; align-items:center; justify-content:center; gap:10px; width:100%; max-width:340px; padding:14px 20px; border:none; border-radius:14px; background:linear-gradient(135deg,#a855f7,#7c3aed); color:#fff; font-size:16px; font-weight:700; cursor:pointer; margin-bottom:14px; animation:gmPulse 2s infinite; transition:transform 0.15s,box-shadow 0.15s; }';
@@ -1557,11 +1560,13 @@ function init() {
   html += '    <div class="gm-card gm-card-climb" data-gm="start-climb">';
   html += '      <div class="gm-card-icon">🏔️</div>';
   html += '      <div class="gm-card-title">爬塔闯关</div>';
+  html += '      <div class="gm-card-slogan">先上100层看看</div>';
   html += '      <div class="gm-card-desc">答对向上跳 · 答错摔下来<br>老师/家长/同事/课长 Boss 战</div>';
   html += '    </div>';
   html += '    <div class="gm-card gm-card-boxing" data-gm="start-boxing">';
   html += '      <div class="gm-card-icon">🥊</div>';
   html += '      <div class="gm-card-title">单词拳击</div>';
+  html += '      <div class="gm-card-slogan">先拿个冠军看看</div>';
   html += '      <div class="gm-card-desc">第一人称视角 · 出拳KO对手<br>连击越高伤害越高</div>';
   html += '    </div>';
   html += '  </div>';
@@ -1829,6 +1834,16 @@ function showTowerClimb() {
 }
 
 function start() {
+  // 🏯 进塔横幅
+  (function(){try{
+    var b=document.createElement('div');
+    b.id='gmBanner';
+    b.innerHTML='<span style="font-size:32px;margin-right:10px">🏯</span><span style="font-weight:800;font-size:18px">先上100层看看</span>';
+    b.style.cssText='position:fixed;top:0;left:0;right:0;z-index:99999;display:flex;align-items:center;justify-content:center;gap:8px;height:64px;background:linear-gradient(135deg,rgba(168,85,247,0.95),rgba(236,72,153,0.95));color:#fff;backdrop-filter:blur(8px);transform:translateY(-100%);transition:transform 0.5s cubic-bezier(0.34,1.56,0.64,1);box-shadow:0 4px 20px rgba(0,0,0,0.3)';
+    document.body.appendChild(b);
+    requestAnimationFrame(function(){b.style.transform='translateY(0)'});
+    setTimeout(function(){b.style.transform='translateY(-100%)';setTimeout(function(){b.remove()},600)},3000);
+  }catch(e){}})();
   try {
   // 从 localStorage 读取单词范围设置
   var gm = JSON.parse(localStorage.getItem('game_settings') || '{}');

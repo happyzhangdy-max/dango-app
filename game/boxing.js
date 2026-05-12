@@ -1171,6 +1171,16 @@ function gameOver() {
 // 启动 / 菜单
 // ============================================================
 function start() {
+  // 🥊 拳击横幅
+  (function(){try{
+    var b=document.createElement('div');
+    b.id='gmBanner';
+    b.innerHTML='<span style="font-size:32px;margin-right:10px">🥊</span><span style="font-weight:800;font-size:18px">先拿个冠军看看</span>';
+    b.style.cssText='position:fixed;top:0;left:0;right:0;z-index:99999;display:flex;align-items:center;justify-content:center;gap:8px;height:64px;background:linear-gradient(135deg,rgba(239,68,68,0.95),rgba(251,191,36,0.95));color:#fff;backdrop-filter:blur(8px);transform:translateY(-100%);transition:transform 0.5s cubic-bezier(0.34,1.56,0.64,1);box-shadow:0 4px 20px rgba(0,0,0,0.3)';
+    document.body.appendChild(b);
+    requestAnimationFrame(function(){b.style.transform='translateY(0)'});
+    setTimeout(function(){b.style.transform='translateY(-100%)';setTimeout(function(){b.remove()},600)},3000);
+  }catch(e){}})();
   cacheByLevel();
   // 从 localStorage 读取单词范围设置
   var gm = JSON.parse(localStorage.getItem('game_settings') || '{}');
