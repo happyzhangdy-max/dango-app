@@ -1354,7 +1354,7 @@ function goToVocab(id){
   go('vocab');
   // 跳转到该词的详情弹窗
   setTimeout(function(){
-    var v=VOCAB_DATA.find(function(x){return x.id===id});
+    var v=findVocabById(id);
     if(v)showDetail(v);
   },100);
 }
