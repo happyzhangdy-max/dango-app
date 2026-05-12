@@ -26,6 +26,11 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
 .vwb-sub { font-size:12px; color:#888; margin-top:6px; letter-spacing:1px; }
 
 .nav { background:rgba(26,26,46,0.95); backdrop-filter:blur(10px); border-bottom:1px solid rgba(255,255,255,0.08); padding:0 16px; display:flex; align-items:center; height:50px; position:sticky; top:0; z-index:100; }
+.nav-dropdown { position:relative; display:inline-block; }
+.nav-more { display:none; position:absolute; top:100%; right:0; background:rgba(26,26,46,0.97); backdrop-filter:blur(10px); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:6px; z-index:200; min-width:160px; box-shadow:0 8px 30px rgba(0,0,0,0.4); }
+.nav-more.show { display:block; }
+.nav-more-item { display:block; width:100%; text-align:left; background:none !important; border:none !important; color:#aaa !important; padding:8px 14px !important; font-size:13px !important; margin:2px 0 !important; border-radius:8px !important; }
+.nav-more-item:hover { background:rgba(168,85,247,0.15) !important; color:#eaeaea !important; }
 .logo { display:flex; flex-direction:column; justify-content:center; margin-right:20px; line-height:1.2; }
 .logo-main { font-size:16px; font-weight:800; background:linear-gradient(135deg,#e94560,#a855f7); -webkit-background-clip:text; -webkit-text-fill-color:transparent; letter-spacing:1px; text-shadow:0 0 20px rgba(168,85,247,0.4); }
 .logo-sub { font-size:10px; color:#6b7280; letter-spacing:2px; font-weight:500; }
@@ -571,14 +576,19 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
   <div class="tabs">
     <button class="tab active" onclick="go('home')">首页</button>
     <button class="tab" onclick="go('vocab')">单词墙</button>
-    <button class="tab" onclick="go('grammar')">背语法</button>
     <button class="tab" onclick="go('review')">复习</button>
-    <button class="tab" onclick="go('book')">生词本</button>
-    <button class="tab" onclick="go('quiz')">真题模拟训练</button>
-    <button class="tab" onclick="go('wrong')">错题本</button>
-    <button class="tab" onclick="go('autoplay')" style="background:linear-gradient(135deg,rgba(233,69,96,0.12),rgba(255,107,157,0.08));border:1px solid rgba(233,69,96,0.2);color:#ff6b9d">🔊 自动播放</button>
     <button class="tab" onclick="go('game')" style="background:linear-gradient(135deg,rgba(168,85,247,0.15),rgba(233,69,96,0.1));border:1px solid rgba(168,85,247,0.2);color:#a78bfa">🎮 闯关</button>
-    <button class="tab" onclick="go('scan')" style="background:linear-gradient(135deg,rgba(16,185,129,0.12),rgba(52,211,153,0.08));border:1px solid rgba(16,185,129,0.2);color:#34d399">📸 扫描</button>
+    <div class="nav-dropdown">
+      <button class="tab" id="moreBtn" onclick="toggleNavMore()" style="cursor:pointer">更多 ▾</button>
+      <div class="nav-more" id="navMore">
+        <button class="tab nav-more-item" onclick="go('grammar');toggleNavMore()">📝 背语法</button>
+        <button class="tab nav-more-item" onclick="go('book');toggleNavMore()">📗 生词本</button>
+        <button class="tab nav-more-item" onclick="go('quiz');toggleNavMore()">📋 真题</button>
+        <button class="tab nav-more-item" onclick="go('wrong');toggleNavMore()">❌ 错题本</button>
+        <button class="tab nav-more-item" onclick="go('autoplay');toggleNavMore()">🔊 自动播放</button>
+        <button class="tab nav-more-item" onclick="go('scan');toggleNavMore()">📸 扫描</button>
+      </div>
+    </div>
   </div>
 </nav>
 <div class="toast" id="toast"></div>
@@ -611,34 +621,24 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
   </div>
   <!-- 📊 学习概览紧凑条 -->
   <div class="stats" style="margin-bottom:12px">
-    <div class="sc"><div class="sn" id="s1">0</div><div class="sl">学习中</div></div>
+    <div class="sc" onclick="resumeLastSession()"><div class="sn" id="s1">0</div><div class="sl">学习中 ▶</div></div>
     <div class="sc" onclick="go('review')"><div class="sn" id="s2">0</div><div class="sl">今日待复习 →</div></div>
   </div>
-  <!-- 🎮 更多功能网格 -->
-  <div class="h-entries">
-    <div class="h-entry h-entry-game" onclick="go('game')" style="grid-column:span 2">
+  <!-- 🎮 更多功能 -->
+  <div class="h-entries" style="grid-template-columns:repeat(3,1fr)">
+    <div class="h-entry h-entry-game" onclick="go('game')">
       <div class="h-icon">🎮</div>
       <div class="h-title">单词闯关</div>
       <div class="h-sub">爬塔答题 · 拳击对战</div>
     </div>
-    <div class="h-entry h-entry-review" onclick="go('review')" style="grid-column:span 2">
+    <div class="h-entry h-entry-review" onclick="go('review')">
       <div class="h-icon">🔄</div>
       <div class="h-title">复习</div>
       <div class="h-sub">遗忘曲线 · 按次数巩固</div>
     </div>
-    <div class="h-entry h-entry-grammar" onclick="go('grammar')" style="grid-column:span 2">
-      <div class="h-icon">📝</div>
-      <div class="h-title">背语法</div>
-      <div class="h-sub">N3 / N2 常考句型</div>
-    </div>
-    <div class="h-entry h-entry-vocab" onclick="go('vocab')" style="grid-column:span 3">
-      <div class="h-icon">📖</div>
-      <div class="h-title">单词墙</div>
-      <div class="h-sub">N5 → N1 全部词汇 · 浏览筛选</div>
-    </div>
-    <div class="h-entry h-entry-autoplay" onclick="go('quiz')" style="grid-column:span 3">
+    <div class="h-entry h-entry-quiz" onclick="go('quiz')">
       <div class="h-icon">📋</div>
-      <div class="h-title">真题模拟训练</div>
+      <div class="h-title">真题模拟</div>
       <div class="h-sub">历年真题 · 高频考点</div>
     </div>
   </div>
@@ -1098,7 +1098,7 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
 <script src="quiz_data_high.js?v=3"></script>
 <script src="quiz_data_real.js?v=3"></script>
 <script src="quiz_data_normal.js?v=3"></script>
-<script src="inline.js?v=73"></script>
+<script src="inline.js?v=74"></script>
 <script src="game/tower-climb.js?v=1778430785734"></script>
 
 
@@ -1126,34 +1126,122 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
 // 搜索框 placeholder 随机轮播
 (function(){
   var PH=[
-    '搜单词、搜句子，试试「美味しい」',
-    '试试「N3 天气语法」',
-    '试试「難しい的例句」',
-    '试试「大丈夫 文法」',
-    '试试「雨が降る」',
-    '试试「ください 敬語」',
-    '试试「て形 用法」',
-    '试试「JLPT N2 読解」',
-    '试试「ありがとう 丁寧」',
-    '试试「かわいい 例文」',
-    '试试「食べる 可能形」',
-    '试试「行く て形」',
-    '试试「勉強 名詞」',
+    '试试「美味しい」',
+    '试试「ありがとう」',
     '试试「お願いします」',
-    '试试「げんき 漢字」',
-    '试试「さようなら 語源」',
-    '试试「猫 訓読み」',
-    '试试「先生 敬称」',
-    '试试「いい天気 会話」',
-    '试试「日本語 勉強法」'
+    '试试「おはようございます」',
+    '试试「こんにちは」',
+    '试试「すみません」',
+    '试试「大丈夫ですか」',
+    '试试「いただきます」',
+    '试试「お疲れ様です」',
+    '试试「よろしくお願いします」',
+    '试试「わかりました」',
+    '试试「いらっしゃいませ」',
+    '试试「お元気ですか」',
+    '试试「お大事に」',
+    '试试「ごちそうさま」',
+    '试试「いってきます」',
+    '试试「ただいま」',
+    '试试「おやすみなさい」',
+    '试试「どういたしまして」',
+    '试试「かしこまりました」'
   ];
   var inp=document.getElementById('aiSearchInput');
   if(!inp)return;
   var i=0;
   setInterval(function(){
     i=(i+1)%PH.length;
-    inp.placeholder=PH[i];
+    inp.placeholder='搜单词、搜句子，'+PH[i];
   },6000);
+})();
+// 导航更多下拉
+function toggleNavMore(){
+  var m=document.getElementById('navMore');
+  if(m)m.classList.toggle('show');
+}
+// 点击外部关闭下拉
+document.addEventListener('click',function(e){
+  var m=document.getElementById('navMore');
+  if(m&&m.classList.contains('show')&&!e.target.closest('.nav-dropdown')){
+    m.classList.remove('show');
+  }
+});
+// 团团链路增强：功能间交叉链接
+(function(){
+  var _prevEnhancePage='';
+  function enhanceLinks(){
+    var page=document.querySelector('.page.active');
+    if(!page||page.id===_prevEnhancePage)return;
+    _prevEnhancePage=page.id;
+    // 单词墙 → "➕今日复习"按钮
+    if(page.id==='p-vocab'){
+      setTimeout(function(){
+        document.querySelectorAll('#p-vocab .vwb').forEach(function(el){
+          if(el.querySelector('.al-link'))return;
+          // extract word info from the card
+          var title=el.querySelector('.vwb-title');
+          if(!title)return;
+          var wordText=title.textContent.trim();
+          var link=document.createElement('span');
+          link.className='al-link';
+          link.textContent='➕今日复习';
+          link.style.cssText='display:inline-block;font-size:10px;color:#4ecca3;cursor:pointer;margin-left:8px;padding:1px 8px;border:1px solid rgba(78,204,163,0.3);border-radius:6px;background:rgba(78,204,163,0.08)';
+          link.title='将此词加入今日复习队列';
+          link.onclick=function(e){
+            e.stopPropagation();
+            // find the word in VOCAB and add to lp/due
+            var w=VOCAB.find(function(v){return v.word===wordText||v.reading===wordText||(v.id&&v.id===wordText)});
+            if(w){
+              // mark as learned today via lp()
+              var p=lp();
+              if(!p[w.id])p[w.id]={id:w.id,count:0,nextDate:new Date().toISOString().split('T')[0]};
+              p[w.id].nextDate=new Date().toISOString().split('T')[0];
+              try{lp(p,1)}catch(e){}
+              link.textContent='✅已加入';
+              link.style.borderColor='rgba(78,204,163,0.6)';
+              link.style.color='#6ee7b7';
+              setTimeout(function(){link.textContent='✅已加'},2000);
+            }
+          };
+          title.parentNode.insertBefore(link,title.nextSibling);
+        });
+      },200);
+    }
+    // 语法页 → "去真题看看" 链接
+    if(page.id==='p-grammar'){
+      setTimeout(function(){
+        document.querySelectorAll('#p-grammar .vwb').forEach(function(el){
+          if(el.querySelector('.al-quiz-link'))return;
+          var title=el.querySelector('.vwb-title');
+          if(!title)return;
+          var gTitle=title.textContent.trim();
+          var link=document.createElement('span');
+          link.className='al-quiz-link';
+          link.textContent='📋 去真题';
+          link.style.cssText='display:inline-block;font-size:10px;color:#f5a623;cursor:pointer;margin-left:8px;padding:1px 8px;border:1px solid rgba(245,166,35,0.3);border-radius:6px;background:rgba(245,166,35,0.08)';
+          link.title='去真题看看这个语法点怎么考';
+          link.onclick=function(e){
+            e.stopPropagation();
+            go('quiz');
+          };
+          title.parentNode.insertBefore(link,title.nextSibling);
+        });
+      },200);
+    }
+  }
+  // 监听页面切换
+  var _origGo=window.go;
+  if(_origGo){
+    window.go=function(p){
+      _origGo(p);
+      setTimeout(enhanceLinks,100);
+    };
+  }
+  // 初始执行
+  setTimeout(enhanceLinks,500);
+  // 定时检测（兜底）
+  setInterval(enhanceLinks,2000);
 })();
 </script>
 </body>
