@@ -485,20 +485,8 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
 .ap-section:hover{ border-color:rgba(255,255,255,0.12); }
 #ap-cat-body, #ap-lvl-body{ display:flex; gap:6px; flex-wrap:wrap; }
 
-/* ── 首页扫描入口 ───────────── */
-.scan-entry {
-  display:flex; align-items:center; gap:14px;
-  background:linear-gradient(135deg,rgba(16,185,129,0.08),rgba(16,185,129,0.02));
-  border:1px solid rgba(16,185,129,0.2); border-radius:10px;
-  padding:14px 18px; margin-bottom:16px; cursor:pointer;
-  transition:opacity 0.3s,transform 0.3s,background 0.3s,border-color 0.3s; position:relative; overflow:hidden;
-}
-.scan-entry:hover { border-color:#10b981; transform:translateY(-1px); box-shadow:0 4px 20px rgba(16,185,129,0.15); }
-.scan-entry-icon { font-size:28px; flex-shrink:0; }
-.scan-entry-text { flex:1; min-width:0; }
-.scan-entry-title { font-size:15px; font-weight:700; color:#eaeaea; }
-.scan-entry-sub { font-size:11px; color:#6b7280; margin-top:2px; }
-.scan-entry-arrow { font-size:18px; color:#10b981; flex-shrink:0; opacity:0.6; }
+/* ── 首页扫描入口 ───────────── */.scan-entry{display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,rgba(16,185,129,0.08),rgba(16,185,129,0.02));border:1px solid rgba(16,185,129,0.2);border-radius:10px;padding:14px 18px;margin-bottom:16px;cursor:pointer;transition:opacity 0.3s,transform 0.3s,background 0.3s,border-color 0.3s;position:relative;overflow:hidden}
+/* ── 旧入口已移至功能区卡片，保留样式兼容 ─── */
 
 /* ── 扫描页面 ───────────────── */
 .scan-header { text-align:center; padding:20px 0 16px; }
@@ -598,57 +586,60 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
 <!-- 首页 -->
 <div class="main"><div class="page active" id="p-home">
   <div class="hero"></div>
-  <!-- AI 搜索栏 -->
-  <div class="search-bar-wrap">
+  <!-- 🔍 搜索框 C位：placeholder 随机轮播 -->
+  <div class="search-bar-wrap" style="margin-bottom:14px">
     <div class="search-bar">
       <span class="search-icon">🔍</span>
-      <input class="search-input" id="aiSearchInput" type="text" placeholder="搜索单词、语法... 试试「N3 天气语法」「難しい的例句」" maxlength="200" autocomplete="off">
+      <input class="search-input" id="aiSearchInput" type="text" placeholder="搜单词、搜句子、试试「美味しい」" maxlength="200" autocomplete="off">
       <span class="search-clear" id="searchClear">✕</span>
       <button class="search-btn" id="searchBtn">搜索</button>
     </div>
     <div class="search-results" id="searchResults"></div>
   </div>
-  <!-- 拍照栏 -->
-  <div class="scan-entry" onclick="go('scan')">
-    <div class="scan-entry-icon">📸</div>
-    <div class="scan-entry-text">
-      <div class="scan-entry-title">拍试卷 · 识图翻译</div>
-      <div class="scan-entry-sub">拍照上传日文试卷 → 自动识别 + 中文翻译</div>
+  <!-- 🎯 两大王牌入口 -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+    <div class="vwb" onclick="go('scan')" style="margin-bottom:0">
+      <div class="vwb-icon">📸</div>
+      <div class="vwb-title">拍照识图</div>
+      <div class="vwb-sub">拍下即查 · 自动识别翻译</div>
     </div>
-    <div class="scan-entry-arrow">→</div>
+    <div class="vwb" onclick="go('autoplay')" style="margin-bottom:0">
+      <div class="vwb-icon">📚</div>
+      <div class="vwb-title">自动背单词</div>
+      <div class="vwb-sub">考级分类 · 场景分类 · 自动播放</div>
+    </div>
   </div>
-  <!-- 统计：已学习 + 今日待复习 -->
-  <div class="stats">
+  <!-- 📊 学习概览紧凑条 -->
+  <div class="stats" style="margin-bottom:12px">
     <div class="sc"><div class="sn" id="s1">0</div><div class="sl">学习中</div></div>
-    <div class="sc"><div class="sn" id="s2">0</div><div class="sl">今日待复习</div></div>
+    <div class="sc" onclick="go('review')"><div class="sn" id="s2">0</div><div class="sl">今日待复习 →</div></div>
   </div>
-  <!-- 自动背单词 -->
-  <div class="h-entry h-entry-large h-entry-autoplay" onclick="go('autoplay')" style="margin-bottom:10px">
-    <div class="h-icon">📚</div>
-    <div class="h-title">自动背单词</div>
-    <div class="h-sub">考级分类 · 场景分类 · 自动播放</div>
-  </div>
-  <!-- 更多功能 -->
+  <!-- 🎮 更多功能网格 -->
   <div class="h-entries">
-    <div class="h-entry h-entry-large h-entry-game" onclick="go('game')">
+    <div class="h-entry h-entry-game" onclick="go('game')" style="grid-column:span 2">
       <div class="h-icon">🎮</div>
       <div class="h-title">单词闯关</div>
-      <div class="h-sub">爬塔答题 · 拳击对战 · 边玩边学</div>
+      <div class="h-sub">爬塔答题 · 拳击对战</div>
     </div>
-    <div class="h-entry h-entry-small h-entry-review" onclick="go('review')">
+    <div class="h-entry h-entry-review" onclick="go('review')" style="grid-column:span 2">
       <div class="h-icon">🔄</div>
       <div class="h-title">复习</div>
-      <div class="h-sub">遗忘曲线 · 按学习次数巩固</div>
+      <div class="h-sub">遗忘曲线 · 按次数巩固</div>
     </div>
-    <div class="h-entry h-entry-small h-entry-grammar" onclick="go('grammar')">
+    <div class="h-entry h-entry-grammar" onclick="go('grammar')" style="grid-column:span 2">
       <div class="h-icon">📝</div>
       <div class="h-title">背语法</div>
-      <div class="h-sub">N3 / N2 常考句型 · 精讲例句</div>
+      <div class="h-sub">N3 / N2 常考句型</div>
     </div>
-    <div class="h-entry h-entry-small h-entry-vocab" onclick="go('vocab')">
+    <div class="h-entry h-entry-vocab" onclick="go('vocab')" style="grid-column:span 3">
       <div class="h-icon">📖</div>
       <div class="h-title">单词墙</div>
       <div class="h-sub">N5 → N1 全部词汇 · 浏览筛选</div>
+    </div>
+    <div class="h-entry h-entry-autoplay" onclick="go('quiz')" style="grid-column:span 3">
+      <div class="h-icon">📋</div>
+      <div class="h-title">真题模拟训练</div>
+      <div class="h-sub">历年真题 · 高频考点</div>
     </div>
   </div>
   <!-- 继续学习 -->
@@ -1107,31 +1098,10 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
 <script src="quiz_data_high.js?v=3"></script>
 <script src="quiz_data_real.js?v=3"></script>
 <script src="quiz_data_normal.js?v=3"></script>
-<script src="inline.js?v=59"></script>
+<script src="inline.js?v=73"></script>
 <script src="game/tower-climb.js?v=1778430785734"></script>
-<script>
-// 诊断：检查 tower-climb 版本
-(function(){
-  var pg = document.getElementById('p-game');
-  if (pg) {
-    var dbg = document.createElement('div');
-    dbg.style.cssText = 'position:fixed;left:0;bottom:0;font-size:10px;color:#fff;background:#e94560;padding:3px 10px;z-index:99999;border-radius:0 6px 0 0';
-    dbg.textContent = 'tower: ' + (typeof Game !== 'undefined' ? 'OK ' + (Game.init ? 'hasInit' : 'noInit') : 'MISSING');
-    document.body.appendChild(dbg);
-  }
-  // 检查 init() 里的 gm-section 个数
-  if (pg) {
-    setTimeout(function() {
-      var sections = pg.querySelectorAll('.gm-section');
-      console.log('gm-sections found:', sections.length);
-      var dbg2 = document.createElement('div');
-      dbg2.style.cssText = 'position:fixed;right:0;bottom:0;font-size:10px;color:#fff;background:' + (sections.length >= 4 ? '#22c55e' : '#e94560') + ';padding:3px 10px;z-index:99999;border-radius:6px 0 0 0';
-      dbg2.textContent = 'gm-sections: ' + sections.length;
-      document.body.appendChild(dbg2);
-    }, 500);
-  }
-})();
-</script>
+
+
 
 <!-- 版权水印 -->
 <div id="wm-watermark" style="position:fixed;left:0;bottom:10px;font-size:10px;color:rgba(168,85,247,0.3);pointer-events:none;z-index:9999;user-select:none;background:rgba(10,10,26,0.9);padding:4px 8px;border-radius:6px;font-family:'Microsoft YaHei',sans-serif;">
@@ -1152,5 +1122,39 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
 </script>
 
 <script src="game/boxing.js?v=1778430787050"></script>
+<script>
+// 搜索框 placeholder 随机轮播
+(function(){
+  var PH=[
+    '搜单词、搜句子，试试「美味しい」',
+    '试试「N3 天气语法」',
+    '试试「難しい的例句」',
+    '试试「大丈夫 文法」',
+    '试试「雨が降る」',
+    '试试「ください 敬語」',
+    '试试「て形 用法」',
+    '试试「JLPT N2 読解」',
+    '试试「ありがとう 丁寧」',
+    '试试「かわいい 例文」',
+    '试试「食べる 可能形」',
+    '试试「行く て形」',
+    '试试「勉強 名詞」',
+    '试试「お願いします」',
+    '试试「げんき 漢字」',
+    '试试「さようなら 語源」',
+    '试试「猫 訓読み」',
+    '试试「先生 敬称」',
+    '试试「いい天気 会話」',
+    '试试「日本語 勉強法」'
+  ];
+  var inp=document.getElementById('aiSearchInput');
+  if(!inp)return;
+  var i=0;
+  setInterval(function(){
+    i=(i+1)%PH.length;
+    inp.placeholder=PH[i];
+  },6000);
+})();
+</script>
 </body>
 </html>
