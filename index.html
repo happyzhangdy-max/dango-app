@@ -266,7 +266,8 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
 /* 汉字切换：三级模式（不影响定位的元素） */
 .vh1 .vm { display:none; }
 .vh2 .vw { visibility:hidden; }
-.vh2 .vr { font-size:22px; font-weight:700; color:#fff; }
+.vh2 .vr { font-size:22px; font-weight:700; color:#fff; margin-bottom:6px; padding:4px 0; }
+.vh2 .vm { display:none; }
 .ol { position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:200; opacity:0; pointer-events:none; transition:opacity 0.3s; display:none; }
 .ol.open { opacity:1; pointer-events:all; display:block; }
 .dw { position:fixed; right:-460px; top:0; bottom:0; width:440px; max-width:96vw; background:#13132a; border-left:1px solid rgba(255,255,255,0.08); z-index:201; transition:right 0.35s cubic-bezier(0.4,0,0.2,1); overflow-y:auto; display:flex; flex-direction:column; overscroll-behavior:none; }
