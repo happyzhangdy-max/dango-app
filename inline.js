@@ -1054,7 +1054,16 @@ function doAISearch(q,localResults){
       '日文：'+q;
   }
   
-  callAI(_searchConfig.apiUrl,_searchConfig.model,[{role:'user',content:prompt}],512,_searchConfig.apiKey).then(function(txt){
+  // AI 搜索缓存
+  var cacheKey = 'ai_srch_'+q.toLowerCase().trim();
+  var cacheData = JSON.parse(localStorage.getItem('_search_cache')||'{}');
+  var cached = cacheData[cacheKey];
+  if(cached && Date.now() - cached.ts < 1800000){ // 30 min TTL
+    el.innerHTML=cached.html + el.innerHTML;
+    return;
+  }
+  
+  callAI(_searchConfig.apiUrl,_searchConfig.model,[{role:'user',content:prompt}],256,_searchConfig.apiKey).then(function(txt){
     // 解析 AI 返回的字段
     var cn='',src='',kanji='',note='';
     
@@ -1104,6 +1113,8 @@ function doAISearch(q,localResults){
       }else{
         el.innerHTML=aiHtml+el.innerHTML;
       }
+      // 缓存 AI 结果
+      try{var _c=JSON.parse(localStorage.getItem('_search_cache')||'{}');_c[cacheKey]={html:aiHtml,ts:Date.now()};localStorage.setItem('_search_cache',JSON.stringify(_c))}catch(e){}
       
       // 自动加入生词本
       if (!alreadyInBook && !VOCAB.some(function(x){ return x.word===jpText; })) {
@@ -1152,6 +1163,8 @@ function doAISearch(q,localResults){
       }else{
         el.innerHTML=aiHtml+el.innerHTML;
       }
+      // 缓存 AI 结果
+      try{var _c=JSON.parse(localStorage.getItem('_search_cache')||'{}');_c[cacheKey]={html:aiHtml,ts:Date.now()};localStorage.setItem('_search_cache',JSON.stringify(_c))}catch(e){}
       
       // 不自动加生词本，用户可手动点收藏按钮
     }
@@ -1162,7 +1175,21 @@ function doAISearch(q,localResults){
 
 function showSearchLoading(){
   var el=document.getElementById('searchResults');
-  el.innerHTML='<div class="search-tip-text" style="color:#888;padding:12px 0;font-size:14px">🐴 AI全力拉磨中<span class="dot-anim"><span>.</span><span>.</span><span>.</span></span></div>';
+  el.innerHTML='<div class="search-ai-loading">'
+    +'<div class="search-spinner"></div>'
+    +'<div class="skeleton-title">🤖 AI 搜索中</div>'
+    +'<div class="skeleton-card">'
+    +'<div class="skeleton-line skeleton-word"></div>'
+    +'<div class="skeleton-line skeleton-reading"></div>'
+    +'<div class="skeleton-line skeleton-meaning"></div>'
+    +'<div class="skeleton-line skeleton-note"></div>'
+    +'</div>'
+    +'<div class="skeleton-card">'
+    +'<div class="skeleton-line skeleton-word" style="width:45%"></div>'
+    +'<div class="skeleton-line skeleton-reading" style="width:25%"></div>'
+    +'<div class="skeleton-line skeleton-meaning" style="width:65%"></div>'
+    +'</div>'
+    +'</div>';
   el.classList.add('visible');
 }
 

@@ -140,13 +140,44 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
 .search-result-ai-row .search-result-word { color:#a78bfa; }
 .search-empty { text-align:center; color:#555; padding:20px 0; font-size:13px; }
 .search-tip-text { text-align:center; color:#444; padding:6px 0; font-size:11px; }
-/* AI 拉磨动效 */
-.dot-anim { display:inline-flex; margin-left:2px; }
-.dot-anim span { opacity:0; animation:dotFade 1.4s infinite; font-size:14px; }
-.dot-anim span:nth-child(1) { animation-delay:0s; }
-.dot-anim span:nth-child(2) { animation-delay:0.2s; }
-.dot-anim span:nth-child(3) { animation-delay:0.4s; }
-@keyframes dotFade { 0%,60%,100% { opacity:0; } 30% { opacity:1; } }
+/* AI 搜索加载动画 */
+.search-ai-loading {
+  padding: 24px 12px; text-align: center;
+}
+.search-spinner {
+  width: 32px; height: 32px;
+  border: 3px solid rgba(168,85,247,0.12);
+  border-top-color: #a855f7;
+  border-radius: 50%;
+  animation: searchSpin 0.7s linear infinite;
+  margin: 0 auto 10px;
+}
+@keyframes searchSpin { to { transform: rotate(360deg); } }
+.search-ai-loading .skeleton-title {
+  font-size: 12px; color: #888; margin-bottom: 14px;
+}
+.skeleton-card {
+  background: rgba(255,255,255,0.03);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  border: 1px solid rgba(255,255,255,0.06);
+  text-align: left;
+}
+.skeleton-line {
+  height: 13px; border-radius: 4px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.04) 75%);
+  background-size: 200% 100%;
+  animation: searchShimmer 1.4s ease-in-out infinite;
+  margin-bottom: 7px;
+}
+.skeleton-line:last-child { margin-bottom: 0; }
+.skeleton-word { width: 55%; height: 20px; }
+.skeleton-reading { width: 30%; }
+.skeleton-meaning { width: 70%; }
+.skeleton-note { width: 45%; }
+@keyframes searchShimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+.search-memo-text { font-size:11px; color:#555; margin-top:8px; }
 .search-ai-badge { font-size:10px; background:rgba(168,85,247,0.12); color:#a78bfa; padding:2px 8px; border-radius:99px; font-weight:500; white-space:nowrap; }
 
 @media(max-width:768px) {
