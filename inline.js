@@ -542,8 +542,8 @@ function apShowCard(){if(_apStop||_apIdx>=_apQueue.length){apDone();return}if(_a
 function apTogglePause(){_apPaused=!_apPaused;var btn=document.querySelector('.ap-controls .btn:first-child');if(btn)btn.textContent=_apPaused?'▶ 继续':'⏸ 暂停';if(!_apPaused&&_apTimer===null)_apTimer=setTimeout(apShowCard,200)}
 function apStop(){_apStop=true;clearTimeout(_apTimer);_apTimer=null;unbindDrag();document.getElementById('apScreen').classList.remove('show');go('vocab')}
 function apDone(){clearTimeout(_apTimer);_apTimer=null;unbindDrag();document.getElementById('apScreen').classList.remove('show');showT('🎉 自动播放完成！共 '+_apQueue.length+' 个词');go('vocab')}
-function apPrev(){if(!_apQueue||_apQueue.length===0)return;clearSpeechQueue();clearTimeout(_apTimer);_apTimer=null;var cur=_apIdx-(_apPaused?0:1);if(cur<=0)return;_apIdx=cur-1;_apPaused=false;apShowCard()}
-function apNext(){if(!_apQueue||_apQueue.length===0)return;clearSpeechQueue();clearTimeout(_apTimer);_apTimer=null;var cur=_apIdx-(_apPaused?0:1);if(cur>=_apQueue.length-1)return;_apIdx=cur+1;_apPaused=false;apShowCard()}
+function apPrev(){if(!_apQueue||_apQueue.length===0)return;clearSpeechQueue();clearTimeout(_apTimer);_apTimer=null;if(_apIdx<=0)return;_apIdx--;_apPaused=false;apShowCard()}
+function apNext(){if(!_apQueue||_apQueue.length===0)return;clearSpeechQueue();clearTimeout(_apTimer);_apTimer=null;if(_apIdx>=_apQueue.length-1)return;_apIdx++;_apPaused=false;apShowCard()}
 
 // ── 学习计划系统 ───────────
 const PLAN_KEY='jp_plans';
@@ -951,29 +951,27 @@ function vApStop(){
 
 function vApPrev(){
   clearSpeechQueue();clearTimeout(_vApTimer);_vApTimer=null;
-  var cur=_vApIdx-(_vApPaused?0:1);
-  if(cur<=0)return;
-  _vApIdx=cur-1;_vApPaused=false;
+  if(_vApIdx<=0)return;
+  _vApIdx--;_vApPaused=false;
   vApShowCard();
 }
 
 function vApNext(){
   clearSpeechQueue();clearTimeout(_vApTimer);_vApTimer=null;
-  var cur=_vApIdx-(_vApPaused?0:1);
-  if(cur>=_vApQueue.length-1)return;
-  _vApIdx=cur+1;_vApPaused=false;
+  if(_vApIdx>=_vApQueue.length-1)return;
+  _vApIdx++;_vApPaused=false;
   vApShowCard();
 }
 
 function vApToggleBook(){
-  var w=_vApQueue[_vApIdx-(_vApPaused?0:1)];
+  var w=_vApQueue[_vApIdx];
   if(!w)return;
   toggleBook({type:'vocab',id:w.id});
   vApSyncMarks(w);
 }
 
 function vApToggleMark(c){
-  var w=_vApQueue[_vApIdx-(_vApPaused?0:1)];
+  var w=_vApQueue[_vApIdx];
   if(!w)return;
   var mk=JSON.parse(localStorage.getItem('mk')||'{}');
   mk[w.id]=mk[w.id]===c?null:c;
