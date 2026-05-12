@@ -1047,6 +1047,11 @@ function doAISearch(q,localResults){
   var isChinese = /[\u4e00-\u9fff]/.test(q) && !/[\u3040-\u309f\u30a0-\u30ff]/.test(q);
   var aiId = '_ai_'+Date.now();
   
+  // 判断是否为句子（长文本或包含助词/动词变形）
+  var isSentence = q.length > 8 || /[がをにへでとよりからまではも]$|て$|た$|ます|ない$|れる|られる|しよう|ましょう/.test(q);
+  // 句子用更多 token
+  var maxTk = isSentence ? 512 : 256;
+  
   // 根据语言选择不同的 prompt
   var prompt;
   if (isChinese) {
@@ -1064,13 +1069,21 @@ function doAISearch(q,localResults){
       '中文翻译：\n'+
       '外来语原词：\n'+
       '日文汉字：\n'+
+      (isSentence ? '单词解析：\n每个单词的【读音】+【中文释义】\n'+
+      '语法点：\n' : '')+
       '说明：\n\n'+
       '规则：\n'+
-      '- 如果是片假名词汇 → 外来语原词写出对应的外语原词（如 switch on）\n'+
-      '- 如果是平假名词汇有对应的日文汉字 → 日文汉字写出汉字形式（如 おいしい→美味しい）\n'+
-      '- 中文翻译写简洁的中文释义\n'+
-      '- 说明写简单备注（如语境、常用搭配），没有就不写\n\n'+
-      '日文：'+q;
+      '- 外来语原词：如果是片假名词汇→写出外语原词（如 switch on）；否则写「无」\n'+
+      (isSentence ?
+      '- 中文翻译：写完整流畅的中文翻译\n'+
+      '- 单词解析：按顺序分解每个单词，每行一个词，格式「词/读音/中文释义」\n'+
+      '- 语法点：标注句中关键语法结构（如 うちに、ている、なければならない）并简要说明含义\n'+
+      '- 说明：写语境、使用场景或注意点\n'
+      :
+      '- 日文汉字：平假名词汇有对应的日文汉字时写出汉字形式（如 おいしい→美味しい）\n'+
+      '- 中文翻译：写简洁的中文释义\n'+
+      '- 说明：写简单备注（如语境、常用搭配），没有就不写\n')+
+      '\n日文：'+q;
   }
   
   // AI 搜索缓存
@@ -1123,6 +1136,8 @@ function doAISearch(q,localResults){
         '<div class="search-result-tags">'+
         (note ? '<span class="search-result-tag">💡 '+escHtml(note)+'</span>' : '')+
         '</div>'+
+        (breakdown ? '<div class="search-result-breakdown" style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.06);font-size:12px;line-height:1.6"><div style="color:#a78bfa;font-weight:600;margin-bottom:4px">📝 单词解析</div><div style="color:#cbd5e1;white-space:pre-wrap">'+escHtml(breakdown)+'</div></div>' : '')+
+        (grammar ? '<div class="search-result-grammar" style="margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.06);font-size:12px;line-height:1.6"><div style="color:#4ecca3;font-weight:600;margin-bottom:4px">🔧 语法点</div><div style="color:#cbd5e1;white-space:pre-wrap">'+escHtml(grammar)+'</div></div>' : '')+
         '</div>'+
         '<div class="search-result-actions" style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;align-items:center">'+
         '<button onclick="event.stopPropagation();speak(\''+escHtml(jpText)+'\')" style="background:none;border:none;cursor:pointer;font-size:18px;padding:4px;color:#888" title="发音">🔊</button>'+
@@ -1145,12 +1160,24 @@ function doAISearch(q,localResults){
       }
     } else {
       // 日文→中文模式（原逻辑）
+      var breakdown='',grammar='';
       txt.split('\n').forEach(function(line){
         var m=line.match(/^中文翻译[：:]?\s*(.*)/);if(m)cn=m[1];
         m=line.match(/^外来语原词[：:]?\s*(.*)/);if(m)src=m[1];
         m=line.match(/^日文汉字[：:]?\s*(.*)/);if(m)kanji=m[1];
         m=line.match(/^说明[：:]?\s*(.*)/);if(m)note=m[1];
+        m=line.match(/^单词解析[：:]?\s*(.*)/);if(m)breakdown=m[1];
+        m=line.match(/^语法点[：:]?\s*(.*)/);if(m)grammar=m[1];
       });
+      // 如果解析字段中含有换行后的多行内容，收集后续行直到遇到下一个字段
+      // 用更简单的方式：直接从txt提取单词解析和语法点节
+      if(!breakdown||breakdown==='无'||breakdown==='なし')breakdown='';
+      if(!grammar||grammar==='无'||grammar==='なし')grammar='';
+      // 如果字段内容跨多行，从原始txt中提取完整段
+      var breakdownMatch = txt.match(/单词解析[：:]\s*([\s\S]*?)(?=\n(语法点|说明|$))/);
+      if(breakdownMatch)breakdown=breakdownMatch[1].trim();
+      var grammarMatch = txt.match(/语法点[：:]\s*([\s\S]*?)(?=\n(说明|$))/);
+      if(grammarMatch)grammar=grammarMatch[1].trim();
       if(!cn&&txt.trim())cn=txt.trim();
       if(src==='无'||src==='なし')src='';
       if(kanji==='无'||kanji==='なし')kanji='';
@@ -1174,6 +1201,8 @@ function doAISearch(q,localResults){
         (src ? '<span class="search-result-tag">语源：'+escHtml(src)+'</span>' : '')+
         (note ? '<span class="search-result-tag">💡 '+escHtml(note)+'</span>' : '')+
         '</div>'+
+        (breakdown ? '<div class="search-result-breakdown" style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.06);font-size:12px;line-height:1.6"><div style="color:#a78bfa;font-weight:600;margin-bottom:4px">📝 单词解析</div><div style="color:#cbd5e1;white-space:pre-wrap">'+escHtml(breakdown)+'</div></div>' : '')+
+        (grammar ? '<div class="search-result-grammar" style="margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.06);font-size:12px;line-height:1.6"><div style="color:#4ecca3;font-weight:600;margin-bottom:4px">🔧 语法点</div><div style="color:#cbd5e1;white-space:pre-wrap">'+escHtml(grammar)+'</div></div>' : '')+
         '</div>'+
         '<div class="search-result-actions" style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;align-items:center">'+
         '<button onclick="event.stopPropagation();speak(\''+escHtml(q)+'\')" style="background:none;border:none;cursor:pointer;font-size:18px;padding:4px;color:#888" title="发音">🔊</button>'+
