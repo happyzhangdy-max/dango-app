@@ -703,7 +703,7 @@ function renderAutoPlayOptions(){
     +'<span id="ap-cat-arrow" onclick="_apToggle(document.getElementById(\'ap-cat-section\'),\'ap-cat-body\')" style="color:#64748b;font-size:14px;cursor:pointer;transition:transform 0.2s">▼</span></span>'
     +'</div>'
     +'<div id="ap-cat-body" style="margin-top:12px;display:flex;flex-wrap:wrap;gap:6px;'+(catOn?'':'opacity:0.35;pointer-events:none')+'">'
-    +ALL_CATEGORIES.map(function(cat){var a=selCats.length===0||selCats.indexOf(cat)>=0;return '<span class="ap-tag'+(a?' ap-tag-on':'')+'" data-cat="'+cat.replace(/'/g,'\\\'')+'" onclick="_apToggleCat(this)" style="display:inline-block;padding:5px 12px;border-radius:16px;font-size:11px;cursor:pointer;transition:all 0.2s;'+(a?'background:linear-gradient(135deg,#a855f7,#7c3aed);color:#fff':'background:rgba(255,255,255,0.06);color:#64748b')+'">'+cat+'</span>'}).join('')
+    +ALL_CATEGORIES.map(function(cat){var a=selCats.indexOf(cat)>=0;return '<span class="ap-tag'+(a?' ap-tag-on':'')+'" data-cat="'+cat.replace(/'/g,'\\\'')+'" onclick="_apToggleCat(this)" style="display:inline-block;padding:5px 12px;border-radius:16px;font-size:11px;cursor:pointer;transition:all 0.2s;'+(a?'background:linear-gradient(135deg,#a855f7,#7c3aed);color:#fff':'background:rgba(255,255,255,0.06);color:#64748b')+'">'+cat+'</span>'}).join('')
     +'</div>'
     +'</div>'
     // 形式
