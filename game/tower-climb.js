@@ -1433,6 +1433,19 @@ function _gmHandleClick(e) {
   
   if (action === 'start-climb') { Game.start(); return; }
   if (action === 'start-boxing') { window.GameBoxing.start(); return; }
+  
+  if (action === 'quick-start') {
+    var s2 = _gmLoadSettings();
+    s2.selLvls = ['N3'];
+    s2.selCats = [];
+    s2.lvlOn = true;
+    s2.catOn = true;
+    s2.quizType = 'word';
+    s2.displayMode = 0;
+    _gmSaveSettings();
+    Game.start();
+    return;
+  }
 }
 
 function init() {
@@ -1465,6 +1478,7 @@ function init() {
   // style
   html += '<style>';
   html += '  @keyframes gmFadeIn { from { opacity:0; transform:translateY(12px) } to { opacity:1; transform:translateY(0) } }';
+  html += '  @keyframes gmPulse { 0%,100%{box-shadow:0 0 0 0 rgba(168,85,247,0.4)} 50%{box-shadow:0 0 0 12px rgba(168,85,247,0)} }';
   html += '  .gm-title { font-size:22px; font-weight:800; letter-spacing:2px; margin-bottom:4px; }';
   html += '  .gm-sub { font-size:12px; color:#64748b; margin-bottom:16px; }';
   html += '  .gm-card { background:linear-gradient(135deg,#1a1a3e,#0f3460); border-radius:16px; padding:24px 16px; cursor:pointer; text-align:center; transition:all 0.3s; position:relative; overflow:hidden; border:1px solid rgba(255,255,255,0.06); }';
@@ -1476,6 +1490,9 @@ function init() {
   html += '  .gm-card-climb .gm-card-title { background:linear-gradient(135deg,#a855f7,#ec4899); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }';
   html += '  .gm-card-boxing { border-color:rgba(239,68,68,0.3); }';
   html += '  .gm-card-boxing .gm-card-title { background:linear-gradient(135deg,#ef4444,#fbbf24); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }';
+  html += '  .gm-quickstart { display:flex; align-items:center; justify-content:center; gap:10px; width:100%; max-width:340px; padding:14px 20px; border:none; border-radius:14px; background:linear-gradient(135deg,#a855f7,#7c3aed); color:#fff; font-size:16px; font-weight:700; cursor:pointer; margin-bottom:14px; animation:gmPulse 2s infinite; transition:transform 0.15s,box-shadow 0.15s; }';
+  html += '  .gm-quickstart:hover { transform:translateY(-2px); box-shadow:0 6px 25px rgba(168,85,247,0.35); }';
+  html += '  .gm-quickstart:active { transform:translateY(0); }';
   html += '  .gm-section { padding:12px 14px; background:rgba(255,255,255,0.03); border-radius:12px; margin-bottom:10px; border:1px solid rgba(255,255,255,0.06); }';
   html += '  .gm-checkbox { font-size:16px; cursor:pointer; user-select:none; }';
   html += '  .gm-checked { color:#e94560; }';
@@ -1488,6 +1505,7 @@ function init() {
   html += '  <div style="font-size:34px;margin-bottom:4px">🎮</div>';
   html += '  <div class="gm-title" style="background:linear-gradient(135deg,#e94560,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent">游戏模式</div>';
   html += '  <div class="gm-sub">先选单词范围和方式，再选游戏开始</div>';
+  html += '  <button class="gm-quickstart" data-gm="quick-start">⚡ 快速开始 ｜ N3 · 爬塔闯关 · 默认配置</button>';
   
   // ---- 单词选择区 ----
   html += '  <div style="width:100%;max-width:340px;text-align:left;animation:gmFadeIn 0.3s ease-out both">';
