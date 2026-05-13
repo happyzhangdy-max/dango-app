@@ -1304,11 +1304,11 @@ html { overflow:hidden; }
 
 </div>
 
-  <!-- �?节奏五：学习计划展示�?-->
+  <!-- ◉ 节奏五：学习计划展示区 -->
   <div id="continueSection" style="display:none">
-    <div class="dst" style="margin-top:16px">�?继续学习</div>
+    <div class="dst" style="margin-top:16px">📖 继续学习</div>
     <div id="continueInfo" style="font-size:12px;color:#888;margin-bottom:10px"></div>
-    <button class="btn bs" onclick="resumeLastSession()" style="width:100%;padding:10px;font-size:14px">�?继续学习</button>
+    <button class="btn bs" onclick="resumeLastSession()" style="width:100%;padding:10px;font-size:14px">📖 继续学习</button>
   </div>
   <div class="dst" style="margin-top:16px">📋 我的学习计划</div>
   <div id="planList"></div>
@@ -1850,7 +1850,7 @@ html { overflow:hidden; }
       title.parentNode.insertBefore(link,title.nextSibling);
     });
   }
-  // MutationObserver（替代轮询，更高���）
+  // MutationObserver（替代轮询，更高（替代轮询）
   var obs=new MutationObserver(function(){
     var page=document.querySelector('.page.active');
     if(!page)return;
