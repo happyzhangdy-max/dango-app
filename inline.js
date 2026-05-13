@@ -34,7 +34,7 @@ function go(p){closeD();closePlanModal();
   if(tt){tt.textContent=titleMap[p]||'';tt.classList.toggle('show',!!titleMap[p])}
   var tb=document.getElementById('topbarBack');
   if(tb)tb.classList.toggle('show',!!titleMap[p]);
-  closeSubmenu();if(p==='home'){upH();upP();var _ds=document.querySelector('.plan-entry-card');if(_ds)_ds.style.display='';}else{var _ds=document.querySelector('.plan-entry-card');if(_ds)_ds.style.display='none';}if(p==='vocab'){renderV();showPlanFilterBanner();clearTimeout(_vocabTrackingTimer);_vocabTrackingTimer=setTimeout(function(){initVocabTracking()},50)}if(p==='grammar')renderG();if(p==='quiz'){document.getElementById('quizStart').style.display='block';document.getElementById('quizArea').style.display='none';document.getElementById('quizResult').style.display='none'};if(p==='review')renderR();if(p==='book')renderBook();if(p==='wrong')renderWrong();if(p==='autoplay')renderAutoPlayOptions();if(p==='scan'){loadScanHistory()}if(p==='studyplan'){renderStudyPlan()}}
+  closeSubmenu();if(p==='home'){upH();upP();}if(p==='vocab'){renderV();showPlanFilterBanner();clearTimeout(_vocabTrackingTimer);_vocabTrackingTimer=setTimeout(function(){initVocabTracking()},50)}if(p==='grammar')renderG();if(p==='quiz'){document.getElementById('quizStart').style.display='block';document.getElementById('quizArea').style.display='none';document.getElementById('quizResult').style.display='none'};if(p==='review')renderR();if(p==='book')renderBook();if(p==='wrong')renderWrong();if(p==='autoplay')renderAutoPlayOptions();if(p==='scan'){loadScanHistory()}if(p==='studyplan'){renderStudyPlan()}injectPlanStrip(p);}
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function startQuiz(){quizIdx=0;quizRight=0;window._lastPassage='';var src=(typeof QUIZ_DATA_HIGH!=='undefined'?QUIZ_DATA_HIGH:[]).concat(typeof QUIZ_DATA_NORMAL!=='undefined'?QUIZ_DATA_NORMAL:[]);quizData=shuffle([...src]).slice(0,Math.min(10,src.length));document.getElementById('quizStart').style.display='none';document.getElementById('quizResult').style.display='none';document.getElementById('quizArea').style.display='block';showQuiz()}
 function showQuiz(){const q=quizData[quizIdx];document.getElementById('quizProg').textContent=(quizIdx+1)+'/'+quizData.length;document.getElementById('quizBar').style.width=((quizIdx)/quizData.length*100)+'%';const pEl=document.getElementById('quizPassage');if(q.passage&&q.passage!==window._lastPassage){pEl.innerHTML='<div style="background:#1a2a4a;border-left:3px solid #f5a623;border-radius:0 10px 10px 0;padding:10px 14px;margin-bottom:12px;font-size:12px;line-height:1.9;white-space:pre-wrap;color:#c8d6e5;max-height:300px;overflow-y:auto"><b style="color:#f5a623;font-size:10px;display:block;margin-bottom:4px">📖 阅读原文</b>'+q.passage.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>')+'</div>';pEl.style.display='block';window._lastPassage=q.passage}else{pEl.style.display='none'};document.getElementById('quizQ').innerHTML='<div style="display:flex;align-items:flex-start;gap:8px">'+q.question+'<button onclick="speakQuizQ()" style="flex-shrink:0;background:none;border:none;font-size:18px;cursor:pointer;opacity:0.7;padding:2px" title="读题">🔊</button></div>';const optDiv=document.getElementById('quizOpts');optDiv.innerHTML='';q.options.forEach((o,i)=>{const b=document.createElement('button');b.className='btn bs';b.style.textAlign='left';b.style.fontSize='13px';b.style.padding='10px 14px';var hasJa=/[\u3040-\u309F\u30A0-\u30FF\uFF00-\uFFEF\u4E00-\u9FAF]/.test(o);b.innerHTML='<span style="flex:1">'+(i+1)+'. '+o+'</span>'+(hasJa?'<span onclick="event.stopPropagation();speakQuizOpt('+i+')" style="flex-shrink:0;cursor:pointer;opacity:0.7;margin-left:8px;font-size:15px" title="朗读选项">🔊</span>':'');b.style.display='flex';b.style.alignItems='center';b.onclick=()=>answerQuiz(i);optDiv.appendChild(b)});document.getElementById('quizFeedback').style.display='none';document.getElementById('quizNextBtn').style.display='none'}
@@ -376,6 +376,24 @@ function clearBook(){
     renderBook();
     showT('收藏已清空');
 }
+function startBookAutoPlay(){
+  var book=getBook();
+  if(!book.length){showT('生词本为空');return;}
+  clearTimeout(_apTimer);_apTimer=null;
+  clearTimeout(_vApTimer);_vApTimer=null;
+  var ids=book.map(function(i){return i.id}).filter(function(id){return VOCAB.find(function(v){return v.id===id})});
+  if(!ids.length){showT('生词本中的词不在词库中');return;}
+  var _idx=0;
+  showT('▶ 开始自动播放 · 共 '+ids.length+' 词');
+  function next(){
+    if(_idx>=ids.length){showT('✅ 生词本播放完毕');return;}
+    var v=VOCAB.find(function(x){return x.id===ids[_idx]});
+    if(v)openD(v);
+    _idx++;
+    _apTimer=setTimeout(next,3000);
+  }
+  next();
+}
 
 // ── 错题本──────────
 const WRONG_KEY = 'jp_wrong';
@@ -623,6 +641,31 @@ function upP(){
   var levels=active.map(function(p){return p.levels.map(function(l){return l.toUpperCase()}).join('+')}).join(' · ');
   prog.innerHTML='<div class="pep-bar"><div class="pep-fill" style="width:'+pct+'%"></div></div>'
     +'<div class="pep-info"><span>'+levels+'</span><span>'+Math.round(pct)+'%</span></div>';
+}
+// ── 学习计划常驻窄条（非首页页面顶部） ──
+function injectPlanStrip(p){
+  // 移除所有页面上旧 strip
+  document.querySelectorAll('.ps-inline').forEach(function(el){el.remove()});
+  if(p==='home'||p==='studyplan'||p==='settings')return;
+  var page=document.getElementById('p-'+p);
+  if(!page||page.classList.contains('ps-has-strip'))return;
+  var plans=getPlans();
+  var active=plans.filter(function(pl){return!pl.finished});
+  var strip=document.createElement('div');
+  strip.className='ps-inline';
+  strip.onclick=function(){go('studyplan')};
+  if(active.length===0){
+    strip.innerHTML='<span class="psi-icon">📋</span><span class="psi-title">我的学习计划</span><span class="psi-sub">点击创建</span><span class="psi-arrow">→</span>';
+  }else{
+    var totalWords=0,totalLearned=0;
+    active.forEach(function(pl){if(pl.wordOrder){totalWords+=pl.wordOrder.length;totalLearned+=pl.learnedIndex||0}});
+    var pct=totalWords>0?Math.min(100,totalLearned/totalWords*100):0;
+    strip.innerHTML='<span class="psi-icon">📋</span><span class="psi-title">我的学习计划</span>'
+      +'<div class="psi-bar"><div class="psi-fill" style="width:'+pct+'%"></div></div>'
+      +'<span class="psi-pct">'+Math.round(pct)+'%</span><span class="psi-arrow">→</span>';
+  }
+  page.insertBefore(strip,page.firstChild);
+  page.classList.add('ps-has-strip');
 }
 function showPlanModal(){document.getElementById('planModal').classList.add('open');document.getElementById('planModal').querySelector('.dw').classList.add('open');planCalcEstimate()}
 function closePlanModal(){document.getElementById('planModal').classList.remove('open');document.getElementById('planModal').querySelector('.dw').classList.remove('open')}

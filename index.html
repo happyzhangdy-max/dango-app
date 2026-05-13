@@ -295,6 +295,32 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 .plan-entry-arrow { font-size:20px; color:var(--text-quaternary); flex-shrink:0; margin-top:2px; transition:transform 0.3s ease; }
 .plan-entry-card:hover .plan-entry-arrow { transform:translateX(5px); }
 
+/* ── 学习计划常驻窄条（非首页页面顶部）── */
+.ps-inline {
+  display:flex; align-items:center; gap:8px;
+  padding:9px 16px; margin-bottom:10px;
+  background:rgba(168,85,247,0.05);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  border:1px solid rgba(168,85,247,0.10);
+  border-radius:10px;
+  cursor:pointer;
+  transition:all 0.2s;
+}
+.ps-inline:hover {
+  background:rgba(168,85,247,0.10);
+  border-color:rgba(168,85,247,0.25);
+}
+.ps-inline:active { transform:scale(0.98); }
+.psi-icon { font-size:18px; flex-shrink:0; line-height:1; }
+.psi-title { font-size:13px; font-weight:700; color:var(--text-primary); white-space:nowrap; flex-shrink:0; }
+.psi-sub { font-size:11px; color:var(--text-tertiary); flex:1; }
+.psi-bar { flex:1; height:4px; background:rgba(255,255,255,0.08); border-radius:2px; overflow:hidden; }
+.psi-fill { height:100%; background:linear-gradient(90deg,var(--purple),var(--amber)); border-radius:2px; transition:width 0.4s; }
+.psi-pct { font-size:10px; font-weight:600; color:var(--text-tertiary); white-space:nowrap; min-width:30px; text-align:right; }
+.psi-arrow { font-size:14px; color:var(--text-quaternary); flex-shrink:0; transition:transform 0.2s; }
+.ps-inline:hover .psi-arrow { transform:translateX(3px); }
+
 /* 设置页卡片 */
 .settings-card {
   display:flex; align-items:center; gap:14px;
@@ -323,7 +349,7 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 .tab.active { color:#eaeaea; background:#0f3460; }
 
 /* ===== 游戏模块 ===== */
-#p-game { display:none; flex-direction:column; overflow-y:auto; background:var(--bg-primary); position:fixed; top:52px; left:50%; transform:translateX(-50%); width:100%; max-width:960px; bottom:62px; padding:16px; padding-bottom:80px; }
+#p-game { display:none; flex-direction:column; overflow-y:auto; background:var(--bg-primary); position:fixed; top:52px; left:50%; transform:translateX(-50%); width:100%; max-width:960px; bottom:62px; z-index:10; padding:16px; padding-bottom:80px; }
 #p-game.active { display:flex; }
 #gh-world { flex:1; min-height:200px; position:relative; }
 #gh-quiz { flex-shrink:0; }
@@ -852,12 +878,15 @@ html { overflow:hidden; }
 }
 .topbar__logo { display: flex; flex-direction: column; line-height: 1.2; flex-shrink: 0; }
 .topbar__main {
-  font-size: 15px; font-weight: 800;
+  font-size: 12px; font-weight: 700;
   background: linear-gradient(135deg, var(--amber), var(--coral));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  letter-spacing: 1px;
+  letter-spacing: 2px;
+  opacity: 0.7;
+  transition: opacity 0.2s;
 }
+.topbar__logo:hover .topbar__main { opacity: 1; }
 .topbar__sub { font-size: 10px; color: var(--text-tertiary); letter-spacing: 2px; font-weight: 500; }
 .topbar__title {
   font-size: var(--fs-small); color: var(--text-secondary);
@@ -1257,10 +1286,6 @@ html { overflow:hidden; }
       <span class="sub-icon">📋</span>
       <span class="sub-label">新建学习计划</span>
     </div>
-    <div class="submenu-item" onclick="resumeLastSession();closeSubmenu()">
-      <span class="sub-icon">🚀</span>
-      <span class="sub-label">继续学习</span>
-    </div>
     <div class="submenu-item" onclick="go('autoplay');closeSubmenu()">
       <span class="sub-icon">▶️</span>
       <span class="sub-label">自动背单词</span>
@@ -1579,6 +1604,7 @@ html { overflow:hidden; }
 <div class="page" id="p-book">
   <div style="margin-bottom:14px;display:flex;align-items:center;justify-content:space-between">
     <span style="color:#888;font-size:13px" id="bookCount"></span>
+    <button class="btn bp" style="font-size:11px;padding:5px 10px" onclick="startBookAutoPlay()">▶ 自动播放</button>
     <button class="btn br" style="font-size:11px;padding:5px 10px" onclick="clearBook()">清空生词本</button>
   </div>
   <div id="bookC"></div>
@@ -1606,7 +1632,7 @@ html { overflow:hidden; }
 <div class="page" id="p-scan">
   <div class="scan-header">
     <div class="scan-header-icon">📸</div>
-    <div class="scan-header-title">日文试卷识图翻译</div>
+    <div class="scan-header-title">识图翻译</div>
     <div class="scan-header-sub">拍照或选择图片 → 自动识别日文 → 翻译成中文</div>
   </div>
   <!-- 无图片时显示上传区 -->
@@ -1834,7 +1860,7 @@ html { overflow:hidden; }
 <script src="grammar_data.js?v=3"></script>
 <script src="quiz_data_high.js?v=3"></script>
 <script src="quiz_data_normal.js?v=3"></script>
-<script src="inline.js?v=91"></script>
+<script src="inline.js?v=92"></script>
 <script src="game/tower-climb.js?v=6"></script>
 
 
