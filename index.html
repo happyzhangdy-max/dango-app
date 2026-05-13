@@ -150,7 +150,82 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 .vwb-title { font-size:20px; font-weight:800; background:linear-gradient(135deg,#e94560,#a855f7); -webkit-background-clip:text; -webkit-text-fill-color:transparent; letter-spacing:2px; }
 .vwb-sub { font-size:12px; color:#888; margin-top:6px; letter-spacing:1px; }
 
+/* ===== 首页 · 四向节奏 v2 ===== */
+/* 品牌标题区 */
+.brand-section { padding:64px 0 56px; text-align:center; position:relative; }
+.brand-title {
+  font-family:var(--font-jp); font-size:44px; font-weight:900;
+  background:linear-gradient(135deg,#fafafa 0%,var(--amber) 40%,var(--coral) 100%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  letter-spacing:6px; line-height:1.2; margin-bottom:12px;
+}
+.brand-subtitle { font-size:15px; color:var(--text-tertiary); letter-spacing:4px; font-weight:400; }
 
+/* 非对称 pair 卡片 */
+.pair-section { display:flex; gap:14px; margin-bottom:16px; }
+.pair-card {
+  flex:1; display:flex; align-items:center; gap:14px;
+  background:linear-gradient(135deg,#1a1a3e,#0f3460);
+  border:1px solid rgba(168,85,247,0.3);
+  border-radius:var(--radius-lg); padding:20px 18px;
+  cursor:pointer; transition:all var(--tr-normal);
+  position:relative; overflow:hidden;
+}
+.pair-card:hover { transform:translateY(-3px); box-shadow:0 8px 30px rgba(168,85,247,0.2); }
+/* 📸 向左偏移 + 珊瑚色 */
+.pair-card-scan { transform:translateX(-6px) translateY(4px); border-color:rgba(233,69,96,0.35); }
+.pair-card-scan:hover { border-color:var(--coral); box-shadow:0 8px 30px rgba(233,69,96,0.2); }
+/* 📚 向右偏移 + 琥珀色 */
+.pair-card-autoplay { transform:translateX(6px) translateY(-4px); border-color:rgba(245,158,11,0.35); }
+.pair-card-autoplay:hover { border-color:var(--amber); box-shadow:0 8px 30px rgba(245,158,11,0.2); }
+.pair-card-icon { font-size:32px; flex-shrink:0; line-height:1; }
+.pair-card-text { flex:1; min-width:0; }
+.pair-card-title { font-size:17px; font-weight:800; color:var(--text-primary); letter-spacing:1px; margin-bottom:3px; }
+.pair-card-sub { font-size:11px; color:var(--text-tertiary); letter-spacing:0.5px; line-height:1.4; }
+.pair-badge { font-size:9px; color:var(--coral); font-weight:700; vertical-align:super; margin-left:2px; }
+.pair-card-arrow { font-size:16px; color:var(--text-quaternary); flex-shrink:0; transition:transform 0.3s ease; }
+.pair-card:hover .pair-card-arrow { transform:translateX(4px); }
+
+/* 游戏宽区 */
+.game-wide {
+  position:relative; border-radius:var(--radius-lg); overflow:hidden; cursor:pointer;
+  background:linear-gradient(135deg,#1a1a3e 0%,#0f3460 100%);
+  border:1px solid rgba(168,85,247,0.25);
+  transition:all var(--tr-normal); margin-top:8px;
+}
+.game-wide:hover { border-color:rgba(168,85,247,0.5); transform:translateY(-3px); box-shadow:0 8px 30px rgba(168,85,247,0.25); }
+.game-wide-bg {
+  position:absolute; inset:0; pointer-events:none;
+  background:radial-gradient(ellipse at 80% 50%,rgba(168,85,247,0.08) 0%,transparent 60%),
+             radial-gradient(ellipse at 20% 50%,rgba(245,158,11,0.06) 0%,transparent 60%);
+}
+.game-wide-content { position:relative; z-index:1; display:flex; align-items:center; gap:16px; padding:24px 22px; }
+.game-wide-icon { font-size:38px; flex-shrink:0; line-height:1; }
+.game-wide-info { flex:1; min-width:0; }
+.game-wide-title { font-size:20px; font-weight:800; color:var(--text-primary); letter-spacing:2px; margin-bottom:4px; }
+.game-wide-sub { font-size:12px; color:var(--text-tertiary); letter-spacing:0.5px; }
+.game-wide-chips { display:flex; gap:8px; flex-shrink:0; }
+.game-chip {
+  display:inline-flex; align-items:center; gap:4px;
+  padding:5px 12px; border-radius:var(--radius-full);
+  font-size:10px; font-weight:700; letter-spacing:0.5px; white-space:nowrap;
+}
+.game-chip-challenge { background:rgba(78,204,163,0.12); color:var(--teal); border:1px solid rgba(78,204,163,0.25); }
+.game-chip-rank { background:rgba(245,158,11,0.12); color:var(--amber); border:1px solid rgba(245,158,11,0.25); }
+.game-wide-arrow { font-size:20px; color:var(--text-quaternary); flex-shrink:0; transition:transform 0.3s ease; }
+.game-wide:hover .game-wide-arrow { transform:translateX(6px); }
+
+/* 响应式调整 */
+@media(max-width:600px){
+  .brand-section { padding:48px 0 40px; }
+  .brand-title { font-size:34px; letter-spacing:4px; }
+  .brand-subtitle { font-size:13px; letter-spacing:3px; }
+  .pair-section { flex-direction:column; gap:12px; }
+  .pair-card { transform:none !important; padding:16px 14px; }
+  .pair-card-scan, .pair-card-autoplay { transform:none !important; }
+  .game-wide-content { padding:18px 16px; flex-wrap:wrap; }
+  .game-wide-chips { width:100%; padding-left:54px; }
+}
 
 .nav-more { display:none; position:absolute; top:100%; right:0; background:rgba(26,26,46,0.97); backdrop-filter:blur(10px); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:6px; z-index:200; min-width:160px; box-shadow:0 8px 30px rgba(0,0,0,0.4); }
 .nav-more.show { display:block; }
@@ -1126,30 +1201,17 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 </div>
 <div class="toast" id="toast"></div>
 
-<!-- 首页 -->
+<!-- 🏠 首页 · 四向节奏 v2 -->
 <div class="main"><div class="page active" id="p-home">
-  <div class="hero">
-    <div class="hero-content">
-      <div class="hero-badge">
-        <span class="hero-badge-icon">🔥</span>
-        <span class="hero-badge-text" id="heroStreak">学习第 0 天</span>
-      </div>
-      <h1 class="hero-title">日本語コーナー</h1>
-      <p class="hero-tagline">从零到N1，每天进步一点点</p>
-      <div class="hero-actions">
-        <button class="hero-cta hero-cta-primary" onclick="go('vocab')">开始学习</button>
-        <button class="hero-cta hero-cta-secondary" onclick="resumeLastSession()">继续学习</button>
-      </div>
-    </div>
+
+  <!-- ◉ 节奏一：品牌标题 -->
+  <div class="brand-section">
+    <h1 class="brand-title">日本語コーナー</h1>
+    <p class="brand-subtitle">✦ 行小之的外语角 ✦</p>
   </div>
-  <!-- 新用户引导 -->
-  <div class="onboarding-banner" id="onboardingBanner">
-    <span class="onboarding-icon">🎯</span>
-    <span class="onboarding-text">新手上路？先学 <strong>10 个单词</strong>，解锁完整学习体验！</span>
-    <button class="onboarding-close" onclick="dismissOnboarding(event)">✕</button>
-  </div>
-  <!-- 🔍 搜索框 C位：placeholder 随机轮播 -->
-  <div class="search-bar-wrap" style="margin-bottom:14px">
+
+  <!-- ◉ 节奏二：搜索栏（贯穿式） -->
+  <div class="search-bar-wrap">
     <div class="search-bar">
       <span class="search-icon">🔍</span>
       <input class="search-input" id="aiSearchInput" type="text" placeholder="搜单词、搜句子、试试「美味しい」" maxlength="200" autocomplete="off">
@@ -1158,59 +1220,44 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
     </div>
     <div class="search-results" id="searchResults"></div>
   </div>
-  <!-- 🎯 两大王牌入口 -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
-    <div class="vwb" onclick="go('scan')" style="margin-bottom:0">
-      <div class="vwb-icon">📸</div>
-      <div class="vwb-title">拍照识图 <span style="font-size:10px;color:var(--coral);font-weight:600;vertical-align:super">Beta</span></div>
-      <div class="vwb-sub">拍下即查 · 自动识别翻译</div>
+
+  <!-- ◉ 节奏三：非对称 pair 卡片 -->
+  <div class="pair-section">
+    <div class="pair-card pair-card-scan" onclick="go('scan')">
+      <div class="pair-card-icon">📸</div>
+      <div class="pair-card-text">
+        <div class="pair-card-title">拍照识图 <span class="pair-badge">Beta</span></div>
+        <div class="pair-card-sub">拍下即查 · 自动识别翻译</div>
+      </div>
+      <div class="pair-card-arrow">→</div>
     </div>
-    <div class="vwb" onclick="go('autoplay')" style="margin-bottom:0">
-      <div class="vwb-icon">📚</div>
-      <div class="vwb-title">自动背单词</div>
-      <div class="vwb-sub">考级分类 · 场景分类 · 自动播放</div>
-    </div>
-  </div>
-  <!-- 📊 学习概览紧凑条 -->
-  <div class="stats" style="margin-bottom:12px">
-    <div class="sc" onclick="resumeLastSession()"><div class="sn" id="s1">0</div><div class="sl">学习中 ▶</div></div>
-    <div class="sc" onclick="go('review')"><div class="sn" id="s2">0</div><div class="sl">今日待复习 →</div></div>
-  </div>
-  <!-- 🎮 更多功能 -->
-  <div class="h-entries" style="grid-template-columns:repeat(3,1fr)">
-    <div class="h-entry h-entry-game" onclick="go('game')">
-      <div class="h-icon">🎮</div>
-      <div class="h-title">单词闯关</div>
-      <div class="h-sub">爬塔答题 · 拳击对战</div>
-    </div>
-    <div class="h-entry h-entry-review" onclick="go('review')">
-      <div class="h-icon">🔄</div>
-      <div class="h-title">复习</div>
-      <div class="h-sub">遗忘曲线 · 按次数巩固</div>
-    </div>
-    <div class="h-entry h-entry-quiz" onclick="go('quiz')">
-      <div class="h-icon">📋</div>
-      <div class="h-title">真题模拟</div>
-      <div class="h-sub">N1-N3 · 历年真题 · 高频考点</div>
+    <div class="pair-card pair-card-autoplay" onclick="go('autoplay')">
+      <div class="pair-card-icon">📚</div>
+      <div class="pair-card-text">
+        <div class="pair-card-title">自动背单词</div>
+        <div class="pair-card-sub">考级分类 · 场景分类 · 自动播放</div>
+      </div>
+      <div class="pair-card-arrow">→</div>
     </div>
   </div>
-  <!-- 继续学习 -->
-  <div id="continueSection" style="display:none">
-    <div class="vwb" id="continueBtn" onclick="resumeLastSession()" style="cursor:pointer;padding:20px 20px;margin-bottom:8px">
-      <div class="vwb-icon" style="font-size:28px">▶️</div>
-      <div class="vwb-title" style="font-size:16px">继续学习</div>
-      <div class="vwb-sub" id="continueInfo">上次学到...</div>
+
+  <!-- ◉ 节奏四：游戏宽区 -->
+  <div class="game-wide" onclick="go('game')">
+    <div class="game-wide-bg"></div>
+    <div class="game-wide-content">
+      <div class="game-wide-icon">🎮</div>
+      <div class="game-wide-info">
+        <div class="game-wide-title">单词大冒险</div>
+        <div class="game-wide-sub">爬塔答题 · 拳击对战</div>
+      </div>
+      <div class="game-wide-chips">
+        <span class="game-chip game-chip-challenge">⚡ 今日挑战</span>
+        <span class="game-chip game-chip-rank">🏆 排行榜</span>
+      </div>
+      <div class="game-wide-arrow">→</div>
     </div>
   </div>
-  
-  <!-- 学习计划 -->
-  <div class="sect">📋 学习计划</div>
-  <div id="planList"><div style="text-align:center;color:#555;padding:12px 0;font-size:12px">还没有学习计划，新建一个开始吧 ✨</div></div>
-  <div class="vwb" onclick="showPlanModal()" style="cursor:pointer;padding:20px 20px">
-    <div class="vwb-icon" style="font-size:28px">➕</div>
-    <div class="vwb-title" style="font-size:16px">新建计划</div>
-    <div class="vwb-sub">设定学习目标 · 每日坚持</div>
-  </div>
+
 </div>
 
 <!-- 词汇页 -->
@@ -1650,7 +1697,7 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 <script src="quiz_data_high.js?v=3"></script>
 <script src="quiz_data_real.js?v=3"></script>
 <script src="quiz_data_normal.js?v=3"></script>
-<script src="inline.js?v=85"></script>
+<script src="inline.js?v=86"></script>
 <script src="game/tower-climb.js?v=1778500000003"></script>
 
 
