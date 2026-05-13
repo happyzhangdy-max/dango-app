@@ -669,18 +669,33 @@ function startPlanStudy(idx){
   var plans=getPlans();
   if(!plans[idx])return;
   var plan=plans[idx];
-  // 生成今日固定单词列表（同一天同一计划 = 相同单词）
+  
+  // 检查今天是否已有缓存的单词列表（同一天同一计划复用）
+  var saved=JSON.parse(localStorage.getItem('ap_settings')||'{}');
+  var today=new Date().toISOString().split('T')[0];
+  
+  if(saved.todayWordIds&&saved.todayWordIds.length>0&&saved.planDate===today){
+    // 复用今日缓存，只更新 levels/count
+    saved.levels=plan.levels;
+    saved.count=plan.daily;
+    saved.lvlOn=true;
+    localStorage.setItem('ap_settings',JSON.stringify(saved));
+    go('autoplay');
+    return;
+  }
+  
+  // 首次今日学习：生成固定单词列表
   var pool=VOCAB.filter(function(v){
     return plan.levels.indexOf(v.level)>=0;
   });
   pool=[...pool].sort(function(){return Math.random()-0.5});
   if(pool.length>plan.daily)pool=pool.slice(0,plan.daily);
   
-  // 保存计划设置 + 预生成单词 ID 到自动播放
-  var saved=JSON.parse(localStorage.getItem('ap_settings')||'{}');
+  // 保存计划设置 + 预生成单词 ID + 日期标记
   saved.levels=plan.levels;
   saved.count=plan.daily;
   saved.lvlOn=true;
+  saved.planDate=today;
   saved.todayWordIds=pool.map(function(v){return v.id});
   localStorage.setItem('ap_settings',JSON.stringify(saved));
   go('autoplay');
@@ -820,7 +835,7 @@ function _apToggle(triggerEl,bodyId){
 // 考级分类勾选切换
 function _apToggleLvlSection(){
   var saved=JSON.parse(localStorage.getItem('ap_settings')||'{}');
-  saved.lvlOn=!saved.lvlOn;
+  delete saved.todayWordIds;saved.lvlOn=!saved.lvlOn;
   if(!saved.lvlOn&&!saved.catOn){saved.lvlOn=true} // 至少保留一个
   localStorage.setItem('ap_settings',JSON.stringify(saved));
   renderAutoPlayOptions();
@@ -829,7 +844,7 @@ function _apToggleLvlSection(){
 // 场景分类勾选切换
 function _apToggleCatSection(){
   var saved=JSON.parse(localStorage.getItem('ap_settings')||'{}');
-  saved.catOn=!saved.catOn;
+  delete saved.todayWordIds;saved.catOn=!saved.catOn;
   if(!saved.lvlOn&&!saved.catOn){saved.catOn=true} // 至少保留一个
   localStorage.setItem('ap_settings',JSON.stringify(saved));
   renderAutoPlayOptions();
@@ -839,7 +854,7 @@ function _apToggleCatSection(){
 function _apToggleLvl(el,lvl){
   var saved=JSON.parse(localStorage.getItem('ap_settings')||'{}');
   var lvls=saved.levels||['n5','n4','n3'];
-  var idx=lvls.indexOf(lvl);
+  delete saved.todayWordIds;var idx=lvls.indexOf(lvl);
   if(idx>=0)lvls.splice(idx,1);else lvls.push(lvl);
   if(lvls.length===0)lvls=['n5','n4','n3'];
   saved.levels=lvls;localStorage.setItem('ap_settings',JSON.stringify(saved));
@@ -852,7 +867,7 @@ function _apToggleLvl(el,lvl){
 function _apToggleCat(el){
   var saved=JSON.parse(localStorage.getItem('ap_settings')||'{}');
   var cats=saved.categories||[];
-  var cat=el.getAttribute('data-cat');
+  delete saved.todayWordIds;var cat=el.getAttribute('data-cat');
   var idx=cats.indexOf(cat);
   if(idx>=0)cats.splice(idx,1);else cats.push(cat);
   saved.categories=cats;localStorage.setItem('ap_settings',JSON.stringify(saved));
@@ -864,14 +879,14 @@ function _apToggleCat(el){
 // 全选场景
 function _apCatAll(){
   var saved=JSON.parse(localStorage.getItem('ap_settings')||'{}');
-  saved.categories=[];localStorage.setItem('ap_settings',JSON.stringify(saved));
+  delete saved.todayWordIds;saved.categories=[];localStorage.setItem('ap_settings',JSON.stringify(saved));
   document.querySelectorAll('#ap-cat-body .ap-tag').forEach(function(el){el.classList.add('ap-tag-on');el.style.background='linear-gradient(135deg,#a855f7,#7c3aed)';el.style.color='#fff'});
 }
 
 // 形式
 function _apSetFormat(el,f){
   var saved=JSON.parse(localStorage.getItem('ap_settings')||'{}');
-  saved.format=f;localStorage.setItem('ap_settings',JSON.stringify(saved));
+  delete saved.todayWordIds;saved.format=f;localStorage.setItem('ap_settings',JSON.stringify(saved));
   document.querySelectorAll('[data-format]').forEach(function(x){x.classList.remove('ap-tag-on');x.style.background='rgba(255,255,255,0.06)';x.style.color='#64748b'});
   el.classList.add('ap-tag-on');el.style.background='linear-gradient(135deg,#6366f1,#8b5cf6)';el.style.color='#fff';
 }
@@ -879,7 +894,7 @@ function _apSetFormat(el,f){
 // 速度
 function _apSetSpeed(el,s){
   var saved=JSON.parse(localStorage.getItem('ap_settings')||'{}');
-  saved.speed=s;localStorage.setItem('ap_settings',JSON.stringify(saved));
+  delete saved.todayWordIds;saved.speed=s;localStorage.setItem('ap_settings',JSON.stringify(saved));
   document.querySelectorAll('[data-speed]').forEach(function(x){x.classList.remove('ap-tag-on');x.style.background='rgba(255,255,255,0.06)';x.style.color='#64748b'});
   el.classList.add('ap-tag-on');el.style.background='linear-gradient(135deg,#4ecca3,#2ecc71)';el.style.color='#fff';
 }
@@ -887,7 +902,7 @@ function _apSetSpeed(el,s){
 // 数量
 function _apSetCount(el,n){
   var saved=JSON.parse(localStorage.getItem('ap_settings')||'{}');
-  saved.count=n;localStorage.setItem('ap_settings',JSON.stringify(saved));
+  delete saved.todayWordIds;saved.count=n;localStorage.setItem('ap_settings',JSON.stringify(saved));
   document.querySelectorAll('[data-count]').forEach(function(x){x.classList.remove('ap-tag-on');x.style.background='rgba(255,255,255,0.06)';x.style.color='#64748b'});
   el.classList.add('ap-tag-on');el.style.background='linear-gradient(135deg,#f5a623,#ffd700)';el.style.color='#000';
 }
