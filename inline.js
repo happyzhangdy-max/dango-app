@@ -24,17 +24,17 @@ function go(p){closeD();closePlanModal();
   if(pageEl)pageEl.classList.add('active');
   // Update bottom nav active state
   document.querySelectorAll('.bottombar__item').forEach(function(x){if(x)x.classList.remove('bottombar__item--active')});
-  var sectionMap={'home':'home','vocab':'learn','autoplay':'learn','review':'review','book':'review','wrong':'review','game':'practice','quiz':'practice','scan':'home','studyplan':'learn'};
+  var sectionMap={'home':'home','vocab':'learn','autoplay':'learn','review':'review','book':'review','wrong':'review','game':'practice','quiz':'practice','scan':'home','studyplan':'learn','settings':'settings'};
   var sec=sectionMap[p]||'home';
   var navEl=document.querySelector('.bottombar__item[data-section="'+sec+'"]');
   if(navEl)navEl.classList.add('bottombar__item--active');
   // Update topbar title
-  var titleMap={'home':'','vocab':'单词墙','grammar':'背语法','review':'待复习','book':'单词本','quiz':'模拟题','wrong':'错题本','autoplay':'自动背单词','game':'单词大冒险','scan':'拍照识图','studyplan':'学习计划'};
+  var titleMap={'home':'','vocab':'单词墙','grammar':'背语法','review':'待复习','book':'单词本','quiz':'模拟题','wrong':'错题本','autoplay':'自动背单词','game':'单词大冒险','scan':'拍照识图','studyplan':'学习计划','settings':''};
   var tt=document.getElementById('topbarTitle');
   if(tt){tt.textContent=titleMap[p]||'';tt.classList.toggle('show',!!titleMap[p])}
   var tb=document.getElementById('topbarBack');
   if(tb)tb.classList.toggle('show',!!titleMap[p]);
-  closeSubmenu();if(p==='home'){upH();upP();var _pl=document.getElementById('planList');if(_pl)_pl.style.display='';var _ds=document.querySelector('.main>.dst');if(_ds)_ds.style.display='';}else{var _ds=document.querySelector('.main>.dst');if(_ds)_ds.style.display='none';var _pl=document.getElementById('planList');if(_pl)_pl.style.display='none';}if(p==='vocab'){renderV();showPlanFilterBanner();clearTimeout(_vocabTrackingTimer);_vocabTrackingTimer=setTimeout(function(){initVocabTracking()},50)}if(p==='grammar')renderG();if(p==='quiz'){document.getElementById('quizStart').style.display='block';document.getElementById('quizArea').style.display='none';document.getElementById('quizResult').style.display='none'};if(p==='review')renderR();if(p==='book')renderBook();if(p==='wrong')renderWrong();if(p==='autoplay')renderAutoPlayOptions();if(p==='scan'){loadScanHistory()}if(p==='studyplan'){renderStudyPlan()}}
+  closeSubmenu();if(p==='home'){upH();upP();var _pl=document.getElementById('planList');if(_pl)_pl.style.display='';var _ds=document.querySelector('.plan-entry-card');if(_ds)_ds.style.display='';}else{var _ds=document.querySelector('.plan-entry-card');if(_ds)_ds.style.display='none';var _pl=document.getElementById('planList');if(_pl)_pl.style.display='none';}if(p==='vocab'){renderV();showPlanFilterBanner();clearTimeout(_vocabTrackingTimer);_vocabTrackingTimer=setTimeout(function(){initVocabTracking()},50)}if(p==='grammar')renderG();if(p==='quiz'){document.getElementById('quizStart').style.display='block';document.getElementById('quizArea').style.display='none';document.getElementById('quizResult').style.display='none'};if(p==='review')renderR();if(p==='book')renderBook();if(p==='wrong')renderWrong();if(p==='autoplay')renderAutoPlayOptions();if(p==='scan'){loadScanHistory()}if(p==='studyplan'){renderStudyPlan()}}
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function startQuiz(){quizIdx=0;quizRight=0;window._lastPassage='';var src=(typeof QUIZ_DATA_HIGH!=='undefined'?QUIZ_DATA_HIGH:[]).concat(typeof QUIZ_DATA_NORMAL!=='undefined'?QUIZ_DATA_NORMAL:[]);quizData=shuffle([...src]).slice(0,Math.min(10,src.length));document.getElementById('quizStart').style.display='none';document.getElementById('quizResult').style.display='none';document.getElementById('quizArea').style.display='block';showQuiz()}
 function showQuiz(){const q=quizData[quizIdx];document.getElementById('quizProg').textContent=(quizIdx+1)+'/'+quizData.length;document.getElementById('quizBar').style.width=((quizIdx)/quizData.length*100)+'%';const pEl=document.getElementById('quizPassage');if(q.passage&&q.passage!==window._lastPassage){pEl.innerHTML='<div style="background:#1a2a4a;border-left:3px solid #f5a623;border-radius:0 10px 10px 0;padding:10px 14px;margin-bottom:12px;font-size:12px;line-height:1.9;white-space:pre-wrap;color:#c8d6e5;max-height:300px;overflow-y:auto"><b style="color:#f5a623;font-size:10px;display:block;margin-bottom:4px">📖 阅读原文</b>'+q.passage.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>')+'</div>';pEl.style.display='block';window._lastPassage=q.passage}else{pEl.style.display='none'};document.getElementById('quizQ').innerHTML='<div style="display:flex;align-items:flex-start;gap:8px">'+q.question+'<button onclick="speakQuizQ()" style="flex-shrink:0;background:none;border:none;font-size:18px;cursor:pointer;opacity:0.7;padding:2px" title="读题">🔊</button></div>';const optDiv=document.getElementById('quizOpts');optDiv.innerHTML='';q.options.forEach((o,i)=>{const b=document.createElement('button');b.className='btn bs';b.style.textAlign='left';b.style.fontSize='13px';b.style.padding='10px 14px';var hasJa=/[\u3040-\u309F\u30A0-\u30FF\uFF00-\uFFEF\u4E00-\u9FAF]/.test(o);b.innerHTML='<span style="flex:1">'+(i+1)+'. '+o+'</span>'+(hasJa?'<span onclick="event.stopPropagation();speakQuizOpt('+i+')" style="flex-shrink:0;cursor:pointer;opacity:0.7;margin-left:8px;font-size:15px" title="朗读选项">🔊</span>':'');b.style.display='flex';b.style.alignItems='center';b.onclick=()=>answerQuiz(i);optDiv.appendChild(b)});document.getElementById('quizFeedback').style.display='none';document.getElementById('quizNextBtn').style.display='none'}
@@ -603,9 +603,10 @@ function getPlans(){try{return JSON.parse(localStorage.getItem(PLAN_KEY)||'[]')}
 function savePlans(p){localStorage.setItem(PLAN_KEY,JSON.stringify(p))}
 function upP(){
   var plans=getPlans();
-  // 学习计划标题可点击进入详情页
-  var dst=document.querySelector('.main>.dst');
-  if(dst)dst.onclick=function(){go('studyplan')};
+  // 更新卡片副标题
+  var sub=document.getElementById('planEntrySub');
+  var active=plans.filter(function(p){return!p.finished});
+  if(sub)sub.textContent=active.length>0?active.length+' 个进行中计划':'点击创建学习计划';
   // 计划列表
   var list=document.getElementById('planList');
   if(!list)return;
