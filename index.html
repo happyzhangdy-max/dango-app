@@ -7,6 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>日语角</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&family=Noto+Sans+JP:wght@300;400;500;700;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
@@ -99,7 +100,7 @@
 
 * { margin:0; padding:0; box-sizing:border-box; }
 body { font-family:var(--font-sc); background:var(--bg-primary); color:var(--text-primary); min-height:100vh; position:relative; scroll-padding-top:52px; }
-body::before { content:''; position:fixed; inset:0; background:url('bg.jpg') center top/cover no-repeat; opacity:0.55; z-index:0; pointer-events:none; }
+body::before { content:''; position:fixed; inset:0; background:radial-gradient(ellipse at 15% 40%, rgba(245,158,11,0.10) 0%, transparent 50%),radial-gradient(ellipse at 85% 60%, rgba(233,69,96,0.07) 0%, transparent 50%),radial-gradient(ellipse at 50% 80%, rgba(168,85,247,0.05) 0%, transparent 50%),linear-gradient(135deg, #0a0a12 0%, #12121e 50%, #0f3460 100%); z-index:0; pointer-events:none; }
 /* ── 氛围光晕系统（重建 v2） ────────── */
 .ambient-glow { position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden; }
 .ambient-glow .glow { position:absolute; width:500px; height:500px; border-radius:50%; filter:blur(120px); opacity:0.25; will-change:transform; }
@@ -208,6 +209,15 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 .pair-badge { font-size:9px; color:var(--coral); font-weight:700; vertical-align:super; margin-left:2px; }
 .pair-card-arrow { font-size:16px; color:var(--text-quaternary); flex-shrink:0; transition:transform 0.3s ease; }
 .pair-card:hover .pair-card-arrow { transform:translateX(4px); }
+/* 斜角渐变发光边缘 — brand-upgrade 设计规范 */
+.pair-card::after, .game-wide::after {
+  content:''; position:absolute; inset:-1px; border-radius:15px;
+  background:linear-gradient(135deg, rgba(245,158,11,0.12), transparent 50%, rgba(233,69,96,0.12));
+  opacity:0; transition:opacity 0.35s ease; pointer-events:none; z-index:-1;
+}
+.pair-card-scan::after { background:linear-gradient(135deg, rgba(233,69,96,0.12), transparent 50%, rgba(245,158,11,0.08)); }
+.pair-card-autoplay::after { background:linear-gradient(135deg, rgba(245,158,11,0.12), transparent 50%, rgba(78,204,163,0.08)); }
+.pair-card:hover::after, .game-wide:hover::after { opacity:1; }
 
 /* 游戏宽区 — 玻璃质感 + 紫珀光晕 */
 .game-wide {
@@ -1737,7 +1747,7 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 <script src="quiz_data_high.js?v=3"></script>
 <script src="quiz_data_real.js?v=3"></script>
 <script src="quiz_data_normal.js?v=3"></script>
-<script src="inline.js?v=90"></script>
+<script src="inline.js?v=91"></script>
 <script src="game/tower-climb.js?v=6"></script>
 
 
