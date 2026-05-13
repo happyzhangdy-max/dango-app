@@ -31,16 +31,7 @@ function go(p){closeD();closePlanModal();
   var titleMap={'home':'','vocab':'单词墙','grammar':'背语法','review':'待复习','book':'单词本','quiz':'模拟题','wrong':'错题本','autoplay':'自动背单词','game':'单词大冒险','scan':'拍照识图'};
   var tt=document.getElementById('topbarTitle');
   if(tt){tt.textContent=titleMap[p]||'';tt.classList.toggle('show',!!titleMap[p])}
-  closeSubmenu();
-  if(p==='home'){upH();upP()}
-  if(p==='vocab'){renderV();clearTimeout(_vocabTrackingTimer);_vocabTrackingTimer=setTimeout(function(){initVocabTracking()},50)}
-  if(p==='grammar')renderG();
-  if(p==='quiz'){var qs=document.getElementById('quizStart');if(qs)qs.style.display='block';var qa=document.getElementById('quizArea');if(qa)qa.style.display='none';var qr=document.getElementById('quizResult');if(qr)qr.style.display='none'}
-  if(p==='review')renderR();
-  if(p==='book')renderBook();
-  if(p==='wrong')renderWrong();
-  if(p==='autoplay')renderAutoPlayOptions();
-  if(p==='scan'){loadScanHistory()}
+  closeSubmenu();if(p==='home'){upH();upP()}if(p==='vocab'){renderV();clearTimeout(_vocabTrackingTimer);_vocabTrackingTimer=setTimeout(function(){initVocabTracking()},50)}if(p==='grammar')renderG();if(p==='quiz'){document.getElementById('quizStart').style.display='block';document.getElementById('quizArea').style.display='none';document.getElementById('quizResult').style.display='none'};if(p==='review')renderR();if(p==='book')renderBook();if(p==='wrong')renderWrong();if(p==='autoplay')renderAutoPlayOptions();if(p==='scan'){loadScanHistory()}}
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function startQuiz(mode){quizMode=mode;quizIdx=0;quizRight=0;window._lastPassage='';let src;if(mode==='high')src=QUIZ_DATA_HIGH;else if(mode==='normal')src=QUIZ_DATA_NORMAL;else src=QUIZ_DATA_REAL;quizData=shuffle([...src]).slice(0,mode==='real'?src.length:10);document.getElementById('quizStart').style.display='none';document.getElementById('quizResult').style.display='none';document.getElementById('quizArea').style.display='block';showQuiz()}
 function showQuiz(){const q=quizData[quizIdx];document.getElementById('quizProg').textContent=(quizIdx+1)+'/'+quizData.length;document.getElementById('quizBar').style.width=((quizIdx)/quizData.length*100)+'%';const pEl=document.getElementById('quizPassage');if(q.passage&&q.passage!==window._lastPassage){pEl.innerHTML='<div style="background:#1a2a4a;border-left:3px solid #f5a623;border-radius:0 10px 10px 0;padding:10px 14px;margin-bottom:12px;font-size:12px;line-height:1.9;white-space:pre-wrap;color:#c8d6e5;max-height:300px;overflow-y:auto"><b style="color:#f5a623;font-size:10px;display:block;margin-bottom:4px">📖 阅读原文</b>'+q.passage.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>')+'</div>';pEl.style.display='block';window._lastPassage=q.passage}else{pEl.style.display='none'};document.getElementById('quizQ').innerHTML='<div style="display:flex;align-items:flex-start;gap:8px">'+q.question+'<button onclick="speakQuizQ()" style="flex-shrink:0;background:none;border:none;font-size:18px;cursor:pointer;opacity:0.7;padding:2px" title="读题">🔊</button></div>';const optDiv=document.getElementById('quizOpts');optDiv.innerHTML='';q.options.forEach((o,i)=>{const b=document.createElement('button');b.className='btn bs';b.style.textAlign='left';b.style.fontSize='13px';b.style.padding='10px 14px';var hasJa=/[\u3040-\u309F\u30A0-\u30FF\uFF00-\uFFEF\u4E00-\u9FAF]/.test(o);b.innerHTML='<span style="flex:1">'+(i+1)+'. '+o+'</span>'+(hasJa?'<span onclick="event.stopPropagation();speakQuizOpt('+i+')" style="flex-shrink:0;cursor:pointer;opacity:0.7;margin-left:8px;font-size:15px" title="朗读选项">🔊</span>':'');b.style.display='flex';b.style.alignItems='center';b.onclick=()=>answerQuiz(i);optDiv.appendChild(b)});document.getElementById('quizFeedback').style.display='none';document.getElementById('quizNextBtn').style.display='none'}
@@ -768,6 +759,7 @@ var ALL_CATEGORIES=[];
 (function(){var c={};VOCAB.forEach(function(v){c[v.category]=1});ALL_CATEGORIES=Object.keys(c).sort()})();
 
 function renderAutoPlayOptions(){
+  if(!document.getElementById('p-autoplay').classList.contains('active'))return;
   var c=document.getElementById('p-autoplay');if(!c)return;
   var lvls=['n5','n4','n3','n2','n1'];
   var lvlNames={n5:'N5',n4:'N4',n3:'N3',n2:'N2',n1:'N1'};
@@ -1550,25 +1542,26 @@ function handleScanFile(input){
 
 function loadScanImage(dataUrl){
   _scanImageData=dataUrl;
-  var se=document.getElementById('scanEmpty');if(se)se.style.display='none';
-  var sp=document.getElementById('scanPreview');if(sp)sp.style.display='block';
-  var sr=document.getElementById('scanResult');if(sr)sr.style.display='none';
-  var sl=document.getElementById('scanLoading');if(sl)sl.style.display='none';
-  var si=document.getElementById('scanImage');if(si)si.src=dataUrl;
+  document.getElementById('scanEmpty').style.display='none';
+  document.getElementById('scanPreview').style.display='block';
+  document.getElementById('scanResult').style.display='none';
+  document.getElementById('scanLoading').style.display='none';
+  document.getElementById('scanImage').src=dataUrl;
 }
 
 function clearScanImage(){
   _scanImageData=null;
-  var se=document.getElementById('scanEmpty');if(se)se.style.display='block';
-  var sp=document.getElementById('scanPreview');if(sp)sp.style.display='none';
-  var sr=document.getElementById('scanResult');if(sr)sr.style.display='none';
-  var sl=document.getElementById('scanLoading');if(sl)sl.style.display='none';
-  var db=document.getElementById('scanDoBtn');if(db){db.disabled=false;db.textContent='🔍 识别并翻译'}
+  document.getElementById('scanEmpty').style.display='block';
+  document.getElementById('scanPreview').style.display='none';
+  document.getElementById('scanResult').style.display='none';
+  document.getElementById('scanLoading').style.display='none';
+  document.getElementById('scanDoBtn').disabled=false;
+  document.getElementById('scanDoBtn').textContent='🔍 识别并翻译';
 }
 
 // 监听粘贴事件：支持用户粘贴截图到扫描页
 document.addEventListener('paste',function(e){
-  if(!document.getElementById('p-scan')||!document.getElementById('p-scan').classList.contains('active'))return;
+  if(document.getElementById('p-scan').style.display==='none')return;
   var items=e.clipboardData&&e.clipboardData.items;
   if(!items)return;
   for(var i=0;i<items.length;i++){
@@ -1626,12 +1619,12 @@ function doScan(){
     showT('⚠️ 服务未配置，请联系管理员');
     return;
   }
-  var db=document.getElementById('scanDoBtn');
-  if(db){db.disabled=true;db.textContent='⏳ 处理中...'}
-  var sp=document.getElementById('scanPreview');if(sp)sp.style.display='none';
-  var sl=document.getElementById('scanLoading');if(sl)sl.style.display='block';
-  var sr=document.getElementById('scanResult');if(sr)sr.style.display='none';
-  var lt=document.getElementById('scanLoadingText');if(lt)lt.textContent='正在识别图片中的日文...';
+  document.getElementById('scanDoBtn').disabled=true;
+  document.getElementById('scanDoBtn').textContent='⏳ 处理中...';
+  document.getElementById('scanPreview').style.display='none';
+  document.getElementById('scanLoading').style.display='block';
+  document.getElementById('scanResult').style.display='none';
+  document.getElementById('scanLoadingText').textContent='正在识别图片中的日文...';
   
   compressImage(_scanImageData,1200).then(function(compressed){
     return callOCRandTranslate(compressed);
@@ -1707,35 +1700,33 @@ function callAI(url,model,messages,maxTokens,apiKey){
 }
 
 function showScanResult(jpText,cnText){
-  var sl=document.getElementById('scanLoading');if(sl)sl.style.display='none';
-  var sr=document.getElementById('scanResult');if(sr)sr.style.display='block';
-  var sp=document.getElementById('scanPreview');if(sp)sp.style.display='none';
+  document.getElementById('scanLoading').style.display='none';
+  document.getElementById('scanResult').style.display='block';
+  document.getElementById('scanPreview').style.display='none';
   
-  var sj=document.getElementById('scanJpText');if(sj)sj.textContent=jpText;
-  var sc=document.getElementById('scanCnText');if(sc)sc.textContent=cnText;
-  var sfj=document.getElementById('scanFullJp');if(sfj)sfj.textContent=jpText;
-  var sfc=document.getElementById('scanFullCn');if(sfc)sfc.textContent=cnText;
+  document.getElementById('scanJpText').textContent=jpText;
+  document.getElementById('scanCnText').textContent=cnText;
+  document.getElementById('scanFullJp').textContent=jpText;
+  document.getElementById('scanFullCn').textContent=cnText;
   
   // 默认显示对照视图
-  var firstTab=document.querySelector('.scan-result-tab.active');
-  switchScanView('parallel',firstTab||document.querySelector('.scan-result-tab'));
+  switchScanView('parallel',document.querySelector('.scan-result-tab.active'));
   
   // 保存历史
   saveScanHistory(jpText,cnText);
 }
 
 function switchScanView(view,btn){
-  document.querySelectorAll('.scan-result-tab').forEach(function(t){if(t)t.classList.remove('active')});
+  document.querySelectorAll('.scan-result-tab').forEach(function(t){t.classList.remove('active')});
   if(btn)btn.classList.add('active');
   
-  var sp=document.getElementById('scanParallel');if(sp)sp.style.display=view==='parallel'?'grid':'none';
-  var sfo=document.getElementById('scanFullOrig');if(sfo)sfo.style.display=view==='orig'?'block':'none';
-  var sft=document.getElementById('scanFullTrans');if(sft)sft.style.display=view==='trans'?'block':'none';
+  document.getElementById('scanParallel').style.display=view==='parallel'?'grid':'none';
+  document.getElementById('scanFullOrig').style.display=view==='orig'?'block':'none';
+  document.getElementById('scanFullTrans').style.display=view==='trans'?'block':'none';
 }
 
 function copyScanResult(){
-  var cnEl=document.getElementById('scanCnText');
-  var cn=cnEl?cnEl.textContent:'';
+  var cn=document.getElementById('scanCnText').textContent;
   if(!cn){showT('没有可复制的内容');return}
   // 使用 textarea 方案兼容
   var ta=document.createElement('textarea');
@@ -1756,12 +1747,11 @@ function saveScanHistory(jp,cn){
 function renderScanHistory(){
   var list=document.getElementById('scanHistoryList');
   if(!list)return;
-  var sh=document.getElementById('scanHistory');
   if(_scanHistory.length===0){
-    if(sh)sh.style.display='none';
+    document.getElementById('scanHistory').style.display='none';
     return;
   }
-  if(sh)sh.style.display='block';
+  document.getElementById('scanHistory').style.display='block';
   var html='';
   for(var i=0;i<_scanHistory.length;i++){
     var h=_scanHistory[i];
@@ -1774,12 +1764,32 @@ function renderScanHistory(){
 }
 
 function loadScanHistory(){
+  if(!document.getElementById('p-scan').classList.contains('active'))return;
   try{
     var h=localStorage.getItem('scanHist');
     if(h)_scanHistory=JSON.parse(h);
   }catch(e){_scanHistory=[]}
   renderScanHistory();
 }
+
+// 粘贴图片支持
+document.addEventListener('paste',function(e){
+  var items=e.clipboardData&&e.clipboardData.items;
+  if(!items)return;
+  // 只在扫描页面生效
+  var sp=document.getElementById('p-scan');
+  if(!sp||!sp.classList.contains('active'))return;
+  for(var i=0;i<items.length;i++){
+    if(items[i].type.indexOf('image')===0){
+      var file=items[i].getAsFile();
+      if(!file)continue;
+      var reader=new FileReader();
+      reader.onload=function(ev){loadScanImage(ev.target.result);showT('✅ 已粘贴截图')};
+      reader.readAsDataURL(file);
+      break;
+    }
+  }
+});
 
 // 上传区点击触发选图
 document.addEventListener('DOMContentLoaded',function(){
