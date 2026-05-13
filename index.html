@@ -111,8 +111,8 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 .main,.nav { position:relative; z-index:1; }
 
 /* ── Hero 容器 ──────────────────── */
-.hero { position:relative; width:calc(100% + 32px); margin-left:-16px; margin-bottom:18px; height:160px; overflow:hidden; padding-top:0; display:flex; align-items:center; justify-content:center; }
-.hero::before { content:''; position:absolute; inset:0; opacity:0.6; }
+.hero { position:relative; width:calc(100% + 32px); margin-left:-16px; margin-bottom:18px; height:200px; overflow:hidden; padding-top:0; display:flex; align-items:center; justify-content:center; }
+.hero::before { content:''; position:absolute; inset:0; background:url('bg.jpg') center 15%/cover no-repeat; opacity:0.6; }
 .hero::after { content:''; position:absolute; inset:0; background:linear-gradient(180deg, transparent 40%, var(--bg-primary) 100%); z-index:1; }
 
 /* Hero 内容层 */
@@ -135,7 +135,6 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 .onboarding-banner { position:relative; background:linear-gradient(135deg, rgba(168,85,247,0.08) 0%, rgba(245,158,11,0.08) 100%); border:1px solid rgba(168,85,247,0.15); border-radius:var(--radius-md); padding:10px 14px; margin-bottom:14px; display:flex; align-items:center; gap:10px; animation:fadeSlideIn 0.5s ease; cursor:pointer; }
 .onboarding-banner.hidden { display:none; }
 @keyframes fadeSlideIn { from{opacity:0;transform:translateY(-10px)} to{opacity:1;transform:translateY(0)} }
-@keyframes pulseGlow { 0%,100%{opacity:0.6} 50%{opacity:1} }
 .onboarding-icon { font-size:20px; flex-shrink:0; }
 .onboarding-text { flex:1; font-size:12px; color:var(--text-secondary); line-height:1.5; }
 .onboarding-text strong { color:var(--amber); }
@@ -144,7 +143,6 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 
 .vwb { display:block; background:linear-gradient(135deg,#1a1a3e,#0f3460); border:1px solid rgba(168,85,247,0.3); border-radius:14px; padding:28px 20px; margin-bottom:16px; cursor:pointer; text-align:center; transition:opacity 0.3s,transform 0.3s,background 0.3s,border-color 0.3s; position:relative; overflow:hidden; }
 .vwb:hover { border-color:#a855f7; transform:translateY(-2px); box-shadow:0 8px 30px rgba(168,85,247,0.2); }
-.vwb:active { transform:scale(0.97); }
 .vwb::after { content:''; position:absolute; top:-50%; right:-50%; width:100%; height:200%; background:linear-gradient(45deg,transparent 40%,rgba(168,85,247,0.05) 50%,transparent 60%); transition:opacity 0.6s,transform 0.6s,background 0.6s; }
 .vwb:hover::after { transform:translateX(30px); }
 .vwb-icon { font-size:36px; display:block; margin-bottom:6px; }
@@ -261,7 +259,7 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 /* 通用微交互动画：按钮点击收缩，卡片点击下沉 */
 .search-result-item:active { transform:scale(0.99); }
 .btn:active { transform:scale(0.96); }
-.vwb:active { transform:scale(0.97); }
+.vwb:active { transform:translateY(0); }
 .h-entry:active { transform:translateY(-1px); }
 .search-results { margin-top:12px; display:none; background:#1a1a2e; border-radius:10px; padding:4px 0; box-shadow:0 4px 20px rgba(0,0,0,0.2); }
 .search-results.visible { display:block; }
@@ -1119,9 +1117,17 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 <div class="submenu-overlay" id="submenuSocial">
   <div class="submenu-handle"></div>
   <div class="submenu-grid">
+    <div class="submenu-item" onclick="go('home');closeSubmenu()">
+      <span class="sub-icon">ℹ️</span>
+      <span class="sub-label">关于日语角</span>
+    </div>
     <div class="submenu-item" onclick="window.open('https://github.com/happyzhangdy-max/nihongo-corner','_blank')">
       <span class="sub-icon">💻</span>
       <span class="sub-label">GitHub</span>
+    </div>
+    <div class="submenu-item" onclick="showT('更多功能开发中 🚧');closeSubmenu()">
+      <span class="sub-icon">🎉</span>
+      <span class="sub-label">活动挑战</span>
     </div>
   </div>
 </div>
@@ -1163,7 +1169,7 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
     <div class="vwb" onclick="go('scan')" style="margin-bottom:0">
       <div class="vwb-icon">📸</div>
-      <div class="vwb-title">拍照识图 <span style="font-size:10px;color:var(--coral);font-weight:600;vertical-align:super">Beta</span></div>
+      <div class="vwb-title">拍照识图</div>
       <div class="vwb-sub">拍下即查 · 自动识别翻译</div>
     </div>
     <div class="vwb" onclick="go('autoplay')" style="margin-bottom:0">
@@ -1192,7 +1198,7 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
     <div class="h-entry h-entry-quiz" onclick="go('quiz')">
       <div class="h-icon">📋</div>
       <div class="h-title">真题模拟</div>
-      <div class="h-sub">N1-N3 · 历年真题 · 高频考点</div>
+      <div class="h-sub">历年真题 · 高频考点</div>
     </div>
   </div>
   <!-- 继续学习 -->
@@ -1206,7 +1212,7 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
   
   <!-- 学习计划 -->
   <div class="sect">📋 学习计划</div>
-  <div id="planList"><div class="empty-plan">还没有学习计划，新建一个开始吧 ✨</div></div>
+  <div id="planList"><div style="text-align:center;color:#555;padding:12px 0;font-size:12px">还没有学习计划，新建一个开始吧</div></div>
   <div class="vwb" onclick="showPlanModal()" style="cursor:pointer;padding:20px 20px">
     <div class="vwb-icon" style="font-size:28px">➕</div>
     <div class="vwb-title" style="font-size:16px">新建计划</div>
@@ -1651,7 +1657,7 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 <script src="quiz_data_high.js?v=3"></script>
 <script src="quiz_data_real.js?v=3"></script>
 <script src="quiz_data_normal.js?v=3"></script>
-<script src="inline.js?v=82"></script>
+<script src="inline.js?v=81"></script>
 <script src="game/tower-climb.js?v=1778500000001"></script>
 
 
@@ -1663,6 +1669,14 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
         <span onclick="if(confirm('确定要清空所有学习记录吗？\n(SM-2进度/学习计划/生词本/错题本/搜索缓存)')){['jp','jp_plans','jp_book','jp_wrong','jp_mark','jp_search_book','jp_session','gc','gm','gb','ap_settings','_search_cache','scanHist','mk'].forEach(function(k){localStorage.removeItem(k)});showT('✅ 学习记录已清空');location.reload()}" style="cursor:pointer;text-decoration:underline;">🗑 清空学习记录</span>
     </div>
 </div>
+<script>
+(function(){
+    const uid = localStorage.getItem('wm_uid') || 
+        (localStorage.setItem('wm_uid', (Date.now().toString(36) + Math.random().toString(36).substr(2, 8)).toUpperCase()),
+        (Date.now().toString(36) + Math.random().toString(36).substr(2, 8)).toUpperCase());
+    document.getElementById('wm-user-id').textContent = uid;
+})();
+</script>
 
 <script src="game/boxing.js?v=1778500000002"></script>
 <script>
@@ -1698,6 +1712,18 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
     inp.placeholder='搜单词、搜句子，'+PH[i];
   },6000);
 })();
+// 导航更多下拉
+function toggleNavMore(){
+  var m=document.getElementById('navMore');
+  if(m)m.classList.toggle('show');
+}
+// 点击外部关闭下拉
+document.addEventListener('click',function(e){
+  var m=document.getElementById('navMore');
+  if(m&&m.classList.contains('show')&&!e.target.closest('.nav-dropdown')){
+    m.classList.remove('show');
+  }
+});
 // // 团团链路增强：功能间交叉链接
 (function(){
   function doEnhanceVocab(){
@@ -1748,7 +1774,14 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
       title.parentNode.insertBefore(link,title.nextSibling);
     });
   }
-  // MutationObserver（替代 setInterval 轮询，更高效）
+  // 周期性检查（最可靠的方式）
+  setInterval(function(){
+    var page=document.querySelector('.page.active');
+    if(!page)return;
+    if(page.id==='p-vocab')doEnhanceVocab();
+    if(page.id==='p-grammar')doEnhanceGrammar();
+  },1500);
+  // MutationObserver 辅助
   var obs=new MutationObserver(function(){
     var page=document.querySelector('.page.active');
     if(!page)return;
