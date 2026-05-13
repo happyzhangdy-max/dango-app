@@ -1,5 +1,5 @@
 /**
- * tower-climb.js v4 — 学生→社畜剧情爬塔 + 楼层平台化 + 回血机制
+ * tower-climb.js v6 — 学生→社畜剧情爬塔 + 楼层平台化 + 回血机制
  * 
  * 参考：「是男人就上100层」平台跳跃核心体验
  * 
@@ -696,6 +696,11 @@ function onCorrect() {
     showFloatText('💊 下题答对回血！', '#4ade80', 28);
   }
 
+  // 🎉 每20层大字庆祝
+  if (state.floor % 20 === 0) {
+    setTimeout(() => showFloorCelebration(state.floor), 300);
+  }
+
   // Boss 检查
   const bossHere = findBoss(state.floor);
   if (bossHere && !state.isBoss) {
@@ -865,6 +870,39 @@ function showFloatText(text, color, size = 32) {
 }
 
 // ============================================================
+// 🎉 每20层大字庆祝
+// ============================================================
+function showFloorCelebration(floor) {
+  const container = document.getElementById('p-game');
+  if (!container) return;
+  
+  const overlay = document.createElement('div');
+  overlay.id = 'gh-celebration';
+  overlay.style.cssText = `
+    position:absolute;inset:0;z-index:100;
+    display:flex;align-items:center;justify-content:center;
+    background:radial-gradient(circle, rgba(168,85,247,0.25) 0%, transparent 70%);
+    animation:celebFadeIn 0.5s ease-out;
+    pointer-events:none;
+  `;
+  overlay.innerHTML = `
+    <div style="text-align:center;animation:celebScale 0.6s cubic-bezier(0.34,1.56,0.64,1), celebPulse 2s ease-in-out infinite;padding:30px;border-radius:24px;background:radial-gradient(circle, rgba(168,85,247,0.15) 0%, transparent 70%);box-shadow:0 0 60px rgba(168,85,247,0.15)">
+      <div style="font-size:56px;margin-bottom:8px;line-height:1.2">🎉</div>
+      <div style="font-size:34px;font-weight:900;color:#fff;text-shadow:0 0 30px rgba(168,85,247,0.6),0 0 60px rgba(168,85,247,0.3);letter-spacing:2px;line-height:1.3">你已经爬了 ${floor} 层了！</div>
+      <div style="font-size:14px;color:rgba(255,255,255,0.5);margin-top:8px;letter-spacing:4px">✦ 继续向上 ✦</div>
+    </div>
+  `;
+  container.appendChild(overlay);
+  
+  // 自动消失（2.5秒后淡出）
+  setTimeout(() => {
+    overlay.style.transition = 'opacity 0.8s ease';
+    overlay.style.opacity = '0';
+    setTimeout(() => overlay.remove(), 800);
+  }, 2500);
+}
+
+// ============================================================
 // 渲染：世界（平台 + 玩家 + Boss）
 // ============================================================
 function renderWorld(centerFloor) {
@@ -1030,6 +1068,7 @@ function renderHUD() {
   if (el.hudFloor) el.hudFloor.textContent = `🏔️ ${state.floor}F`;
   if (el.hudHp) el.hudHp.innerHTML = hearts;
   if (el.hudScore) el.hudScore.textContent = `🎯 ${state.score}`;
+  if (el.floorCounterBig) el.floorCounterBig.textContent = state.floor;
   
   // 回血进度指示
   const healEl = document.getElementById('gh-heal-progress');
@@ -1656,6 +1695,19 @@ function showTowerClimb() {
         60% { opacity:0.8; transform:translate(-50%,-80%) scale(1) }
         100% { opacity:0; transform:translate(-50%,-120%) scale(0.8) }
       }
+      @keyframes celebFadeIn {
+        0% { opacity:0; }
+        100% { opacity:1; }
+      }
+      @keyframes celebScale {
+        0% { transform:scale(0.3); opacity:0; }
+        50% { transform:scale(1.1); }
+        100% { transform:scale(1); opacity:1; }
+      }
+      @keyframes celebPulse {
+        0%,100% { box-shadow:0 0 20px rgba(168,85,247,0.3), 0 0 60px rgba(168,85,247,0.1); }
+        50% { box-shadow:0 0 40px rgba(168,85,247,0.6), 0 0 80px rgba(168,85,247,0.2); }
+      }
       /* ===== 小人物 CSS ===== */
       .game-char { position:relative; width:26px; height:46px; display:inline-block; }
       .gc-head {
@@ -1731,6 +1783,7 @@ function showTowerClimb() {
         <span id="gh-heal-progress" style="font-size:11px;transition:all 0.3s;color:#64748b">💊 --</span>
         <span id="gh-hud-score">🎯 0</span>
       </div>
+      <div id="gh-floor-counter-big" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-60%);font-size:96px;font-weight:900;color:rgba(168,85,247,0.10);pointer-events:none;z-index:2;text-shadow:0 0 40px rgba(168,85,247,0.08);line-height:1;font-family:var(--font-en);transition:all 0.4s">1</div>
       <div id="gh-world" style="flex:1;overflow:hidden">
         <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:20px">
           <div style="font-size:40px;margin-bottom:8px;animation:bounceIn 0.8s cubic-bezier(0.34,1.56,0.64,1)">🏔️</div>
@@ -1788,6 +1841,7 @@ function showTowerClimb() {
   el.hudFloor = document.getElementById('gh-hud-floor');
   el.hudHp = document.getElementById('gh-hud-hp');
   el.hudScore = document.getElementById('gh-hud-score');
+  el.floorCounterBig = document.getElementById('gh-floor-counter-big');
   
   document.getElementById('gh-start-btn')?.addEventListener('click', start);
   

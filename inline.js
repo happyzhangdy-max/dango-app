@@ -628,11 +628,20 @@ function upP(){
   active.forEach(function(plan,idx){
     var d=document.createElement('div');d.className='plan-card';
     var ls=plan.levels.map(function(l){return l.toUpperCase()}).join(' + ');
-    var total=plan.daily*plan.days;
-    var pct=Math.min(100,plan.completedDays/plan.days*100);
+    var total,pct,completedDays;
+    if(plan.wordOrder){
+      total=plan.wordOrder.length;
+      completedDays=Math.floor(plan.learnedIndex/plan.daily);
+      pct=Math.min(100,plan.learnedIndex/total*100);
+    }else{
+      // 兼容旧计划（无 wordOrder）
+      total=plan.daily*plan.days;
+      completedDays=plan.completedDays||0;
+      pct=Math.min(100,completedDays/plan.days*100);
+    }
     var realIdx=plans.indexOf(plan);
     d.innerHTML='<div class="plan-level" onclick="event.stopPropagation();startPlanStudy('+realIdx+')" style="cursor:pointer">'+ls+' · 每日 '+plan.daily+' 词</div>'
-      +'<div class="plan-meta" onclick="event.stopPropagation();startPlanStudy('+realIdx+')" style="cursor:pointer">共 '+total+' 词 · '+plan.days+' 天 · 已完成 '+plan.completedDays+' 天</div>'
+      +'<div class="plan-meta" onclick="event.stopPropagation();startPlanStudy('+realIdx+')" style="cursor:pointer">共 '+total+' 词 · '+plan.days+' 天 · 已完成 '+completedDays+' 天</div>'
       +'<div class="plan-bar" onclick="event.stopPropagation();startPlanStudy('+realIdx+')" style="cursor:pointer"><div class="plan-fill" style="width:'+pct+'%"></div></div>'
       +'<div class="plan-actions">'
       +'<button class="btn bs" style="font-size:10px;padding:3px 8px" onclick="event.stopPropagation();startPlanStudy('+realIdx+')">▶ 今日学习</button>'
@@ -660,8 +669,12 @@ function createPlan(){
   if(!dlyInput||!dlyInput.value||parseInt(dlyInput.value)<1){showT('请输入每日学习量');return}
   var levels=[];lvlBtns.forEach(function(b){levels.push(b.getAttribute('data-lvl'))});
   var daily=parseInt(dlyInput.value)||10;if(daily<1)daily=1;
-  var plan={id:Date.now(),levels:levels,daily:daily,days:parseInt(document.getElementById('planDaysInput').value)||30,created:new Date().toISOString().split('T')[0],startDate:new Date().toISOString().split('T')[0],completedDays:0,finished:false};
-  var plans=getPlans();plans.push(plan);savePlans(plans);closePlanModal();upP();showT('🎉 学习计划已创建！')}
+  // 分页式顺序学习：生成完整单词池，一次打乱
+  var pool=VOCAB.filter(function(v){return levels.indexOf(v.level)>=0});
+  var wordOrder=[...pool].sort(function(){return Math.random()-0.5}).map(function(v){return v.id});
+  var days=Math.ceil(wordOrder.length/daily);
+  var plan={id:Date.now(),levels:levels,daily:daily,days:days,wordOrder:wordOrder,learnedIndex:0,created:new Date().toISOString().split('T')[0],startDate:new Date().toISOString().split('T')[0],finished:false};
+  var plans=getPlans();plans.push(plan);savePlans(plans);closePlanModal();upP();showT('🎉 学习计划已创建！共 '+wordOrder.length+' 词，约 '+days+' 天')}
 function deletePlan(idx){
   if(!confirm('确定删除此计划？'))return;
   var plans=getPlans();plans.splice(idx,1);savePlans(plans);upP()}
@@ -669,13 +682,14 @@ function startPlanStudy(idx){
   var plans=getPlans();
   if(!plans[idx])return;
   var plan=plans[idx];
+  if(plan.finished){showT('✅ 该计划已完成所有单词！');return}
+  if(!plan.wordOrder||plan.learnedIndex>=plan.wordOrder.length){plan.finished=true;savePlans(plans);upP();showT('✅ 该计划已完成所有单词！');return}
   
-  // 检查今天是否已有缓存的单词列表（同一天同一计划复用）
   var saved=JSON.parse(localStorage.getItem('ap_settings')||'{}');
   var today=new Date().toISOString().split('T')[0];
   
-  if(saved.todayWordIds&&saved.todayWordIds.length>0&&saved.planDate===today){
-    // 复用今日缓存，只更新 levels/count
+  // 检查今天是否已有缓存的单词列表（同一天同一计划复用，需匹配 planStudyIdx）
+  if(saved.todayWordIds&&saved.todayWordIds.length>0&&saved.planDate===today&&saved.planStudyIdx===idx){
     saved.levels=plan.levels;
     saved.count=plan.daily;
     saved.lvlOn=true;
@@ -684,19 +698,17 @@ function startPlanStudy(idx){
     return;
   }
   
-  // 首次今日学习：生成固定单词列表
-  var pool=VOCAB.filter(function(v){
-    return plan.levels.indexOf(v.level)>=0;
-  });
-  pool=[...pool].sort(function(){return Math.random()-0.5});
-  if(pool.length>plan.daily)pool=pool.slice(0,plan.daily);
+  // 从 wordOrder 顺序取今日词汇（分页式）
+  var end=Math.min(plan.learnedIndex+plan.daily,plan.wordOrder.length);
+  var todayWordIds=plan.wordOrder.slice(plan.learnedIndex,end);
   
-  // 保存计划设置 + 预生成单词 ID + 日期标记
+  // 保存计划设置 + 预生成单词 ID + 日期标记 + 计划索引（用于完成时回写）
   saved.levels=plan.levels;
-  saved.count=plan.daily;
+  saved.count=todayWordIds.length;
   saved.lvlOn=true;
   saved.planDate=today;
-  saved.todayWordIds=pool.map(function(v){return v.id});
+  saved.planStudyIdx=idx;
+  saved.todayWordIds=todayWordIds;
   localStorage.setItem('ap_settings',JSON.stringify(saved));
   go('autoplay');
 }
@@ -933,6 +945,10 @@ function startVocabAutoPlay(){
     if(pool.length===0){showT('没有符合条件的词汇，请调整筛选条件');return}
     pool=[...pool].sort(function(){return Math.random()-0.5});
     if(count>0&&pool.length>count)pool=pool.slice(0,count);
+    // 缓存今日单词顺序，同日复用（参考学习计划 todayWordIds 模式）
+    saved.planDate=new Date().toISOString().split('T')[0];
+    saved.todayWordIds=pool.map(function(v){return v.id});
+    localStorage.setItem('ap_settings',JSON.stringify(saved));
   }
   
   _vApQueue=pool;_vApIdx=0;_vApPaused=false;_vApActive=true;
@@ -1028,7 +1044,32 @@ function vApStop(){
   // vAp 使用 gApScreen 显示（见 vAp 启动代码），应清除 gApScreen 的 show 类
   document.getElementById('gApScreen').classList.remove('show');
   var shown=Math.min(_vApIdx+1,_vApQueue.length);
-  showT('⏹ 已停止（'+shown+'/'+_vApQueue.length+' 词）');
+  var total=_vApQueue.length;
+  
+  // 如果是从学习计划进入且学完了今日全部词汇 → 推进 learnedIndex
+  var saved=JSON.parse(localStorage.getItem('ap_settings')||'{}');
+  if(saved.planStudyIdx!==undefined&&shown>=total){
+    var plans=getPlans();
+    var plan=plans[saved.planStudyIdx];
+    if(plan&&!plan.finished&&plan.wordOrder){
+      plan.learnedIndex+=plan.daily;
+      if(plan.learnedIndex>=plan.wordOrder.length){
+        plan.finished=true;
+        showT('🎉 计划全部完成！共 '+plan.wordOrder.length+' 词');
+      }else{
+        var remaining=plan.wordOrder.length-plan.learnedIndex;
+        var daysLeft=Math.ceil(remaining/plan.daily);
+        showT('✅ 今日学习完成！剩余约 '+daysLeft+' 天（'+remaining+' 词）');
+      }
+      savePlans(plans);
+      upP();
+    }
+    delete saved.planStudyIdx;
+    localStorage.setItem('ap_settings',JSON.stringify(saved));
+  }else{
+    showT('⏹ 已停止（'+shown+'/'+total+' 词）');
+  }
+  
   _vApQueue=[];_vApIdx=0;
 }
 
