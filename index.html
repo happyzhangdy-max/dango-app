@@ -156,8 +156,9 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 .brand-section { padding:24px 0 20px; text-align:center; position:relative; }
 .brand-title {
   font-family:var(--font-jp); font-size:36px; font-weight:900;
-  background:linear-gradient(135deg,#818cf8 0%,#a855f7 50%,#c084fc 100%);
+  background:linear-gradient(135deg,#a855f7 0%,#c084fc 40%,#f59e0b 100%);
   -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 0 24px rgba(168,85,247,0.15));
   letter-spacing:6px; line-height:1.2; margin-bottom:12px;
 }
 .brand-subtitle { font-size:13px; color:var(--text-tertiary); letter-spacing:3px; font-weight:400; }
@@ -166,14 +167,11 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 .pair-section { display:flex; gap:12px; margin-bottom:10px; }
 .pair-card {
   flex:1; display:flex; align-items:center; gap:14px;
-  background:linear-gradient(135deg, rgba(18,18,30,0.55), rgba(18,18,30,0.3));
-  backdrop-filter:blur(16px);
-  -webkit-backdrop-filter:blur(16px);
-  border:1px solid rgba(168,85,247,0.25);
-  border-radius:var(--radius-lg); padding:12px 12px;
+  background:linear-gradient(135deg, rgba(168,85,247,0.08), rgba(78,204,163,0.05));
+  border:1px solid rgba(168,85,247,0.18);
+  border-radius:var(--radius-lg); padding:14px 16px;
   cursor:pointer; transition:all var(--tr-normal);
   position:relative; overflow:hidden;
-  box-shadow:0 4px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04);
 }
 .pair-card::before {
   content:''; position:absolute;
@@ -184,24 +182,14 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
   pointer-events:none;
   transition:all 0.5s ease;
 }
-.pair-card:hover { transform:translateY(-3px); }
+.pair-card:hover { border-color:rgba(168,85,247,0.45); transform:translateY(-2px); box-shadow:0 8px 28px rgba(168,85,247,0.18); }
 .pair-card:hover::before { opacity:0.7; transform:scale(1.2); }
-/* 📸 扫描卡 — 紫→珊瑚渐变 */
-.pair-card-scan { transform:translateX(-6px) translateY(4px); border-color:rgba(233,69,96,0.3); }
-.pair-card-scan::after {
-  content:''; position:absolute; inset:0; pointer-events:none; border-radius:inherit;
-  background:linear-gradient(135deg, rgba(233,69,96,0.08), transparent 50%);
-}
-.pair-card-scan:hover { border-color:var(--coral); box-shadow:0 8px 32px rgba(233,69,96,0.18), 0 4px 24px rgba(0,0,0,0.3); }
-.pair-card-scan:hover::after { background:linear-gradient(135deg, rgba(233,69,96,0.12), transparent 50%); }
-/* 📚 自动背单词卡 — 紫→琥珀渐变 */
-.pair-card-autoplay { transform:translateX(6px) translateY(-4px); border-color:rgba(245,158,11,0.3); }
-.pair-card-autoplay::after {
-  content:''; position:absolute; inset:0; pointer-events:none; border-radius:inherit;
-  background:linear-gradient(135deg, rgba(245,158,11,0.08), transparent 50%);
-}
-.pair-card-autoplay:hover { border-color:var(--amber); box-shadow:0 8px 32px rgba(245,158,11,0.18), 0 4px 24px rgba(0,0,0,0.3); }
-.pair-card-autoplay:hover::after { background:linear-gradient(135deg, rgba(245,158,11,0.12), transparent 50%); }
+/* 📸 扫描卡 — 紫→珊瑚 */
+.pair-card-scan { border-color:rgba(233,69,96,0.2); }
+.pair-card-scan:hover { border-color:rgba(233,69,96,0.5); box-shadow:0 8px 28px rgba(233,69,96,0.15); }
+/* 📚 自动背单词卡 — 紫→琥珀 */
+.pair-card-autoplay { border-color:rgba(245,158,11,0.2); }
+.pair-card-autoplay:hover { border-color:rgba(245,158,11,0.5); box-shadow:0 8px 28px rgba(245,158,11,0.15); }
 .pair-card-icon { font-size:32px; flex-shrink:0; line-height:1; }
 .pair-card-text { flex:1; min-width:0; }
 .pair-card-title { font-size:17px; font-weight:800; color:var(--text-primary); letter-spacing:1px; margin-bottom:3px; }
@@ -209,16 +197,24 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 .pair-badge { font-size:9px; color:var(--coral); font-weight:700; vertical-align:super; margin-left:2px; }
 .pair-card-arrow { font-size:16px; color:var(--text-quaternary); flex-shrink:0; transition:transform 0.3s ease; }
 .pair-card:hover .pair-card-arrow { transform:translateX(4px); }
-/* 斜角渐变发光边缘 — brand-upgrade 设计规范 */
+/* 斜角渐变发光边缘 */
 .pair-card::after, .game-wide::after {
   content:''; position:absolute; inset:-1px; border-radius:15px;
-  background:linear-gradient(135deg, rgba(245,158,11,0.12), transparent 50%, rgba(233,69,96,0.12));
+  background:linear-gradient(135deg, rgba(168,85,247,0.10), transparent 50%, rgba(78,204,163,0.06));
   opacity:0; transition:opacity 0.35s ease; pointer-events:none; z-index:-1;
 }
-.pair-card-scan::after { background:linear-gradient(135deg, rgba(233,69,96,0.12), transparent 50%, rgba(245,158,11,0.08)); }
-.pair-card-autoplay::after { background:linear-gradient(135deg, rgba(245,158,11,0.12), transparent 50%, rgba(78,204,163,0.08)); }
-.pair-card-plan::after { background:linear-gradient(135deg, rgba(168,85,247,0.12), transparent 50%, rgba(78,204,163,0.08)); }
+.pair-card-scan::after { background:linear-gradient(135deg, rgba(233,69,96,0.10), transparent 50%, rgba(168,85,247,0.06)); }
+.pair-card-autoplay::after { background:linear-gradient(135deg, rgba(245,158,11,0.10), transparent 50%, rgba(168,85,247,0.06)); }
 .pair-card:hover::after, .game-wide:hover::after { opacity:1; }
+
+/* ── 学习计划入口区 ── */
+.plan-section { margin-bottom:6px; }
+.plan-section-header { display:flex; align-items:center; gap:8px; cursor:pointer; padding:10px 0 8px; transition:opacity 0.2s; }
+.plan-section-header:hover { opacity:0.7; }
+.plan-section-icon { font-size:16px; line-height:1; }
+.plan-section-title { font-size:14px; font-weight:700; color:var(--text-primary); letter-spacing:1px; }
+.plan-section-link { font-size:11px; color:var(--text-tertiary); margin-left:auto; transition:color 0.2s; }
+.plan-section-header:hover .plan-section-link { color:var(--purple-light); }
 
 /* 游戏宽区 — 玻璃质感 + 紫珀光晕 */
 .game-wide {
@@ -444,8 +440,8 @@ html { overflow:hidden; }
 .h-entry-vocab:hover { border-color:#e94560; box-shadow:0 8px 30px rgba(233,69,96,0.2); }
 /* AI 搜索栏 */
 .search-bar-wrap { margin-bottom: 10px; position: relative; }
-.search-bar { display:flex; align-items:center; background:var(--bg-surface-2); border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:4px 16px; transition:all 0.3s; }
-.search-bar:focus-within { border-color:var(--purple); box-shadow:0 0 20px rgba(168,85,247,0.15); }
+.search-bar { display:flex; align-items:center; background:rgba(168,85,247,0.06); border:1px solid rgba(168,85,247,0.10); border-radius:var(--radius-md); padding:4px 16px; backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); transition:all 0.3s; }
+.search-bar:focus-within { border-color:rgba(168,85,247,0.35); box-shadow:0 0 24px rgba(168,85,247,0.10); }
 .search-icon { font-size:18px; margin-right:12px; opacity:0.6; flex-shrink:0; }
 .search-input { flex:1; background:transparent; border:none; outline:none; color:var(--text-primary); font-size:var(--fs-body); padding:12px 0; font-family:inherit; }
 .search-input::placeholder { color:var(--text-tertiary); font-size:var(--fs-caption); }
@@ -1379,13 +1375,32 @@ html { overflow:hidden; }
       </div>
       <div class="pair-card-arrow">→</div>
     </div>
-    <div class="pair-card pair-card-plan" onclick="go('studyplan')">
-      <div class="pair-card-icon">📋</div>
-      <div class="pair-card-text">
-        <div class="pair-card-title">我的学习计划</div>
-        <div class="pair-card-sub" id="pairPlanSub">点击查看学习进度</div>
+  </div>
+
+  <!-- ◉ 节奏三：学习计划入口区 -->
+  <div class="plan-section">
+    <div class="plan-section-header" onclick="go('studyplan')">
+      <span class="plan-section-icon">📋</span>
+      <span class="plan-section-title">我的学习计划</span>
+      <span class="plan-section-link">管理 →</span>
+    </div>
+    <div class="pair-section">
+      <div class="pair-card pair-card-scan" onclick="go('scan')">
+        <div class="pair-card-icon">📸</div>
+        <div class="pair-card-text">
+          <div class="pair-card-title">拍照识图 <span class="pair-badge">Beta</span></div>
+          <div class="pair-card-sub">拍下即查 · 自动识别翻译</div>
+        </div>
+        <div class="pair-card-arrow">→</div>
       </div>
-      <div class="pair-card-arrow">→</div>
+      <div class="pair-card pair-card-autoplay" onclick="go('autoplay')">
+        <div class="pair-card-icon">📚</div>
+        <div class="pair-card-text">
+          <div class="pair-card-title">自动背单词</div>
+          <div class="pair-card-sub">考级分类 · 场景分类 · 自动播放</div>
+        </div>
+        <div class="pair-card-arrow">→</div>
+      </div>
     </div>
   </div>
 
@@ -1405,7 +1420,6 @@ html { overflow:hidden; }
       <div class="game-wide-arrow">→</div>
     </div>
   </div>
-
 
 </div>
 
@@ -1866,7 +1880,7 @@ html { overflow:hidden; }
 <script src="grammar_data.js?v=3"></script>
 <script src="quiz_data_high.js?v=3"></script>
 <script src="quiz_data_normal.js?v=3"></script>
-<script src="inline.js?v=94"></script>
+<script src="inline.js?v=95"></script>
 <script src="game/tower-climb.js?v=6"></script>
 
 
