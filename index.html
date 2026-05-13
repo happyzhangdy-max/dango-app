@@ -387,9 +387,7 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 /* 防止 body 滚动，让 .main / .page 内部滚动 */
 body { overflow:hidden; }
 html { overflow:hidden; }
-.main { max-height:calc(100vh - 52px - 62px); overflow-y:auto; padding:12px; display:flex; flex-direction:column; }
-.main > .page { flex-shrink:0; }
-.main > div:last-child { margin-top:auto; }
+.main { max-height:calc(100vh - 52px - 62px); overflow-y:auto; padding:12px; }
 #p-home { padding-top:0; padding-bottom:80px; }
 @media(max-width:600px){ .page,.main{ padding:12px; padding-top:60px; padding-bottom:80px; } .tab{ font-size:11px; padding:4px 10px; } .vwb{ padding:20px 14px; } .hero{ height:160px; } }
 .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:8px; margin-bottom:16px; }
@@ -1381,7 +1379,7 @@ html { overflow:hidden; }
   </div>
 
   <!-- 底部版权信息 -->
-  <div style="text-align:center;padding:20px 20px 80px;color:#64748b;font-size:11px;border-top:1px solid rgba(106,130,175,0.1);background:rgba(10,10,26,0.5);">
+  <div style="text-align:center;padding:20px 20px 80px;color:#64748b;font-size:11px;margin-top:40px;border-top:1px solid rgba(106,130,175,0.1);background:rgba(10,10,26,0.5);">
     <p>© 2026 日语角 · All Rights Reserved</p>
   </div>
 
