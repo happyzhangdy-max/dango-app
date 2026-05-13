@@ -6,11 +6,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>日语�?/title>
+<title>日语�?/title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&family=Noto+Sans+JP:wght@300;400;500;700;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-/* ===== Design Tokens (外语�?v3.0) ===== */
+/* ===== Design Tokens (外语�?v3.0) ===== */
 :root {
   /* === Dark Surface (4-level) === */
   --bg-primary: #0a0a12;
@@ -100,7 +100,7 @@
 * { margin:0; padding:0; box-sizing:border-box; }
 body { font-family:var(--font-sc); background:var(--bg-primary); color:var(--text-primary); min-height:100vh; position:relative; scroll-padding-top:52px; }
 body::before { content:''; position:fixed; inset:0; background:url('bg.jpg') center top/cover no-repeat; opacity:0.55; z-index:0; pointer-events:none; }
-/* ── 氛围光晕系统（重�?v2�?────────── */
+/* ── 氛围光晕系统（重�?v2�?────────── */
 .ambient-glow { position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden; }
 .ambient-glow .glow { position:absolute; width:500px; height:500px; border-radius:50%; filter:blur(120px); opacity:0.25; will-change:transform; }
 .ambient-glow .glow-1 { top:-120px; right:-80px; background:radial-gradient(circle, rgba(245,158,11,0.3) 0%, transparent 70%); width:600px; height:600px; opacity:0.2; }
@@ -115,7 +115,7 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 .hero::before { content:''; position:absolute; inset:0; }
 .hero::after { content:''; position:absolute; inset:0; background:linear-gradient(180deg, transparent 40%, var(--bg-primary) 100%); z-index:1; }
 
-/* Hero 内容�?*/
+/* Hero 内容�?*/
 .hero-content { position:relative; z-index:2; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:0 24px; width:100%; }
 .hero-badge { display:inline-flex; align-items:center; gap:4px; background:rgba(245,158,11,0.12); border:1px solid rgba(245,158,11,0.2); border-radius:var(--radius-full); padding:3px 10px 3px 8px; margin-bottom:8px; backdrop-filter:blur(4px); }
 .hero-badge-icon { font-size:14px; }
@@ -131,7 +131,7 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 .hero-cta-secondary { background:rgba(255,255,255,0.06); color:var(--text-secondary); border:1px solid rgba(255,255,255,0.1); backdrop-filter:blur(4px); }
 .hero-cta-secondary:hover { background:rgba(255,255,255,0.1); color:var(--text-primary); }
 
-/* ── 新用户引导横�?────────────────── */
+/* ── 新用户引导横�?────────────────── */
 .onboarding-banner { position:relative; background:linear-gradient(135deg, rgba(168,85,247,0.08) 0%, rgba(245,158,11,0.08) 100%); border:1px solid rgba(168,85,247,0.15); border-radius:var(--radius-md); padding:10px 14px; margin-bottom:14px; display:flex; align-items:center; gap:10px; animation:fadeSlideIn 0.5s ease; cursor:pointer; }
 .onboarding-banner.hidden { display:none; }
 @keyframes pulseGlow { 0%,100%{opacity:0.6} 50%{opacity:1} }
@@ -151,7 +151,7 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 .vwb-sub { font-size:12px; color:#888; margin-top:6px; letter-spacing:1px; }
 
 /* ===== 首页 · 四向节奏 v2 ===== */
-/* 品牌标题�?*/
+/* 品牌标题�?*/
 .brand-section { padding:64px 0 56px; text-align:center; position:relative; }
 .brand-title {
   font-family:var(--font-jp); font-size:44px; font-weight:900;
@@ -161,7 +161,7 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 }
 .brand-subtitle { font-size:15px; color:var(--text-tertiary); letter-spacing:4px; font-weight:400; }
 
-/* 非对�?pair 卡片 �?玻璃质感重设�?*/
+/* 非对�?pair 卡片 �?玻璃质感重设�?*/
 .pair-section { display:flex; gap:14px; margin-bottom:16px; }
 .pair-card {
   flex:1; display:flex; align-items:center; gap:14px;
@@ -185,7 +185,7 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 }
 .pair-card:hover { transform:translateY(-3px); }
 .pair-card:hover::before { opacity:0.7; transform:scale(1.2); }
-/* 📸 扫描�?�?紫→珊瑚渐变 */
+/* 📸 扫描�?�?紫→珊瑚渐变 */
 .pair-card-scan { transform:translateX(-6px) translateY(4px); border-color:rgba(233,69,96,0.3); }
 .pair-card-scan::after {
   content:''; position:absolute; inset:0; pointer-events:none; border-radius:inherit;
@@ -193,7 +193,7 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 }
 .pair-card-scan:hover { border-color:var(--coral); box-shadow:0 8px 32px rgba(233,69,96,0.18), 0 4px 24px rgba(0,0,0,0.3); }
 .pair-card-scan:hover::after { background:linear-gradient(135deg, rgba(233,69,96,0.12), transparent 50%); }
-/* 📚 自动背单词卡 �?紫→琥珀渐变 */
+/* 📚 自动背单词卡 �?紫→琥珀渐变 */
 .pair-card-autoplay { transform:translateX(6px) translateY(-4px); border-color:rgba(245,158,11,0.3); }
 .pair-card-autoplay::after {
   content:''; position:absolute; inset:0; pointer-events:none; border-radius:inherit;
@@ -209,7 +209,7 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 .pair-card-arrow { font-size:16px; color:var(--text-quaternary); flex-shrink:0; transition:transform 0.3s ease; }
 .pair-card:hover .pair-card-arrow { transform:translateX(4px); }
 
-/* 游戏宽区 �?玻璃质感 + 紫珀光晕 */
+/* 游戏宽区 �?玻璃质感 + 紫珀光晕 */
 .game-wide {
   position:relative; border-radius:var(--radius-lg); overflow:hidden; cursor:pointer;
   background:linear-gradient(135deg, rgba(18,18,30,0.5), rgba(18,18,30,0.25));
@@ -243,7 +243,7 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 .game-wide-arrow { font-size:20px; color:var(--text-quaternary); flex-shrink:0; transition:transform 0.3s ease; }
 .game-wide:hover .game-wide-arrow { transform:translateX(6px); }
 
-/* 响应式调�?*/
+/* 响应式调�?*/
 @media(max-width:600px){
   .brand-section { padding:48px 0 40px; }
   .brand-title { font-size:34px; letter-spacing:4px; }
@@ -347,7 +347,7 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 .h-entry-small .h-sub { font-size:11px; margin-top:4px; }
 .h-entry-vocab { border-color:rgba(233,69,96,0.3); }
 .h-entry-vocab:hover { border-color:#e94560; box-shadow:0 8px 30px rgba(233,69,96,0.2); }
-/* AI 搜索�?*/
+/* AI 搜索�?*/
 .search-bar-wrap { margin-bottom: 16px; position: relative; }
 .search-bar { display:flex; align-items:center; background:var(--bg-surface-2); border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:4px 16px; transition:all 0.3s; }
 .search-bar:focus-within { border-color:var(--purple); box-shadow:0 0 20px rgba(168,85,247,0.15); }
@@ -360,7 +360,7 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 .search-btn { background:linear-gradient(135deg,var(--purple),#7c3aed); border:none; color:#fff; padding:8px 18px; border-radius:var(--radius-sm); font-size:var(--fs-caption); font-weight:600; cursor:pointer; transition:opacity 0.2s,transform 0.2s,background 0.2s,border-color 0.2s; margin-left:8px; flex-shrink:0; }
 .search-btn:hover { transform:translateY(-1px); box-shadow:0 4px 15px rgba(168,85,247,0.3); }
 .search-btn:active { transform:translateY(0); }
-/* 通用微交互动画：按钮点击收缩，卡片点击下�?*/
+/* 通用微交互动画：按钮点击收缩，卡片点击下�?*/
 .search-result-item:active { transform:scale(0.99); }
 .btn:active { transform:scale(0.96); }
 .vwb:active { transform:translateY(0); }
@@ -468,7 +468,7 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 .legend { display:flex; gap:10px; flex-wrap:wrap; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:8px 12px; margin-bottom:14px; font-size:11px; color:#888; }
 .vg { display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:8px; }
 
-/* 汉字切换：三级模式（不影响定位的元素�?*/
+/* 汉字切换：三级模式（不影响定位的元素�?*/
 .vh1 .vm { display:none; }
 .vh2 .vw { visibility:hidden; }
 .vh2 .vr { font-size:22px; font-weight:700; color:#fff; margin-bottom:6px; padding:4px 0; }
@@ -588,7 +588,7 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 .toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%) translateY(14px); background:var(--bg-surface-2); border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:8px 18px; font-size:var(--fs-small); opacity:0; transition:opacity 0.3s,transform 0.3s,background 0.3s,border-color 0.3s; pointer-events:none; z-index:999; box-shadow:var(--shadow-elevated); }
 .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
-/* --- 新增：颜色标记按�?--- */
+/* --- 新增：颜色标记按�?--- */
 .vm-btn-group { display:flex; gap:3px; margin-left:auto; align-items:center; }
 .vm-btn { width:22px; height:22px; border-radius:50%; border:2px solid transparent; cursor:pointer; transition:opacity 0.2s,transform 0.2s,background 0.2s,border-color 0.2s; padding:0; font-size:11px; display:inline-flex; align-items:center; justify-content:center; opacity:0.35; background:transparent; }
 .vm-btn:hover { transform:scale(1.25); opacity:0.8; }
@@ -600,17 +600,17 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 .v-info { cursor:pointer; font-size:14px; margin-left:6px; opacity:0.5; transition:opacity 0.2s; vertical-align:middle; }
 .v-info:hover { opacity:1; }
 
-/* --- 浏览学习：卡片折叠状�?--- */
+/* --- 浏览学习：卡片折叠状�?--- */
 .vc-fold .vw { visibility:hidden; }
 .vc-fold .vr { font-size:22px; font-weight:700; color:#fff; margin-bottom:6px; padding:4px 0; }
 .vc-fold .vm { display:none; }
 /* ===== 移动端适配 ===== */
 @media(max-width:768px){
   .main{ padding:10px; }
-  /* 导航栏水平滚�?*/
+  /* 导航栏水平滚�?*/
   .tabs{ overflow-x:auto; -webkit-overflow-scrolling:touch; flex-wrap:nowrap; gap:0; padding:0 4px; justify-content:flex-start; }
   .tabs .tab{ flex-shrink:0; font-size:12px; padding:8px 10px; }
-  /* 顶部操作栏自动换�?*/
+  /* 顶部操作栏自动换�?*/
   #p-vocab .st2, #p-vocab .st3{ flex-wrap:wrap; gap:4px; }
   #p-vocab .st2 .tab, #p-vocab .st3 .tab{ font-size:11px; padding:5px 8px; }
   /* 单词卡片全宽 */
@@ -644,10 +644,10 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
   .sc{ padding:10px; }
   .sc .sn{ font-size:22px; }
   .sc .sl{ font-size:11px; }
-  /* 详情弹窗 �?底部 3/5 上滑 */
+  /* 详情弹窗 �?底部 3/5 上滑 */
   .dw{ width:100vw !important; max-width:100vw !important; height:60vh !important; top:auto !important; bottom:-60vh; right:0 !important; border-radius:14px 14px 0 0; transition:bottom 0.35s cubic-bezier(0.4,0,0.2,1); }
   .dw.open{ bottom:0; }
-  /* 弹性滚�?防滑 */
+  /* 弹性滚�?防滑 */
   .dw .db{ -webkit-overflow-scrolling:touch; }
   .ol.open{ touch-action:none; }
   .hero{ min-height:60px; }
@@ -655,7 +655,7 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
   .cs{ max-width:100%; }
   .sp .st{ gap:6px; }
   .sp .st .btn{ font-size:10px; padding:3px 8px; }
-  /* 复习�?*/
+  /* 复习�?*/
   .re{ padding:20px; }
   .re .rem{ font-size:36px; }
 }
@@ -682,7 +682,7 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 .lvl-btn{ padding:6px 14px; border-radius:6px; border:1px solid #333; background:#16213e; color:#aaa; font-size:12px; cursor:pointer; transition:opacity .2s,transform .2s,background .2s,border-color .2s; }
 .lvl-btn.active{ background:linear-gradient(135deg,#e94560,#a855f7); color:#fff; border-color:transparent; }
 .lvl-btn:hover{ border-color:#a855f7; }
-/* 自动播放选项�?*/
+/* 自动播放选项�?*/
 .ap-tag{ user-select:none; }
 .ap-tag:hover{ opacity:0.85; transform:scale(0.97); }
 .ap-section{ transition:border-color 0.2s; }
@@ -768,7 +768,7 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 /* ── 粘贴图片 ───────────────── */
 .scan-paste-hint { font-size:11px; color:#555; text-align:center; margin-top:8px; }
 
-/* ══�?Top Bar (simplified) ══�?*/
+/* ══�?Top Bar (simplified) ══�?*/
 .topbar {
   position: sticky; top: 0; z-index: 100;
   height: 52px;
@@ -783,7 +783,7 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 }
 .topbar__logo { display: flex; flex-direction: column; line-height: 1.2; flex-shrink: 0; }
 .topbar__main {
-  font-size: 17px; font-weight: 800;
+  font-size: 15px; font-weight: 800;
   background: linear-gradient(135deg, var(--amber), var(--coral));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -797,7 +797,7 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 }
 .topbar__title.show { opacity: 1; }
 
-/* ══�?Bottom Navigation Bar ══�?*/
+/* ══�?Bottom Navigation Bar ══�?*/
 .bottombar {
   --nav-h: 62px;
   position: fixed; bottom: 0; left: 0; right: 0;
@@ -855,7 +855,7 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 .bottombar__item--active .bottombar__icon { transform: translateY(-1px); }
 .bottombar__label { line-height: 1; font-size: 10px; letter-spacing: 0.3px; }
 
-/* ══�?Submenu Overlay Panels ══�?*/
+/* ══�?Submenu Overlay Panels ══�?*/
 .submenu-overlay {
   position: fixed; bottom: 62px; left: 0; right: 0;
   background: linear-gradient(180deg, var(--bg-surface-2) 0%, rgba(18,18,30,0.97) 100%);
@@ -888,7 +888,7 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
   grid-template-columns: repeat(3, 1fr);
   gap: 8px;
 }
-/* 学习子菜�?�?�?2x2布局 */
+/* 学习子菜�?�?�?2x2布局 */
 #submenuLearn .submenu-grid {
   grid-template-columns: repeat(2, 1fr);
 }
@@ -931,7 +931,7 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 }
 
 
-/* ══�?Word Card (Glassmorphism) ══�?*/
+/* ══�?Word Card (Glassmorphism) ══�?*/
 .vc {
   position: relative;
   padding: 18px 20px;
@@ -1146,8 +1146,7 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 </div>
 <header class="topbar">
   <div class="topbar__logo" onclick="go('home')" style="cursor:pointer">
-    <span class="topbar__main">日语�?/span>
-    <span class="topbar__sub">快乐背单�?/span>
+    <span class="topbar__main">�?琛屽皬涔嬬殑澶栬瑙?�?/span>
   </div>
   <span class="topbar__title" id="topbarTitle"></span>
 </header>
@@ -1186,11 +1185,11 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
     </div>
     <div class="submenu-item" onclick="go('autoplay');closeSubmenu()">
       <span class="sub-icon">▶️</span>
-      <span class="sub-label">自动背单�?/span>
+      <span class="sub-label">自动背单�?/span>
     </div>
     <div class="submenu-item" onclick="go('vocab');closeSubmenu()">
-      <span class="sub-icon">🗂�?/span>
-      <span class="sub-label">单词�?/span>
+      <span class="sub-icon">🗂�?/span>
+      <span class="sub-label">单词�?/span>
     </div>
   </div>
 </div>
@@ -1201,15 +1200,15 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
   <div class="submenu-grid">
     <div class="submenu-item" onclick="go('review');closeSubmenu()">
       <span class="sub-icon">📖</span>
-      <span class="sub-label">待复�?/span>
+      <span class="sub-label">待复�?/span>
     </div>
     <div class="submenu-item" onclick="go('book');closeSubmenu()">
-      <span class="sub-icon">🗂�?/span>
-      <span class="sub-label">单词�?/span>
+      <span class="sub-icon">🗂�?/span>
+      <span class="sub-label">单词�?/span>
     </div>
     <div class="submenu-item" onclick="go('wrong');closeSubmenu()">
       <span class="sub-icon">⚠️</span>
-      <span class="sub-label">错题�?/span>
+      <span class="sub-label">错题�?/span>
     </div>
   </div>
 </div>
@@ -1220,11 +1219,11 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
   <div class="submenu-grid">
     <div class="submenu-item" onclick="go('game');closeSubmenu()">
       <span class="sub-icon">🎮</span>
-      <span class="sub-label">单词大冒�?/span>
+      <span class="sub-label">单词大冒�?/span>
     </div>
     <div class="submenu-item" onclick="go('quiz');closeSubmenu()">
       <span class="sub-icon">📋</span>
-      <span class="sub-label">模拟�?/span>
+      <span class="sub-label">模拟�?/span>
     </div>
   </div>
 </div>
@@ -1233,24 +1232,24 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 <!-- 🏠 首页 · 四向节奏 v2 -->
 <div class="main"><div class="page active" id="p-home">
 
-  <!-- �?节奏一：品牌标�?-->
+  <!-- �?节奏一：品牌标�?-->
   <div class="brand-section">
-    <h1 class="brand-title">日本語コーナ�?/h1>
-    <p class="brand-subtitle">�?行小之的外语�?�?/p>
+    <h1 class="brand-title">日本語コーナ�?/h1>
+    <p class="brand-subtitle">�?行小之的外语�?�?/p>
   </div>
 
-  <!-- �?节奏二：搜索栏（贯穿式） -->
+  <!-- �?节奏二：搜索栏（贯穿式） -->
   <div class="search-bar-wrap">
     <div class="search-bar">
       <span class="search-icon">🔍</span>
-      <input class="search-input" id="aiSearchInput" type="text" placeholder="搜单词、搜句子、试试「美味しい�? maxlength="200" autocomplete="off">
-      <span class="search-clear" id="searchClear">�?/span>
+      <input class="search-input" id="aiSearchInput" type="text" placeholder="搜单词、搜句子、试试「美味しい�? maxlength="200" autocomplete="off">
+      <span class="search-clear" id="searchClear">�?/span>
       <button class="search-btn" id="searchBtn">搜索</button>
     </div>
     <div class="search-results" id="searchResults"></div>
   </div>
 
-  <!-- �?节奏三：非对�?pair 卡片 -->
+  <!-- �?节奏三：非对�?pair 卡片 -->
   <div class="pair-section">
     <div class="pair-card pair-card-scan" onclick="go('scan')">
       <div class="pair-card-icon">📸</div>
@@ -1258,52 +1257,52 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
         <div class="pair-card-title">拍照识图 <span class="pair-badge">Beta</span></div>
         <div class="pair-card-sub">拍下即查 · 自动识别翻译</div>
       </div>
-      <div class="pair-card-arrow">�?/div>
+      <div class="pair-card-arrow">�?/div>
     </div>
     <div class="pair-card pair-card-autoplay" onclick="go('autoplay')">
       <div class="pair-card-icon">📚</div>
       <div class="pair-card-text">
-        <div class="pair-card-title">自动背单�?/div>
+        <div class="pair-card-title">自动背单�?/div>
         <div class="pair-card-sub">考级分类 · 场景分类 · 自动播放</div>
       </div>
-      <div class="pair-card-arrow">�?/div>
+      <div class="pair-card-arrow">�?/div>
     </div>
   </div>
 
-  <!-- �?节奏四：游戏宽区 -->
+  <!-- �?节奏四：游戏宽区 -->
   <div class="game-wide" onclick="go('game')">
     <div class="game-wide-bg"></div>
     <div class="game-wide-content">
       <div class="game-wide-icon">🎮</div>
       <div class="game-wide-info">
-        <div class="game-wide-title">单词大冒�?/div>
+        <div class="game-wide-title">单词大冒�?/div>
         <div class="game-wide-sub">爬塔答题 · 拳击对战</div>
       </div>
       <div class="game-wide-chips">
-        <span class="game-chip game-chip-challenge">�?今日挑战</span>
-        <span class="game-chip game-chip-rank">🏆 排行�?/span>
+        <span class="game-chip game-chip-challenge">�?今日挑战</span>
+        <span class="game-chip game-chip-rank">🏆 排行�?/span>
       </div>
-      <div class="game-wide-arrow">�?/div>
+      <div class="game-wide-arrow">�?/div>
     </div>
   </div>
 
-  <!-- �?节奏五：学习计划展示�?-->
+  <!-- �?节奏五：学习计划展示�?-->
   <div id="continueSection" style="display:none">
-    <div class="dst" style="margin-top:16px">�?继续学习</div>
+    <div class="dst" style="margin-top:16px">�?继续学习</div>
     <div id="continueInfo" style="font-size:12px;color:#888;margin-bottom:10px"></div>
-    <button class="btn bs" onclick="resumeLastSession()" style="width:100%;padding:10px;font-size:14px">�?继续学习</button>
+    <button class="btn bs" onclick="resumeLastSession()" style="width:100%;padding:10px;font-size:14px">�?继续学习</button>
   </div>
   <div class="dst" style="margin-top:16px">📋 我的学习计划</div>
   <div id="planList"></div>
 
 </div>
 
-<!-- 词汇�?-->
+<!-- 词汇�?-->
 <div class="page" id="p-vocab">
   <div id="sp" style="display:none">
     <div class="sp">
       <div class="st">
-        <button class="btn bs" style="padding:4px 10px;font-size:11px" onclick="exitS()">�?返回</button>
+        <button class="btn bs" style="padding:4px 10px;font-size:11px" onclick="exitS()">�?返回</button>
         <div class="pb" style="cursor:pointer" id="studyProgressBar" onclick="studySeek(event)" onmousedown="studyDragStart(event)" ontouchstart="studyDragStart(event)"><div class="pf" id="pf" style="width:5%"></div></div>
         <span id="pt" style="font-size:11px;color:#888;white-space:nowrap">1/30</span>
       </div>
@@ -1317,11 +1316,11 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
             <div class="ch">点击翻转 · 查看释义</div>
           </div>
           <div class="cf cbk">
-            <div class="cm" id="cbm">她；女朋�?/div>
+            <div class="cm" id="cbm">她；女朋�?/div>
             <div class="ct" id="cbt">代词</div>
-            <div class="ce"><div class="jp" id="cbej">彼女は医者です�?/div>
-              <div id="cber" style="font-size:11px;color:#4ecca3;margin-bottom:3px">かのじょ �?いし�?です�?/div>
-              <div id="cbec" style="color:#888">她是医生�?/div>
+            <div class="ce"><div class="jp" id="cbej">彼女は医者です�?/div>
+              <div id="cber" style="font-size:11px;color:#4ecca3;margin-bottom:3px">かのじょ �?いし�?です�?/div>
+              <div id="cbec" style="color:#888">她是医生�?/div>
             </div>
             <div style="margin-top:6px" id="cbb"></div>
           </div>
@@ -1330,7 +1329,7 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
       <div style="display:flex;justify-content:center;gap:8px;margin-bottom:10px">
         <button class="btn bs" style="padding:5px 12px;font-size:11px" onclick="speakW()">🔊 单词</button>
         <button class="btn bs" style="padding:5px 12px;font-size:11px" onclick="speakE()">📢 例句</button>
-        <button class="btn br" style="padding:5px 12px;font-size:11px" onclick="studyNext()">�?下一�?/button>
+        <button class="btn br" style="padding:5px 12px;font-size:11px" onclick="studyNext()">�?下一�?/button>
       </div>
       <div id="abtns" style="display:none;justify-content:center;flex-wrap:wrap;gap:8px">
         <button class="btn ba" onclick="rate(0)">😵 不会</button>
@@ -1340,15 +1339,15 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
     </div>
     <div class="comp" id="comp">
       <div class="cemo">🎉</div>
-      <div class="ctit">本轮学习完成�?/div>
-      <div class="cdesc">太棒了！这批词汇已加入遗忘曲线复习计划�?/div>
+      <div class="ctit">本轮学习完成�?/div>
+      <div class="cdesc">太棒了！这批词汇已加入遗忘曲线复习计划�?/div>
       <div class="cst">
-        <div><div class="csn" id="rn1" style="color:#4ecca3">0</div><div class="csl">学习�?/div></div>
+        <div><div class="csn" id="rn1" style="color:#4ecca3">0</div><div class="csl">学习�?/div></div>
         <div><div class="csn" id="rn2" style="color:#f5a623">0</div><div class="csl">需复习</div></div>
-        <div><div class="csn" id="rn3" style="color:#533483">0</div><div class="csl">已掌�?/div></div>
+        <div><div class="csn" id="rn3" style="color:#533483">0</div><div class="csl">已掌�?/div></div>
       </div>
       <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-        <button class="btn bp" onclick="startStudy(curF)">再学一�?/button>
+        <button class="btn bp" onclick="startStudy(curF)">再学一�?/button>
         <button class="btn bs" onclick="go('vocab')">返回列表</button>
       </div>
     </div>
@@ -1362,11 +1361,11 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
         <button class="tab" onclick="setF('n1',this)">N1</button>
       </div>
       <div class="st3" style="display:inline-flex;margin-left:6px">
-        <button class="tab active" onclick="sortV('freq',this)">📊 高频�?/button>
+        <button class="tab active" onclick="sortV('freq',this)">📊 高频�?/button>
         <button class="tab" onclick="sortV('random',this)">🔀 随机</button>
-        <button class="tab" onclick="sortV('rand100',this)">🎲 随机100�?/button>
-        <button class="tab" onclick="sortV('rand200',this)">🎲 随机200�?/button>
-        <button class="tab" onclick="sortV('rand500',this)">🎲 随机500�?/button>
+        <button class="tab" onclick="sortV('rand100',this)">🎲 随机100�?/button>
+        <button class="tab" onclick="sortV('rand200',this)">🎲 随机200�?/button>
+        <button class="tab" onclick="sortV('rand500',this)">🎲 随机500�?/button>
         <button class="tab" onclick="sortV('category',this)">📂 按分类背</button>
         <button class="tab" onclick="sortV('studyCount',this)">📖 按学习次数背</button>
       </div>
@@ -1375,27 +1374,27 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
       </div>
       <div style="display:inline-flex;margin-left:6px">
         <button class="tab" onclick="setVMark('red',this)" title="筛选不认识">🔴</button>
-        <button class="tab" onclick="setVMark('yellow',this)" title="筛选模�?>🟡</button>
+        <button class="tab" onclick="setVMark('yellow',this)" title="筛选模�?>🟡</button>
         <button class="tab" onclick="setVMark('green',this)" title="筛选已掌握">🟢</button>
       </div>
       <div style="margin-left:auto;display:flex;align-items:center;gap:8px">
         <span id="sortLabel" style="font-size:11px;color:#888">📊 高频降序</span>
         <span id="vocabCount" style="font-size:11px;color:#6b7280"></span>
-        <button class="btn bp" style="padding:5px 12px;font-size:11px" onclick="startStudyFromWall()">�?学习</button>
-        <button class="btn bg" style="padding:5px 8px;font-size:11px" onclick="showAutoPlayOptions()">�?选项</button>
-        <button class="btn bs" style="padding:5px 8px;font-size:11px" onclick="startAutoPlay()">�?自动播放</button>
+        <button class="btn bp" style="padding:5px 12px;font-size:11px" onclick="startStudyFromWall()">�?学习</button>
+        <button class="btn bg" style="padding:5px 8px;font-size:11px" onclick="showAutoPlayOptions()">�?选项</button>
+        <button class="btn bs" style="padding:5px 8px;font-size:11px" onclick="startAutoPlay()">�?自动播放</button>
       </div>
     </div>
     <div class="legend">
-      <span class="fb fb-s">★★★★</span> 常�?8�?)&nbsp;&nbsp;
-      <span class="fb fb-a">★★�?/span> 高频(5-7�?&nbsp;&nbsp;
-      <span class="fb fb-b">★★</span> 常见(3-4�?
+      <span class="fb fb-s">★★★★</span> 常�?8�?)&nbsp;&nbsp;
+      <span class="fb fb-a">★★�?/span> 高频(5-7�?&nbsp;&nbsp;
+      <span class="fb fb-b">★★</span> 常见(3-4�?
     </div>
     <div class="vg" id="vocabG"></div>
   </div>
 </div>
 
-<!-- 语法�?-->
+<!-- 语法�?-->
 <div class="page" id="p-grammar">
   <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px">
     <div class="st2" style="display:inline-flex">
@@ -1405,7 +1404,7 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
     </div>
     <div class="st3" style="display:inline-flex;margin-left:6px">
       <button class="tab" onclick="setGMark('red',this)" title="筛选不认识">🔴</button>
-      <button class="tab" onclick="setGMark('yellow',this)" title="筛选模�?>🟡</button>
+      <button class="tab" onclick="setGMark('yellow',this)" title="筛选模�?>🟡</button>
       <button class="tab" onclick="setGMark('green',this)" title="筛选已掌握">🟢</button>
     </div>
     <div style="display:inline-flex;margin-left:6px">
@@ -1417,31 +1416,31 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
     <div style="margin-left:auto;display:flex;align-items:center;gap:8px">
       <span id="gSortLabel" style="font-size:11px;color:#888"></span>
       <span id="gCount" style="font-size:11px;color:#6b7280"></span>
-      <button class="btn bg" style="padding:5px 8px;font-size:11px" onclick="showGAutoPlayOptions()">�?选项</button>
-      <button class="btn bs" style="padding:5px 8px;font-size:11px" onclick="startGAutoPlay()">�?自动播放</button>
+      <button class="btn bg" style="padding:5px 8px;font-size:11px" onclick="showGAutoPlayOptions()">�?选项</button>
+      <button class="btn bs" style="padding:5px 8px;font-size:11px" onclick="startGAutoPlay()">�?自动播放</button>
     </div>
   </div>
   <div class="gl" id="grammarL"></div>
 </div>
 
-<!-- 真题模拟训练�?-->
+<!-- 真题模拟训练�?-->
 <div class="page" id="p-quiz">
   <div id="quizStart">
     <div class="qg" style="margin-bottom:16px">
       <div class="ac" onclick="startQuiz('high')" style="border-color:rgba(233,69,96,0.3)">
         <div class="ai">🔥</div>
         <div class="at">高频真题训练</div>
-        <div class="ad">历年出现8次以�?· 核心考点</div>
+        <div class="ad">历年出现8次以�?· 核心考点</div>
       </div>
       <div class="ac" onclick="startQuiz('normal')">
         <div class="ai">📝</div>
         <div class="at">真题训练</div>
-        <div class="ad">历年出现3-7�?· 全面覆盖</div>
+        <div class="ad">历年出现3-7�?· 全面覆盖</div>
       </div>
       <div class="ac" onclick="startQuiz('real')" style="border-color:rgba(78,204,163,0.3)">
         <div class="ai">📋</div>
         <div class="at">全套真题练习</div>
-        <div class="ad">2024�?�?N2 全部71�?/div>
+        <div class="ad">2024�?�?N2 全部71�?/div>
       </div>
     </div>
   </div>
@@ -1449,28 +1448,28 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
       <span style="font-size:12px;color:#888" id="quizProg"></span>
       <div class="pb" style="flex:1;height:4px"><div class="pf" id="quizBar" style="width:0"></div></div>
-      <button class="btn bs" style="padding:4px 10px;font-size:11px" onclick="exitQuiz()">�?返回</button>
+      <button class="btn bs" style="padding:4px 10px;font-size:11px" onclick="exitQuiz()">�?返回</button>
     </div>
     <div id="quizPassage" style="display:none;margin-bottom:8px"></div>
     <div id="quizQ" style="background:#1a1a2e;border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:18px;margin-bottom:14px;font-size:14px;line-height:1.8;min-height:80px"></div>
     <div id="quizOpts" style="display:grid;gap:8px;margin-bottom:16px"></div>
     <div id="quizFeedback" style="display:none;background:rgba(15,52,96,0.4);border-radius:10px;padding:12px;margin-bottom:14px;font-size:13px;line-height:1.7"></div>
     <div style="display:flex;justify-content:center;gap:10px">
-      <button class="btn bs" id="quizNextBtn" style="display:none;padding:8px 24px" onclick="nextQuiz()">下一�?�?/button>
+      <button class="btn bs" id="quizNextBtn" style="display:none;padding:8px 24px" onclick="nextQuiz()">下一�?�?/button>
     </div>
   </div>
   <div id="quizResult" style="display:none;text-align:center;padding:40px 20px">
     <div style="font-size:48px;margin-bottom:16px" id="quizEmo">🎉</div>
-    <div style="font-size:20px;font-weight:700;margin-bottom:8px;color:#eaeaea" id="quizTitle">完成�?/div>
+    <div style="font-size:20px;font-weight:700;margin-bottom:8px;color:#eaeaea" id="quizTitle">完成�?/div>
     <div style="font-size:14px;color:#888;margin-bottom:20px" id="quizScore"></div>
     <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-      <button class="btn bp" id="quizRetryBtn" onclick="startQuiz(document.getElementById('quizMode').value)">再练一�?/button>
+      <button class="btn bp" id="quizRetryBtn" onclick="startQuiz(document.getElementById('quizMode').value)">再练一�?/button>
       <button class="btn bs" onclick="exitQuiz()">返回题库</button>
     </div>
   </div>
 </div>
 
-<!-- 复习�?-->
+<!-- 复习�?-->
 <div class="page" id="p-review">
   <div id="reviewC"></div>
 </div>
@@ -1479,7 +1478,7 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 <div class="page" id="p-book">
   <div style="margin-bottom:14px;display:flex;align-items:center;justify-content:space-between">
     <span style="color:#888;font-size:13px" id="bookCount"></span>
-    <button class="btn br" style="font-size:11px;padding:5px 10px" onclick="clearBook()">清空生词�?/button>
+    <button class="btn br" style="font-size:11px;padding:5px 10px" onclick="clearBook()">清空生词�?/button>
   </div>
   <div id="bookC"></div>
 </div>
@@ -1490,13 +1489,13 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
     <span style="color:#888;font-size:13px" id="wrongCount"></span>
     <div style="display:flex;gap:8px">
       <button class="btn bp" style="font-size:11px;padding:5px 10px" onclick="startWrongQuiz()">📝 错题重练</button>
-      <button class="btn br" style="font-size:11px;padding:5px 10px" onclick="clearWrong()">清空错题�?/button>
+      <button class="btn br" style="font-size:11px;padding:5px 10px" onclick="clearWrong()">清空错题�?/button>
     </div>
   </div>
   <div id="wrongC"></div>
 </div>
 
-<!-- ===== 游戏�?===== -->
+<!-- ===== 游戏�?===== -->
 <div class="page" id="p-game"></div>
 
 <!-- ===== 自动播放 ===== -->
@@ -1507,12 +1506,12 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
   <div class="scan-header">
     <div class="scan-header-icon">📸</div>
     <div class="scan-header-title">日文试卷识图翻译</div>
-    <div class="scan-header-sub">拍照或选择图片 �?自动识别日文 �?翻译成中�?/div>
+    <div class="scan-header-sub">拍照或选择图片 �?自动识别日文 �?翻译成中�?/div>
   </div>
-  <!-- 无图片时显示上传�?-->
+  <!-- 无图片时显示上传�?-->
   <div id="scanEmpty">
     <div class="scan-upload-area" id="scanUploadArea">
-      <div class="scan-upload-icon">🖼�?/div>
+      <div class="scan-upload-icon">🖼�?/div>
       <div class="scan-upload-text">点击选择图片，或直接粘贴截图</div>
       <div class="scan-upload-actions">
         <button class="scan-btn scan-btn-primary" onclick="triggerUpload()">📁 从相册选择</button>
@@ -1520,32 +1519,32 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
       </div>
     </div>
   </div>
-  <!-- 有图片时显示预览�?-->
+  <!-- 有图片时显示预览�?-->
   <div id="scanPreview" style="display:none">
     <div class="scan-img-wrap">
       <img id="scanImage" class="scan-img" alt="试卷预览">
-      <button class="scan-img-clear" onclick="clearScanImage()">�?/button>
+      <button class="scan-img-clear" onclick="clearScanImage()">�?/button>
     </div>
     <div class="scan-actions">
       <button class="scan-btn scan-btn-primary scan-btn-lg" id="scanDoBtn" onclick="doScan()">
-        🔍 识别并翻�?
+        🔍 识别并翻�?
       </button>
       <button class="scan-btn scan-btn-lg" onclick="clearScanImage()">🔄 重新选择</button>
     </div>
   </div>
-  <!-- 识别�?-->
+  <!-- 识别�?-->
   <div id="scanLoading" style="display:none">
     <div class="scan-loading">
       <div class="scan-loading-spinner"></div>
       <div class="scan-loading-text" id="scanLoadingText">正在识别图片中的日文...</div>
     </div>
   </div>
-  <!-- 结果�?-->
+  <!-- 结果�?-->
   <div id="scanResult" style="display:none">
     <div class="scan-result-tabs">
       <button class="scan-result-tab active" onclick="switchScanView('parallel',this)">📄 对照</button>
       <button class="scan-result-tab" onclick="switchScanView('orig',this)">🈸 原文</button>
-      <button class="scan-result-tab" onclick="switchScanView('trans',this)">�?译文</button>
+      <button class="scan-result-tab" onclick="switchScanView('trans',this)">�?译文</button>
     </div>
     <div class="scan-result-body" id="scanResultBody">
       <div class="scan-columns" id="scanParallel">
@@ -1554,7 +1553,7 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
           <div class="scan-col-content" id="scanJpText"></div>
         </div>
         <div class="scan-col">
-          <div class="scan-col-title">�?中文译文</div>
+          <div class="scan-col-title">�?中文译文</div>
           <div class="scan-col-content" id="scanCnText"></div>
         </div>
       </div>
@@ -1566,7 +1565,7 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
       </div>
     </div>
     <div class="scan-result-actions">
-      <button class="scan-btn" onclick="clearScanImage()">🔄 识别下一�?/button>
+      <button class="scan-btn" onclick="clearScanImage()">🔄 识别下一�?/button>
       <button class="scan-btn" onclick="copyScanResult()">📋 复制译文</button>
     </div>
   </div>
@@ -1575,7 +1574,7 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
     <div class="sect" style="font-size:13px">📜 历史记录</div>
     <div id="scanHistoryList"></div>
   </div>
-  <!-- 隐藏的文件输�?-->
+  <!-- 隐藏的文件输�?-->
   <input type="file" id="scanFileInput" accept="image/*" style="display:none" onchange="handleScanFile(this)">
   <input type="file" id="scanCameraInput" accept="image/*" capture="environment" style="display:none" onchange="handleScanFile(this)">
 </div>
@@ -1586,8 +1585,8 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 <div class="ol" id="ol" onclick="closeD()"></div>
 <div class="dw" id="dw">
   <div class="dh">
-    <button class="dbk" onclick="closeD()">�?返回</button>
-    <button class="dc" onclick="closeD()">�?/button>
+    <button class="dbk" onclick="closeD()">�?返回</button>
+    <button class="dc" onclick="closeD()">�?/button>
     <div class="dwo" id="drw"></div>
     <div class="dwr" id="drr"></div>
     <div class="dwm" id="drm"></div>
@@ -1605,29 +1604,29 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
   </div>
   <div class="df" style="padding:10px 16px;border-top:1px solid rgba(255,255,255,0.06)">
     <button class="btn bs" style="padding:6px 12px;font-size:12px" onclick="speakDW()">🔊 朗读</button>
-    <button class="btn bp" style="padding:6px 12px;font-size:12px" onclick="closeD();startStudyFromWall(dwId)">�?从本词学�?/button>
-    <button class="btn bg" style="padding:6px 12px;font-size:12px" id="bookBtn" onclick="toggleBook(dwId)">📗 生词�?/button>
+    <button class="btn bp" style="padding:6px 12px;font-size:12px" onclick="closeD();startStudyFromWall(dwId)">�?从本词学�?/button>
+    <button class="btn bg" style="padding:6px 12px;font-size:12px" id="bookBtn" onclick="toggleBook(dwId)">📗 生词�?/button>
   </div>
 </div>
 
 <!-- 自动播放选项弹窗 -->
 <div class="ol" id="autoPlayOverlay" onclick="closeAutoPlayOptions()"></div>
 <div class="ap-modal" id="autoPlayModal">
-  <div class="ap-title">�?自动播放选项</div>
+  <div class="ap-title">�?自动播放选项</div>
   <div class="ap-section">
     <div class="ap-label">间隔时间</div>
-    <label class="ap-radio"><input type="radio" name="apInterval" value="0"> 0�?/label>
-    <label class="ap-radio"><input type="radio" name="apInterval" value="500"> 0.5�?/label>
-    <label class="ap-radio"><input type="radio" name="apInterval" value="1000" checked> 1�?/label>
-    <label class="ap-radio"><input type="radio" name="apInterval" value="2000"> 2�?/label>
-    <label class="ap-radio"><input type="radio" name="apInterval" value="3000"> 3�?/label>
+    <label class="ap-radio"><input type="radio" name="apInterval" value="0"> 0�?/label>
+    <label class="ap-radio"><input type="radio" name="apInterval" value="500"> 0.5�?/label>
+    <label class="ap-radio"><input type="radio" name="apInterval" value="1000" checked> 1�?/label>
+    <label class="ap-radio"><input type="radio" name="apInterval" value="2000"> 2�?/label>
+    <label class="ap-radio"><input type="radio" name="apInterval" value="3000"> 3�?/label>
   </div>
   <div class="ap-section">
     <div class="ap-label">播放内容</div>
-    <label class="ap-radio"><input type="radio" name="apContent" value="word" checked> 仅单�?/label>
+    <label class="ap-radio"><input type="radio" name="apContent" value="word" checked> 仅单�?/label>
     <label class="ap-radio"><input type="radio" name="apContent" value="both"> 单词+例句</label>
   </div>
-  <button class="btn bp" onclick="saveAutoPlayOptions()" style="width:100%;margin-top:10px">�?确认</button>
+  <button class="btn bp" onclick="saveAutoPlayOptions()" style="width:100%;margin-top:10px">�?确认</button>
 </div>
 
 <!-- 自动播放全屏界面 -->
@@ -1642,37 +1641,37 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
     <div class="ap-excn"></div>
   </div>
   <div class="ap-marks" style="margin-top:16px;display:flex;gap:6px;align-items:center;justify-content:center">
-    <button class="vbf ap-bmk" id="apBmk" onclick="apToggleBook()" style="font-size:18px">�?/button>
+    <button class="vbf ap-bmk" id="apBmk" onclick="apToggleBook()" style="font-size:18px">�?/button>
     <button class="vm-btn" onclick="apToggleMark('red')" data-color="red" style="width:18px;height:18px;font-size:9px">🔴</button>
     <button class="vm-btn" onclick="apToggleMark('yellow')" data-color="yellow" style="width:18px;height:18px;font-size:9px">🟡</button>
     <button class="vm-btn" onclick="apToggleMark('green')" data-color="green" style="width:18px;height:18px;font-size:9px">🟢</button>
   </div>
   <div class="ap-controls">
-    <button class="btn bs" style="padding:8px 16px" onclick="apTogglePause()">�?暂停</button>
-    <button class="btn br" style="padding:8px 16px" onclick="apStop()">�?停止</button>
+    <button class="btn bs" style="padding:8px 16px" onclick="apTogglePause()">�?暂停</button>
+    <button class="btn br" style="padding:8px 16px" onclick="apStop()">�?停止</button>
   </div>
-  <button class="ap-nav ap-nav-left" onclick="apPrev()">�?/button>
-  <button class="ap-nav ap-nav-right" onclick="apNext()">�?/button>
+  <button class="ap-nav ap-nav-left" onclick="apPrev()">�?/button>
+  <button class="ap-nav ap-nav-right" onclick="apNext()">�?/button>
 </div>
 
 <!-- 语法自动播放选项弹窗 -->
 <div class="ol" id="gAutoPlayOverlay" onclick="closeGAutoPlayOptions()"></div>
 <div class="ap-modal" id="gAutoPlayModal">
-  <div class="ap-title">�?语法自动播放选项</div>
+  <div class="ap-title">�?语法自动播放选项</div>
   <div class="ap-section">
     <div class="ap-label">间隔时间</div>
-    <label class="ap-radio"><input type="radio" name="gApInterval" value="0"> 0�?/label>
-    <label class="ap-radio"><input type="radio" name="gApInterval" value="500"> 0.5�?/label>
-    <label class="ap-radio"><input type="radio" name="gApInterval" value="1000" checked> 1�?/label>
-    <label class="ap-radio"><input type="radio" name="gApInterval" value="2000"> 2�?/label>
-    <label class="ap-radio"><input type="radio" name="gApInterval" value="3000"> 3�?/label>
+    <label class="ap-radio"><input type="radio" name="gApInterval" value="0"> 0�?/label>
+    <label class="ap-radio"><input type="radio" name="gApInterval" value="500"> 0.5�?/label>
+    <label class="ap-radio"><input type="radio" name="gApInterval" value="1000" checked> 1�?/label>
+    <label class="ap-radio"><input type="radio" name="gApInterval" value="2000"> 2�?/label>
+    <label class="ap-radio"><input type="radio" name="gApInterval" value="3000"> 3�?/label>
   </div>
   <div class="ap-section">
     <div class="ap-label">播放内容</div>
-    <label class="ap-radio"><input type="radio" name="gApContent" value="word" checked> 仅句�?/label>
+    <label class="ap-radio"><input type="radio" name="gApContent" value="word" checked> 仅句�?/label>
     <label class="ap-radio"><input type="radio" name="gApContent" value="both"> 句型+例句</label>
   </div>
-  <button class="btn bp" onclick="saveGAutoPlayOptions()" style="width:100%;margin-top:10px">�?确认</button>
+  <button class="btn bp" onclick="saveGAutoPlayOptions()" style="width:100%;margin-top:10px">�?确认</button>
 </div>
 
 <!-- 语法自动播放全屏界面 -->
@@ -1687,17 +1686,17 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
     <div class="ap-excn"></div>
   </div>
   <div class="ap-marks" style="margin-top:16px;display:flex;gap:6px;align-items:center;justify-content:center">
-    <button class="vbf ap-bmk" id="gApBmk" onclick="gApToggleBook()" style="font-size:18px">�?/button>
+    <button class="vbf ap-bmk" id="gApBmk" onclick="gApToggleBook()" style="font-size:18px">�?/button>
     <button class="vm-btn" onclick="gApToggleMark('red')" data-color="red" style="width:18px;height:18px;font-size:9px">🔴</button>
     <button class="vm-btn" onclick="gApToggleMark('yellow')" data-color="yellow" style="width:18px;height:18px;font-size:9px">🟡</button>
     <button class="vm-btn" onclick="gApToggleMark('green')" data-color="green" style="width:18px;height:18px;font-size:9px">🟢</button>
   </div>
   <div class="ap-controls" style="margin-top:20px">
-    <button class="btn bs" style="padding:8px 16px" onclick="gApTogglePause()">�?暂停</button>
-    <button class="btn br" style="padding:8px 16px" onclick="gApStop()">�?停止</button>
+    <button class="btn bs" style="padding:8px 16px" onclick="gApTogglePause()">�?暂停</button>
+    <button class="btn br" style="padding:8px 16px" onclick="gApStop()">�?停止</button>
   </div>
-  <button class="ap-nav ap-nav-left" onclick="gApPrev()">�?/button>
-  <button class="ap-nav ap-nav-right" onclick="gApNext()">�?/button>
+  <button class="ap-nav ap-nav-left" onclick="gApPrev()">�?/button>
+  <button class="ap-nav ap-nav-right" onclick="gApNext()">�?/button>
 </div>
 
 <!-- 新建计划弹窗 -->
@@ -1705,7 +1704,7 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
   <div class="dw" style="max-width:380px;margin:10vh auto;background:#1a1a2e;border-radius:14px;padding:20px;position:relative;bottom:auto;right:auto;border:1px solid rgba(168,85,247,0.2)">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
       <span style="font-size:16px;font-weight:700">📋 新建学习计划</span>
-      <button onclick="closePlanModal()" style="background:none;border:none;color:#888;font-size:20px;cursor:pointer">�?/button>
+      <button onclick="closePlanModal()" style="background:none;border:none;color:#888;font-size:20px;cursor:pointer">�?/button>
     </div>
     <div style="margin-bottom:14px">
       <div style="font-size:12px;color:#aaa;margin-bottom:6px">目标级别（可多选）</div>
@@ -1718,15 +1717,15 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
       </div>
     </div>
     <div style="margin-bottom:14px">
-      <div style="font-size:12px;color:#aaa;margin-bottom:6px">每日学习�?/div>
+      <div style="font-size:12px;color:#aaa;margin-bottom:6px">每日学习�?/div>
       <input type="number" id="planDailyInput" value="10" min="1" max="500" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid #333;background:#16213e;color:#eaeaea;font-size:14px" oninput="planCalcEstimate()">
     </div>
     <div style="margin-bottom:16px">
       <div style="font-size:12px;color:#aaa;margin-bottom:6px">计划天数 <span style="font-size:10px;color:#666">(根据词库自动计算)</span></div>
       <input type="number" id="planDaysInput" value="30" min="1" max="365" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid #333;background:#16213e;color:#eaeaea;font-size:14px" oninput="planCalcEstimate()">
     </div>
-    <div style="margin-bottom:16px;font-size:11px;color:#888;text-align:center" id="planEstimate">预计学习：约 0 �?/div>
-    <button class="btn ba" style="width:100%;padding:10px;font-size:14px" onclick="createPlan()">�?创建计划</button>
+    <div style="margin-bottom:16px;font-size:11px;color:#888;text-align:center" id="planEstimate">预计学习：约 0 �?/div>
+    <button class="btn ba" style="width:100%;padding:10px;font-size:14px" onclick="createPlan()">�?创建计划</button>
   </div>
 </div>
 
@@ -1735,52 +1734,52 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 <script src="quiz_data_high.js?v=3"></script>
 <script src="quiz_data_real.js?v=3"></script>
 <script src="quiz_data_normal.js?v=3"></script>
-<script src="inline.js?v=89"></script>
+<script src="inline.js?v=90"></script>
 <script src="game/tower-climb.js?v=6"></script>
 
 
 
 <!-- 底部版权信息 -->
 <div style="text-align:center;padding:20px 20px 72px;color:#64748b;font-size:11px;margin-top:30px;border-top:1px solid rgba(106,130,175,0.1);background:rgba(10,10,26,0.5);">
-    <p>© 2026 日语�?· All Rights Reserved</p>
+    <p>© 2026 日语�?· All Rights Reserved</p>
     <div style="margin-top:10px;font-size:10px;opacity:0.4;">
-        <span onclick="if(confirm('确定要清空所有学习记录吗？\n(SM-2进度/学习计划/生词�?错题�?搜索缓存)')){['jp','jp_plans','jp_book','jp_wrong','jp_mark','jp_search_book','jp_session','gc','gm','gb','ap_settings','_search_cache','scanHist','mk'].forEach(function(k){localStorage.removeItem(k)});showT('�?学习记录已清�?);location.reload()}" style="cursor:pointer;text-decoration:underline;">🗑 清空学习记录</span>
+        <span onclick="if(confirm('确定要清空所有学习记录吗？\n(SM-2进度/学习计划/生词�?错题�?搜索缓存)')){['jp','jp_plans','jp_book','jp_wrong','jp_mark','jp_search_book','jp_session','gc','gm','gb','ap_settings','_search_cache','scanHist','mk'].forEach(function(k){localStorage.removeItem(k)});showT('�?学习记录已清�?);location.reload()}" style="cursor:pointer;text-decoration:underline;">🗑 清空学习记录</span>
     </div>
 </div>
 
 
 <script src="game/boxing.js?v=1778500000004"></script>
 <script>
-// 搜索�?placeholder 随机轮播
+// 搜索�?placeholder 随机轮播
 (function(){
   var PH=[
-    '试试「美味しい�?,
-    '试试「ありがとう�?,
-    '试试「お願いします�?,
-    '试试「おはようございます�?,
-    '试试「こんにちは�?,
-    '试试「すみません�?,
-    '试试「大丈夫ですか�?,
-    '试试「いただきます�?,
-    '试试「お疲れ様です�?,
-    '试试「よろしくお願いします�?,
-    '试试「わかりました�?,
-    '试试「いらっしゃいませ�?,
-    '试试「お元気ですか�?,
-    '试试「お大事に�?,
-    '试试「ごちそうさま�?,
-    '试试「いってきます�?,
-    '试试「ただいま�?,
-    '试试「おやすみなさい�?,
-    '试试「どういたしまして�?,
-    '试试「かしこまりました�?
+    '试试「美味しい�?,
+    '试试「ありがとう�?,
+    '试试「お願いします�?,
+    '试试「おはようございます�?,
+    '试试「こんにちは�?,
+    '试试「すみません�?,
+    '试试「大丈夫ですか�?,
+    '试试「いただきます�?,
+    '试试「お疲れ様です�?,
+    '试试「よろしくお願いします�?,
+    '试试「わかりました�?,
+    '试试「いらっしゃいませ�?,
+    '试试「お元気ですか�?,
+    '试试「お大事に�?,
+    '试试「ごちそうさま�?,
+    '试试「いってきます�?,
+    '试试「ただいま�?,
+    '试试「おやすみなさい�?,
+    '试试「どういたしまして�?,
+    '试试「かしこまりました�?
   ];
   var inp=document.getElementById('aiSearchInput');
   if(!inp)return;
   var i=0;
   setInterval(function(){
     i=(i+1)%PH.length;
-    inp.placeholder='搜单词、搜句子�?+PH[i];
+    inp.placeholder='搜单词、搜句子�?+PH[i];
   },6000);
 })();
 // // 团团链路增强：功能间交叉链接
@@ -1795,9 +1794,9 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
       var wordText=wordEl.textContent.trim();
       var link=document.createElement('span');
       link.className='al-link';
-      link.textContent='➕今日复�?;
+      link.textContent='➕今日复�?;
       link.style.cssText='display:inline-block;font-size:9px;color:#4ecca3;cursor:pointer;margin-left:4px;padding:0 5px;border:1px solid rgba(78,204,163,0.3);border-radius:4px;background:rgba(78,204,163,0.08);vertical-align:middle;line-height:1.6';
-      link.title='将此词加入今日复�?;
+      link.title='将此词加入今日复�?;
       link.onclick=function(e){
         e.stopPropagation();
         var w=VOCAB.find(function(v){return v.word===wordText||v.reading===wordText});
@@ -1806,7 +1805,7 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
           if(!p[w.id])p[w.id]={id:w.id,count:0,nextDate:new Date().toISOString().split('T')[0]};
           p[w.id].nextDate=new Date().toISOString().split('T')[0];
           try{lp(p,1)}catch(e){}
-          link.textContent='�?;
+          link.textContent='�?;
           link.style.borderColor='rgba(78,204,163,0.6)';
           link.style.color='#6ee7b7';
         }
@@ -1826,7 +1825,7 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
       if(!title)return;
       var link=document.createElement('span');
       link.className='al-quiz-link';
-      link.textContent='📋去真�?;
+      link.textContent='📋去真�?;
       link.style.cssText='display:inline-block;font-size:10px;color:#f5a623;cursor:pointer;margin-left:6px;padding:1px 6px;border:1px solid rgba(245,166,35,0.3);border-radius:4px;background:rgba(245,166,35,0.08)';
       link.title='去真题看看这个语法点';
       link.onclick=function(e){e.stopPropagation();go('quiz')};
