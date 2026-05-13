@@ -1413,9 +1413,9 @@ html { overflow:hidden; }
       <div style="margin-left:auto;display:flex;align-items:center;gap:8px">
         <span id="sortLabel" style="font-size:11px;color:#888">📊 高频降序</span>
         <span id="vocabCount" style="font-size:11px;color:#6b7280"></span>
-        <button class="btn bp" style="padding:5px 12px;font-size:11px" onclick="startStudyFromWall()">▶ 学习</button>
+        <button class="btn bs" style="padding:5px 12px;font-size:11px" onclick="startStudyFromWall()">▶ 逐词学习</button>
         <button class="btn bg" style="padding:5px 8px;font-size:11px" onclick="showAutoPlayOptions()">⏱ 选项</button>
-        <button class="btn bs" style="padding:5px 8px;font-size:11px" onclick="startAutoPlay()">▶ 自动播放</button>
+        <button class="btn bp" style="padding:5px 8px;font-size:11px" onclick="startAutoPlay()">▶ 自动播放</button>
       </div>
     </div>
     <div class="legend">
@@ -1423,8 +1423,14 @@ html { overflow:hidden; }
       <span class="fb fb-a">★★★</span> 高频(5-7次)&nbsp;&nbsp;
       <span class="fb fb-b">★★</span> 常见(3-4次)
     </div>
+    <div id="planFilterBanner"></div>
     <div class="vg" id="vocabG"></div>
   </div>
+</div>
+
+<!-- 我的学习计划页 -->
+<div class="page" id="p-studyplan">
+  <div id="studyPlanContent"></div>
 </div>
 
 <!-- 语法页 -->
@@ -1756,7 +1762,7 @@ html { overflow:hidden; }
 <script src="grammar_data.js?v=3"></script>
 <script src="quiz_data_high.js?v=3"></script>
 <script src="quiz_data_normal.js?v=3"></script>
-<script src="inline.js?v=102"></script>
+<script src="inline.js?v=86"></script>
 <script src="game/tower-climb.js?v=6"></script>
 
 
