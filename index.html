@@ -153,7 +153,7 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 
 /* ===== 首页 · 四向节奏 v2 ===== */
 /* 品牌标题区 */
-.brand-section { padding:64px 0 56px; text-align:center; position:relative; }
+.brand-section { padding:40px 0 36px; text-align:center; position:relative; }
 .brand-title {
   font-family:var(--font-jp); font-size:44px; font-weight:900;
   background:linear-gradient(135deg,#fafafa 0%,var(--amber) 40%,var(--coral) 100%);
@@ -163,14 +163,14 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 .brand-subtitle { font-size:15px; color:var(--text-tertiary); letter-spacing:4px; font-weight:400; }
 
 /* 非对称 pair 卡片 — 玻璃质感重设计 */
-.pair-section { display:flex; gap:14px; margin-bottom:16px; }
+.pair-section { display:flex; gap:12px; margin-bottom:10px; }
 .pair-card {
   flex:1; display:flex; align-items:center; gap:14px;
   background:linear-gradient(135deg, rgba(18,18,30,0.55), rgba(18,18,30,0.3));
   backdrop-filter:blur(16px);
   -webkit-backdrop-filter:blur(16px);
   border:1px solid rgba(168,85,247,0.25);
-  border-radius:var(--radius-lg); padding:20px 18px;
+  border-radius:var(--radius-lg); padding:14px 14px;
   cursor:pointer; transition:all var(--tr-normal);
   position:relative; overflow:hidden;
   box-shadow:0 4px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04);
@@ -237,7 +237,7 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
     radial-gradient(ellipse at 20% 60%, rgba(245,158,11,0.07) 0%, transparent 60%),
     radial-gradient(ellipse at 50% 100%, rgba(233,69,96,0.04) 0%, transparent 50%);
 }
-.game-wide-content { position:relative; z-index:1; display:flex; align-items:center; gap:16px; padding:24px 22px; }
+.game-wide-content { position:relative; z-index:1; display:flex; align-items:center; gap:14px; padding:18px 18px; }
 .game-wide-icon { font-size:38px; flex-shrink:0; line-height:1; }
 .game-wide-info { flex:1; min-width:0; }
 .game-wide-title { font-size:20px; font-weight:800; color:var(--text-primary); letter-spacing:2px; margin-bottom:4px; }
@@ -255,13 +255,13 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 
 /* 响应式调整 */
 @media(max-width:600px){
-  .brand-section { padding:48px 0 40px; }
-  .brand-title { font-size:34px; letter-spacing:4px; }
-  .brand-subtitle { font-size:13px; letter-spacing:3px; }
-  .pair-section { flex-direction:column; gap:12px; }
-  .pair-card { transform:none !important; padding:16px 14px; }
+  .brand-section { padding:28px 0 22px; }
+  .brand-title { font-size:28px; letter-spacing:3px; }
+  .brand-subtitle { font-size:12px; letter-spacing:2px; }
+  .pair-section { flex-direction:column; gap:8px; }
+  .pair-card { transform:none !important; padding:12px 12px; }
   .pair-card-scan, .pair-card-autoplay { transform:none !important; }
-  .game-wide-content { padding:18px 16px; flex-wrap:wrap; }
+  .game-wide-content { padding:12px 14px; flex-wrap:wrap; }
   .game-wide-chips { width:100%; padding-left:54px; }
 }
 
@@ -331,14 +331,9 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 .main { max-width:960px; margin:0 auto; padding:16px; }
 .page { display:none; max-width:960px; margin:0 auto; padding:16px; }
 .page.active { display:block; }
-/* 首页固定：不滚动，内容自适应 */
-#p-home.active { display:flex; flex-direction:column; height:calc(100vh - 52px - 62px); overflow:hidden; }
-#p-home.active .brand-section { flex-shrink:0; }
-#p-home.active .search-bar-wrap { flex-shrink:0; }
-#p-home.active .pair-section { flex-shrink:0; }
-#p-home.active .game-wide { flex-shrink:0; }
-#p-home.active #continueSection { flex-shrink:0; }
-#p-home.active #planList { flex:1; overflow-y:auto; }
+/* 防止 body 滚动，让 .main 内部滚动 */
+body { overflow:hidden; }
+.main { max-height:calc(100vh - 52px - 62px); overflow-y:auto; }
 @media(max-width:600px){ .page,.main{ padding:12px; padding-top:60px; } .tab{ font-size:11px; padding:4px 10px; } .vwb{ padding:20px 14px; } .hero{ height:160px; } }
 .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:8px; margin-bottom:16px; }
 .sc { background:linear-gradient(135deg,#1a1a3e,#16213e); border:1px solid rgba(168,85,247,0.2); border-radius:10px; padding:14px; text-align:center; cursor:pointer; transition:opacity 0.2s,transform 0.2s,background 0.2s,border-color 0.2s; }
@@ -366,7 +361,7 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 .h-entry-vocab { border-color:rgba(233,69,96,0.3); }
 .h-entry-vocab:hover { border-color:#e94560; box-shadow:0 8px 30px rgba(233,69,96,0.2); }
 /* AI 搜索栏 */
-.search-bar-wrap { margin-bottom: 16px; position: relative; }
+.search-bar-wrap { margin-bottom: 10px; position: relative; }
 .search-bar { display:flex; align-items:center; background:var(--bg-surface-2); border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:4px 16px; transition:all 0.3s; }
 .search-bar:focus-within { border-color:var(--purple); box-shadow:0 0 20px rgba(168,85,247,0.15); }
 .search-icon { font-size:18px; margin-right:12px; opacity:0.6; flex-shrink:0; }
