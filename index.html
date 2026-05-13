@@ -161,23 +161,46 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 }
 .brand-subtitle { font-size:15px; color:var(--text-tertiary); letter-spacing:4px; font-weight:400; }
 
-/* 非对称 pair 卡片 */
+/* 非对称 pair 卡片 — 玻璃质感重设计 */
 .pair-section { display:flex; gap:14px; margin-bottom:16px; }
 .pair-card {
   flex:1; display:flex; align-items:center; gap:14px;
-  background:linear-gradient(135deg,#1a1a3e,#0f3460);
-  border:1px solid rgba(168,85,247,0.3);
+  background:linear-gradient(135deg, rgba(18,18,30,0.55), rgba(18,18,30,0.3));
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  border:1px solid rgba(168,85,247,0.25);
   border-radius:var(--radius-lg); padding:20px 18px;
   cursor:pointer; transition:all var(--tr-normal);
   position:relative; overflow:hidden;
+  box-shadow:0 4px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04);
 }
-.pair-card:hover { transform:translateY(-3px); box-shadow:0 8px 30px rgba(168,85,247,0.2); }
-/* 📸 向左偏移 + 珊瑚色 */
-.pair-card-scan { transform:translateX(-6px) translateY(4px); border-color:rgba(233,69,96,0.35); }
-.pair-card-scan:hover { border-color:var(--coral); box-shadow:0 8px 30px rgba(233,69,96,0.2); }
-/* 📚 向右偏移 + 琥珀色 */
-.pair-card-autoplay { transform:translateX(6px) translateY(-4px); border-color:rgba(245,158,11,0.35); }
-.pair-card-autoplay:hover { border-color:var(--amber); box-shadow:0 8px 30px rgba(245,158,11,0.2); }
+.pair-card::before {
+  content:''; position:absolute;
+  top:-50%; right:-20%;
+  width:200px; height:200px;
+  border-radius:50%;
+  background:radial-gradient(circle, rgba(168,85,247,0.06), transparent 70%);
+  pointer-events:none;
+  transition:all 0.5s ease;
+}
+.pair-card:hover { transform:translateY(-3px); }
+.pair-card:hover::before { opacity:0.7; transform:scale(1.2); }
+/* 📸 扫描卡 — 紫→珊瑚渐变 */
+.pair-card-scan { transform:translateX(-6px) translateY(4px); border-color:rgba(233,69,96,0.3); }
+.pair-card-scan::after {
+  content:''; position:absolute; inset:0; pointer-events:none; border-radius:inherit;
+  background:linear-gradient(135deg, rgba(233,69,96,0.08), transparent 50%);
+}
+.pair-card-scan:hover { border-color:var(--coral); box-shadow:0 8px 32px rgba(233,69,96,0.18), 0 4px 24px rgba(0,0,0,0.3); }
+.pair-card-scan:hover::after { background:linear-gradient(135deg, rgba(233,69,96,0.12), transparent 50%); }
+/* 📚 自动背单词卡 — 紫→琥珀渐变 */
+.pair-card-autoplay { transform:translateX(6px) translateY(-4px); border-color:rgba(245,158,11,0.3); }
+.pair-card-autoplay::after {
+  content:''; position:absolute; inset:0; pointer-events:none; border-radius:inherit;
+  background:linear-gradient(135deg, rgba(245,158,11,0.08), transparent 50%);
+}
+.pair-card-autoplay:hover { border-color:var(--amber); box-shadow:0 8px 32px rgba(245,158,11,0.18), 0 4px 24px rgba(0,0,0,0.3); }
+.pair-card-autoplay:hover::after { background:linear-gradient(135deg, rgba(245,158,11,0.12), transparent 50%); }
 .pair-card-icon { font-size:32px; flex-shrink:0; line-height:1; }
 .pair-card-text { flex:1; min-width:0; }
 .pair-card-title { font-size:17px; font-weight:800; color:var(--text-primary); letter-spacing:1px; margin-bottom:3px; }
@@ -186,18 +209,23 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 .pair-card-arrow { font-size:16px; color:var(--text-quaternary); flex-shrink:0; transition:transform 0.3s ease; }
 .pair-card:hover .pair-card-arrow { transform:translateX(4px); }
 
-/* 游戏宽区 */
+/* 游戏宽区 — 玻璃质感 + 紫珀光晕 */
 .game-wide {
   position:relative; border-radius:var(--radius-lg); overflow:hidden; cursor:pointer;
-  background:linear-gradient(135deg,#1a1a3e 0%,#0f3460 100%);
+  background:linear-gradient(135deg, rgba(18,18,30,0.5), rgba(18,18,30,0.25));
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
   border:1px solid rgba(168,85,247,0.25);
   transition:all var(--tr-normal); margin-top:8px;
+  box-shadow:0 4px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04);
 }
-.game-wide:hover { border-color:rgba(168,85,247,0.5); transform:translateY(-3px); box-shadow:0 8px 30px rgba(168,85,247,0.25); }
+.game-wide:hover { border-color:rgba(168,85,247,0.5); transform:translateY(-3px); box-shadow:0 8px 32px rgba(168,85,247,0.22), 0 4px 24px rgba(0,0,0,0.3); }
 .game-wide-bg {
   position:absolute; inset:0; pointer-events:none;
-  background:radial-gradient(ellipse at 80% 50%,rgba(168,85,247,0.08) 0%,transparent 60%),
-             radial-gradient(ellipse at 20% 50%,rgba(245,158,11,0.06) 0%,transparent 60%);
+  background:
+    radial-gradient(ellipse at 80% 40%, rgba(168,85,247,0.10) 0%, transparent 60%),
+    radial-gradient(ellipse at 20% 60%, rgba(245,158,11,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse at 50% 100%, rgba(233,69,96,0.04) 0%, transparent 50%);
 }
 .game-wide-content { position:relative; z-index:1; display:flex; align-items:center; gap:16px; padding:24px 22px; }
 .game-wide-icon { font-size:38px; flex-shrink:0; line-height:1; }
@@ -1121,81 +1149,69 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 
 <!-- Bottom Navigation -->
 <nav class="bottombar" id="bottombarNav">
-  <button class="bottombar__item bottombar__item--active" data-section="main" onclick="toggleSubmenu('main')">
+  <button class="bottombar__item bottombar__item--active" data-section="learn" onclick="toggleSubmenu('learn')">
     <span class="bottombar__icon">📚</span>
     <span class="bottombar__label">学习</span>
   </button>
-  <button class="bottombar__item" data-section="tools" onclick="toggleSubmenu('tools')">
-    <span class="bottombar__icon">🔧</span>
-    <span class="bottombar__label">工具</span>
+  <button class="bottombar__item" data-section="review" onclick="toggleSubmenu('review')">
+    <span class="bottombar__icon">📖</span>
+    <span class="bottombar__label">复习</span>
   </button>
-  <button class="bottombar__item" data-section="social" onclick="toggleSubmenu('social')">
-    <span class="bottombar__icon">👥</span>
-    <span class="bottombar__label">社交</span>
+  <button class="bottombar__item" data-section="practice" onclick="toggleSubmenu('practice')">
+    <span class="bottombar__icon">🎯</span>
+    <span class="bottombar__label">练习</span>
   </button>
 </nav>
 
 <!-- Submenu: 学习 -->
-<div class="submenu-overlay" id="submenuMain">
+<div class="submenu-overlay" id="submenuLearn">
   <div class="submenu-handle"></div>
   <div class="submenu-grid">
     <div class="submenu-item" onclick="go('home');closeSubmenu()">
-      <span class="sub-icon">🏠</span>
-      <span class="sub-label">首页</span>
+      <span class="sub-icon">📋</span>
+      <span class="sub-label">学习计划</span>
     </div>
-    <div class="submenu-item" onclick="go('vocab');closeSubmenu()">
-      <span class="sub-icon">🗂️</span>
-      <span class="sub-label">单词墙</span>
-    </div>
-    <div class="submenu-item" onclick="go('review');closeSubmenu()">
-      <span class="sub-icon">📖</span>
-      <span class="sub-label">复习</span>
-    </div>
-    <div class="submenu-item" onclick="go('game');closeSubmenu()">
-      <span class="sub-icon">🏆</span>
-      <span class="sub-label">闯关</span>
+    <div class="submenu-item" onclick="resumeLastSession();closeSubmenu()">
+      <span class="sub-icon">▶️</span>
+      <span class="sub-label">继续学习</span>
     </div>
     <div class="submenu-item" onclick="go('autoplay');closeSubmenu()">
       <span class="sub-icon">🔊</span>
-      <span class="sub-label">自动播放</span>
+      <span class="sub-label">自动背单词</span>
     </div>
   </div>
 </div>
 
-<!-- Submenu: 工具 -->
-<div class="submenu-overlay" id="submenuTools">
+<!-- Submenu: 复习 -->
+<div class="submenu-overlay" id="submenuReview">
   <div class="submenu-handle"></div>
   <div class="submenu-grid">
-    <div class="submenu-item" onclick="go('grammar');closeSubmenu()">
-      <span class="sub-icon">📝</span>
-      <span class="sub-label">背语法</span>
-    </div>
-    <div class="submenu-item" onclick="go('quiz');closeSubmenu()">
-      <span class="sub-icon">📋</span>
-      <span class="sub-label">真题训练</span>
+    <div class="submenu-item" onclick="go('review');closeSubmenu()">
+      <span class="sub-icon">📖</span>
+      <span class="sub-label">待复习</span>
     </div>
     <div class="submenu-item" onclick="go('book');closeSubmenu()">
-      <span class="sub-icon">📗</span>
-      <span class="sub-label">生词本</span>
+      <span class="sub-icon">🗂️</span>
+      <span class="sub-label">单词本</span>
     </div>
     <div class="submenu-item" onclick="go('wrong');closeSubmenu()">
       <span class="sub-icon">❌</span>
       <span class="sub-label">错题本</span>
     </div>
-    <div class="submenu-item" onclick="go('scan');closeSubmenu()">
-      <span class="sub-icon">📸</span>
-      <span class="sub-label">拍照识图</span>
-    </div>
   </div>
 </div>
 
-<!-- Submenu: 社交 -->
-<div class="submenu-overlay" id="submenuSocial">
+<!-- Submenu: 练习 -->
+<div class="submenu-overlay" id="submenuPractice">
   <div class="submenu-handle"></div>
   <div class="submenu-grid">
-    <div class="submenu-item" onclick="window.open('https://github.com/happyzhangdy-max/nihongo-corner','_blank')">
-      <span class="sub-icon">💻</span>
-      <span class="sub-label">GitHub</span>
+    <div class="submenu-item" onclick="go('game');closeSubmenu()">
+      <span class="sub-icon">🎮</span>
+      <span class="sub-label">单词大冒险</span>
+    </div>
+    <div class="submenu-item" onclick="go('quiz');closeSubmenu()">
+      <span class="sub-icon">📋</span>
+      <span class="sub-label">模拟题</span>
     </div>
   </div>
 </div>
@@ -1697,7 +1713,7 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 <script src="quiz_data_high.js?v=3"></script>
 <script src="quiz_data_real.js?v=3"></script>
 <script src="quiz_data_normal.js?v=3"></script>
-<script src="inline.js?v=86"></script>
+<script src="inline.js?v=87"></script>
 <script src="game/tower-climb.js?v=1778500000003"></script>
 
 

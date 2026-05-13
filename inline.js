@@ -22,11 +22,11 @@ function go(p){closeD();closePlanModal();
   document.getElementById('p-'+p).classList.add('active');
   // Update bottom nav active state
   document.querySelectorAll('.bottombar__item').forEach(x=>x.classList.remove('bottombar__item--active'));
-  var sectionMap={'home':'main','vocab':'main','review':'main','game':'main','autoplay':'main','grammar':'tools','quiz':'tools','book':'tools','wrong':'tools','scan':'tools'};
+  var sectionMap={'home':'learn','vocab':'learn','autoplay':'learn','review':'review','book':'review','wrong':'review','game':'practice','quiz':'practice'};
   var sec=sectionMap[p]||'main';
   document.querySelector('.bottombar__item[data-section="'+sec+'"]').classList.add('bottombar__item--active');
   // Update topbar title
-  var titleMap={'home':'首页','vocab':'单词墙','grammar':'背语法','review':'复习','book':'生词本','quiz':'真题训练','wrong':'错题本','autoplay':'自动播放','game':'闯关','scan':'拍照识图'};
+  var titleMap={'home':'学习计划','vocab':'单词墙','grammar':'背语法','review':'待复习','book':'单词本','quiz':'模拟题','wrong':'错题本','autoplay':'自动背单词','game':'单词大冒险','scan':'拍照识图'};
   var tt=document.getElementById('topbarTitle');
   if(tt){tt.textContent=titleMap[p]||'';tt.classList.toggle('show',!!titleMap[p])}
   closeSubmenu();if(p==='home'){upH();upP()}if(p==='vocab'){renderV();clearTimeout(_vocabTrackingTimer);_vocabTrackingTimer=setTimeout(function(){initVocabTracking()},50)}if(p==='grammar')renderG();if(p==='quiz'){document.getElementById('quizStart').style.display='block';document.getElementById('quizArea').style.display='none';document.getElementById('quizResult').style.display='none'};if(p==='review')renderR();if(p==='book')renderBook();if(p==='wrong')renderWrong();if(p==='autoplay')renderAutoPlayOptions();if(p==='scan'){loadScanHistory()}}
