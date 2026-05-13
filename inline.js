@@ -669,11 +669,19 @@ function startPlanStudy(idx){
   var plans=getPlans();
   if(!plans[idx])return;
   var plan=plans[idx];
-  // 将计划设置同步到自动播放
+  // 生成今日固定单词列表（同一天同一计划 = 相同单词）
+  var pool=VOCAB.filter(function(v){
+    return plan.levels.indexOf(v.level)>=0;
+  });
+  pool=[...pool].sort(function(){return Math.random()-0.5});
+  if(pool.length>plan.daily)pool=pool.slice(0,plan.daily);
+  
+  // 保存计划设置 + 预生成单词 ID 到自动播放
   var saved=JSON.parse(localStorage.getItem('ap_settings')||'{}');
   saved.levels=plan.levels;
   saved.count=plan.daily;
   saved.lvlOn=true;
+  saved.todayWordIds=pool.map(function(v){return v.id});
   localStorage.setItem('ap_settings',JSON.stringify(saved));
   go('autoplay');
 }
@@ -895,17 +903,22 @@ function startVocabAutoPlay(){
   var catOn=saved.catOn||false;
   var format=saved.format||'word';
   
-  // 过滤词汇
-  var pool=VOCAB.filter(function(v){
-    if(lvlOn&&selLvls.indexOf(v.level)<0)return false;
-    if(catOn&&selCats.length>0&&selCats.indexOf(v.category)<0)return false;
-    return true;
-  });
-  if(pool.length===0){showT('没有符合条件的词汇，请调整筛选条件');return}
-  
-  // 打乱并截取
-  pool=[...pool].sort(function(){return Math.random()-0.5});
-  if(count>0&&pool.length>count)pool=pool.slice(0,count);
+  // 如果有预生成单词列表（从学习计划入口），直接使用不重新打乱
+  var pool;
+  if(saved.todayWordIds&&saved.todayWordIds.length>0){
+    pool=saved.todayWordIds.map(function(id){return VOCAB.find(function(v){return v.id===id})}).filter(Boolean);
+    if(pool.length===0){showT('没有符合条件的词汇');return}
+  }else{
+    // 自由模式：过滤 + 随机打乱
+    pool=VOCAB.filter(function(v){
+      if(lvlOn&&selLvls.indexOf(v.level)<0)return false;
+      if(catOn&&selCats.length>0&&selCats.indexOf(v.category)<0)return false;
+      return true;
+    });
+    if(pool.length===0){showT('没有符合条件的词汇，请调整筛选条件');return}
+    pool=[...pool].sort(function(){return Math.random()-0.5});
+    if(count>0&&pool.length>count)pool=pool.slice(0,count);
+  }
   
   _vApQueue=pool;_vApIdx=0;_vApPaused=false;_vApActive=true;
   
