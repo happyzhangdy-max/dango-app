@@ -22,7 +22,7 @@ function go(p){closeD();closePlanModal();
   document.getElementById('p-'+p).classList.add('active');
   // Update bottom nav active state
   document.querySelectorAll('.bottombar__item').forEach(x=>x.classList.remove('bottombar__item--active'));
-  var sectionMap={'home':'learn','vocab':'learn','autoplay':'learn','review':'review','book':'review','wrong':'review','game':'practice','quiz':'practice'};
+  var sectionMap={'home':'home','vocab':'learn','autoplay':'learn','review':'review','book':'review','wrong':'review','game':'practice','quiz':'practice'};
   var sec=sectionMap[p]||'main';
   document.querySelector('.bottombar__item[data-section="'+sec+'"]').classList.add('bottombar__item--active');
   // Update topbar title
