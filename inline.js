@@ -29,7 +29,7 @@ function go(p){closeD();closePlanModal();
   var navEl=document.querySelector('.bottombar__item[data-section="'+sec+'"]');
   if(navEl)navEl.classList.add('bottombar__item--active');
   // Update topbar title
-  var titleMap={'home':'','vocab':'单词墙','grammar':'背语法','review':'待复习','book':'单词本','quiz':'模拟题','wrong':'错题本','autoplay':'自动背单词','game':'单词大冒险','scan':'拍照识图','studyplan':'学习计划','settings':''};
+  var titleMap={'home':'','vocab':'单词库','grammar':'背语法','review':'待复习','book':'单词本','quiz':'模拟题','wrong':'错题本','autoplay':'自动背单词','game':'单词大冒险','scan':'拍照识图','studyplan':'学习计划','settings':''};
   var tt=document.getElementById('topbarTitle');
   if(tt){tt.textContent=titleMap[p]||'';tt.classList.toggle('show',!!titleMap[p])}
   var tb=document.getElementById('topbarBack');
