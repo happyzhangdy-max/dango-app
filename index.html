@@ -1377,31 +1377,15 @@ html { overflow:hidden; }
     </div>
   </div>
 
-  <!-- ◉ 节奏三：学习计划入口区 -->
-  <div class="plan-section">
-    <div class="plan-section-header" onclick="go('studyplan')">
-      <span class="plan-section-icon">📋</span>
-      <span class="plan-section-title">我的学习计划</span>
-      <span class="plan-section-link">管理 →</span>
+  <!-- ◉ 节奏三：学习计划 -->
+  <div class="plan-entry-card" onclick="go('studyplan')">
+    <div class="plan-entry-icon">📋</div>
+    <div class="plan-entry-body">
+      <div class="plan-entry-title">我的学习计划</div>
+      <div class="plan-entry-sub" id="planEntrySub">点击查看学习进度</div>
+      <div class="plan-entry-prog" id="planEntryProg"></div>
     </div>
-    <div class="pair-section">
-      <div class="pair-card pair-card-scan" onclick="go('scan')">
-        <div class="pair-card-icon">📸</div>
-        <div class="pair-card-text">
-          <div class="pair-card-title">拍照识图 <span class="pair-badge">Beta</span></div>
-          <div class="pair-card-sub">拍下即查 · 自动识别翻译</div>
-        </div>
-        <div class="pair-card-arrow">→</div>
-      </div>
-      <div class="pair-card pair-card-autoplay" onclick="go('autoplay')">
-        <div class="pair-card-icon">📚</div>
-        <div class="pair-card-text">
-          <div class="pair-card-title">自动背单词</div>
-          <div class="pair-card-sub">考级分类 · 场景分类 · 自动播放</div>
-        </div>
-        <div class="pair-card-arrow">→</div>
-      </div>
-    </div>
+    <div class="plan-entry-arrow">→</div>
   </div>
 
   <!-- ◉ 节奏四：游戏宽区 -->
@@ -1880,7 +1864,7 @@ html { overflow:hidden; }
 <script src="grammar_data.js?v=3"></script>
 <script src="quiz_data_high.js?v=3"></script>
 <script src="quiz_data_normal.js?v=3"></script>
-<script src="inline.js?v=95"></script>
+<script src="inline.js?v=96"></script>
 <script src="game/tower-climb.js?v=6"></script>
 
 

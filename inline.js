@@ -619,7 +619,28 @@ function apNext(){if(!_apQueue||_apQueue.length===0)return;clearSpeechQueue();cl
 const PLAN_KEY='jp_plans';
 function getPlans(){try{return JSON.parse(localStorage.getItem(PLAN_KEY)||'[]')}catch(e){return[]}}
 function savePlans(p){localStorage.setItem(PLAN_KEY,JSON.stringify(p))}
-function upP(){} // 首页学习计划进度在 studyplan 页面和窄条中展示
+function upP(){
+  var plans=getPlans();
+  var sub=document.getElementById('planEntrySub');
+  var prog=document.getElementById('planEntryProg');
+  var active=plans.filter(function(p){return!p.finished});
+  if(!sub||!prog)return;
+  if(active.length===0){
+    sub.textContent='点击创建学习计划';
+    prog.style.display='none';
+    return;
+  }
+  sub.textContent=active.length+' 个计划进行中';
+  prog.style.display='block';
+  var totalWords=0,totalLearned=0;
+  active.forEach(function(p){
+    if(p.wordOrder){totalWords+=p.wordOrder.length;totalLearned+=p.learnedIndex||0}
+  });
+  var pct=totalWords>0?Math.min(100,totalLearned/totalWords*100):0;
+  var levels=active.map(function(p){return p.levels.map(function(l){return l.toUpperCase()}).join('+')}).join(' · ');
+  prog.innerHTML='<div class="pep-bar"><div class="pep-fill" style="width:'+pct+'%"></div></div>'
+    +'<div class="pep-info"><span>'+levels+'</span><span>'+Math.round(pct)+'%</span></div>';
+}
 // ── 学习计划常驻窄条（非首页页面顶部） ──
 function injectPlanStrip(p){
   // 移除所有页面上旧 strip
