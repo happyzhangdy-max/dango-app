@@ -1167,16 +1167,16 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 <div class="submenu-overlay" id="submenuLearn">
   <div class="submenu-handle"></div>
   <div class="submenu-grid">
-    <div class="submenu-item" onclick="go('home');closeSubmenu()">
+    <div class="submenu-item" onclick="closeSubmenu();showPlanModal()">
       <span class="sub-icon">📋</span>
       <span class="sub-label">学习计划</span>
     </div>
     <div class="submenu-item" onclick="resumeLastSession();closeSubmenu()">
-      <span class="sub-icon">▶️</span>
+      <span class="sub-icon">🚀</span>
       <span class="sub-label">继续学习</span>
     </div>
     <div class="submenu-item" onclick="go('autoplay');closeSubmenu()">
-      <span class="sub-icon">🔊</span>
+      <span class="sub-icon">▶️</span>
       <span class="sub-label">自动背单词</span>
     </div>
   </div>
