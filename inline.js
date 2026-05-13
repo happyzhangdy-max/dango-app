@@ -253,7 +253,7 @@ function saveBook(book){ localStorage.setItem(BOOK_KEY, JSON.stringify(book)); }
 function isInBook(item){
   // item 可以是 {type:'vocab',id:123} 或 {type:'ai',word:'...'}
   var book = getBook();
-  if (item.type === 'vocab') return book.some(function(x){ return x.type==='vocab' && x.id===item.id; });
+  if (item.type === 'vocab') return book.some(function(x){ return x.type==='vocab' && x.id==item.id; });
   return book.some(function(x){ return x.type==='ai' && x.word===item.word; });
 }
 function toggleBook(item){
@@ -261,7 +261,7 @@ function toggleBook(item){
   var book = getBook();
   var idx = -1;
   if (item.type === 'vocab') {
-    idx = book.findIndex(function(x){ return x.type==='vocab' && x.id===item.id; });
+    idx = book.findIndex(function(x){ return x.type==='vocab' && x.id==item.id; });
   } else {
     idx = book.findIndex(function(x){ return x.type==='ai' && x.word===item.word; });
   }
@@ -270,14 +270,14 @@ function toggleBook(item){
   saveBook(book);
   // 同步更新卡片星星（仅词库词）
   if (item.type === 'vocab') {
-    var inB = book.some(function(x){ return x.type==='vocab' && x.id===item.id; });
+    var inB = book.some(function(x){ return x.type==='vocab' && x.id==item.id; });
     document.querySelectorAll('.vbf[data-id="'+item.id+'"],.ww-bm[data-id="'+item.id+'"]').forEach(function(el){ el.textContent = inB ? '⭐' : '☆'; el.classList.toggle('act', inB); });
   }
   // 同步更新搜索结果页的收藏按钮
   var idVal = item.type==='vocab' ? item.id : item.word;
   document.querySelectorAll('.search-book-btn[data-id="'+idVal+'"]').forEach(function(btn){
     var inB = item.type==='vocab'
-      ? book.some(function(x){ return x.type==='vocab' && x.id===item.id; })
+      ? book.some(function(x){ return x.type==='vocab' && x.id==item.id; })
       : book.some(function(x){ return x.type==='ai' && x.word===item.word; });
     btn.textContent = inB ? '⭐' : '☆';
     btn.style.opacity = inB ? '1' : '0.4';
@@ -285,7 +285,7 @@ function toggleBook(item){
 }
 function updateBookBtn(id){
     var book = getBook();
-    var inBook = book.some(function(x){ return x.type==='vocab' && x.id===id; });
+    var inBook = book.some(function(x){ return x.type==='vocab' && x.id==id; });
     var btn = document.getElementById('bookBtn');
     if (!btn) return;
     btn.textContent = inBook ? '📕 移出生词本' : '📗 加入生词本';
@@ -1417,7 +1417,7 @@ function goToVocab(id){
 function goToGrammar(id){
   go('grammar');
   setTimeout(function(){
-    var g=GRAMMAR_DATA.find(function(x){return x.id===id});
+    var g=GRAMMAR_DATA.find(function(x){return x.id==id});
     if(g){showGDetail(g);}
   },100);
 }
