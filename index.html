@@ -279,7 +279,7 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 .tab.active { color:#eaeaea; background:#0f3460; }
 
 /* ===== 游戏模块 ===== */
-#p-game { display:none; flex-direction:column; height:1px; min-height:calc(100vh - 52px - 62px); overflow-y:auto; background:#0a0a18; }
+#p-game { display:none; flex-direction:column; overflow-y:auto; background:var(--bg-primary); position:fixed; top:52px; left:50%; transform:translateX(-50%); width:100%; max-width:960px; bottom:62px; }
 #p-game.active { display:flex; }
 #gh-world { flex:1; min-height:200px; position:relative; }
 #gh-quiz { flex-shrink:0; }
@@ -331,17 +331,20 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 .main { max-width:960px; margin:0 auto; padding:16px; }
 .page { display:none; max-width:960px; margin:0 auto; padding:16px; }
 .page.active { display:block; }
-/* 非首页 page 也在 .main 外独立滚动（避免 html overflow:hidden 遮挡） */
+/* 非首页 page — 用 fixed 覆盖在 .main 之上，固定于 topbar 和 bottombar 之间 */
 #p-vocab.active, #p-grammar.active, #p-quiz.active, #p-review.active,
 #p-book.active, #p-wrong.active, #p-autoplay.active, #p-scan.active {
-  max-height:calc(100vh - 52px - 62px); overflow-y:auto;
+  position: fixed; top:52px; left:50%; transform:translateX(-50%);
+  width:100%; max-width:960px; bottom:62px;
+  overflow-y:auto; padding:16px; padding-bottom:80px;
+  background:var(--bg-primary);
 }
 /* 防止 body 滚动，让 .main / .page 内部滚动 */
 body { overflow:hidden; }
 html { overflow:hidden; }
 .main { max-height:calc(100vh - 52px - 62px); overflow-y:auto; padding:12px; }
-#p-home { padding-top:0; padding-bottom:0; }
-@media(max-width:600px){ .page,.main{ padding:12px; padding-top:60px; } .tab{ font-size:11px; padding:4px 10px; } .vwb{ padding:20px 14px; } .hero{ height:160px; } }
+#p-home { padding-top:0; padding-bottom:80px; }
+@media(max-width:600px){ .page,.main{ padding:12px; padding-top:60px; padding-bottom:80px; } .tab{ font-size:11px; padding:4px 10px; } .vwb{ padding:20px 14px; } .hero{ height:160px; } }
 .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:8px; margin-bottom:16px; }
 .sc { background:linear-gradient(135deg,#1a1a3e,#16213e); border:1px solid rgba(168,85,247,0.2); border-radius:10px; padding:14px; text-align:center; cursor:pointer; transition:opacity 0.2s,transform 0.2s,background 0.2s,border-color 0.2s; }
 .sc:hover { border-color:rgba(168,85,247,0.5); transform:translateY(-2px); box-shadow:0 4px 15px rgba(0,0,0,0.2); }
@@ -1758,7 +1761,7 @@ html { overflow:hidden; }
 <script src="quiz_data_high.js?v=3"></script>
 <script src="quiz_data_real.js?v=3"></script>
 <script src="quiz_data_normal.js?v=3"></script>
-<script src="inline.js?v=95"></script>
+<script src="inline.js?v=96"></script>
 <script src="game/tower-climb.js?v=6"></script>
 
 
