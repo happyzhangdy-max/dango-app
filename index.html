@@ -1320,6 +1320,14 @@ html { overflow:hidden; }
   <div class="dst" style="margin-top:16px">📋 我的学习计划</div>
   <div id="planList"></div>
 
+  <!-- 底部版权信息 -->
+  <div style="text-align:center;padding:20px 20px 80px;color:#64748b;font-size:11px;margin-top:30px;border-top:1px solid rgba(106,130,175,0.1);background:rgba(10,10,26,0.5);">
+    <p>© 2026 日语角 · All Rights Reserved</p>
+    <div style="margin-top:10px;font-size:10px;opacity:0.4;">
+      <span onclick="if(confirm('确定要清空所有学习记录吗？\n(SM-2进度/学习计划/生词本/错题本/搜索缓存)')){['jp','jp_plans','jp_book','jp_wrong','jp_mark','jp_search_book','jp_session','gc','gm','gb','ap_settings','_search_cache','scanHist','mk'].forEach(function(k){localStorage.removeItem(k)});showT('✅ 学习记录已清空');location.reload()}" style="cursor:pointer;text-decoration:underline;">🗑 清空学习记录</span>
+    </div>
+  </div>
+
 </div></div>
 
 <!-- 词汇页 -->
@@ -1452,20 +1460,10 @@ html { overflow:hidden; }
 <div class="page" id="p-quiz">
   <div id="quizStart">
     <div class="qg" style="margin-bottom:16px">
-      <div class="ac" onclick="startQuiz('high')" style="border-color:rgba(233,69,96,0.3)">
-        <div class="ai">🔥</div>
-        <div class="at">高频真题训练</div>
-        <div class="ad">历年出现8次以上 · 核心考点</div>
-      </div>
-      <div class="ac" onclick="startQuiz('normal')">
+      <div class="ac" onclick="startQuiz()" style="border-color:rgba(168,85,247,0.3)">
         <div class="ai">📝</div>
-        <div class="at">真题训练</div>
-        <div class="ad">历年出现3-7次 · 全面覆盖</div>
-      </div>
-      <div class="ac" onclick="startQuiz('real')" style="border-color:rgba(78,204,163,0.3)">
-        <div class="ai">📋</div>
-        <div class="at">全套真题练习</div>
-        <div class="ad">2024年7月 N2 全部71题</div>
+        <div class="at">模拟真题训练</div>
+        <div class="ad">精选历年高频 + 核心真题 · 每轮10题综合模拟</div>
       </div>
     </div>
   </div>
@@ -1488,7 +1486,7 @@ html { overflow:hidden; }
     <div style="font-size:20px;font-weight:700;margin-bottom:8px;color:#eaeaea" id="quizTitle">完成！</div>
     <div style="font-size:14px;color:#888;margin-bottom:20px" id="quizScore"></div>
     <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-      <button class="btn bp" id="quizRetryBtn" onclick="startQuiz(document.getElementById('quizMode').value)">再练一次</button>
+      <button class="btn bp" id="quizRetryBtn" onclick="startQuiz()">再练一次</button>
       <button class="btn bs" onclick="exitQuiz()">返回题库</button>
     </div>
   </div>
@@ -1757,20 +1755,10 @@ html { overflow:hidden; }
 <script src="data.js?v=20"></script>
 <script src="grammar_data.js?v=3"></script>
 <script src="quiz_data_high.js?v=3"></script>
-<script src="quiz_data_real.js?v=3"></script>
 <script src="quiz_data_normal.js?v=3"></script>
-<script src="inline.js?v=101"></script>
+<script src="inline.js?v=102"></script>
 <script src="game/tower-climb.js?v=6"></script>
 
-
-
-<!-- 底部版权信息 -->
-<div style="text-align:center;padding:20px 20px 72px;color:#64748b;font-size:11px;margin-top:30px;border-top:1px solid rgba(106,130,175,0.1);background:rgba(10,10,26,0.5);">
-    <p>© 2026 日语角 · All Rights Reserved</p>
-    <div style="margin-top:10px;font-size:10px;opacity:0.4;">
-        <span onclick="if(confirm('确定要清空所有学习记录吗？\n(SM-2进度/学习计划/生词本/错题本/搜索缓存)')){['jp','jp_plans','jp_book','jp_wrong','jp_mark','jp_search_book','jp_session','gc','gm','gb','ap_settings','_search_cache','scanHist','mk'].forEach(function(k){localStorage.removeItem(k)});showT('✅ 学习记录已清空');location.reload()}" style="cursor:pointer;text-decoration:underline;">🗑 清空学习记录</span>
-    </div>
-</div>
 
 
 <script src="game/boxing.js?v=1778500000004"></script>
