@@ -265,18 +265,18 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
   .game-wide-chips { width:100%; padding-left:54px; }
 }
 
-/* 学习计划入口卡片 */
+/* 学习计划入口大卡片 — 取代独立计划卡片 */
 .plan-entry-card {
   position:relative; border-radius:var(--radius-lg); overflow:hidden; cursor:pointer;
-  background:linear-gradient(135deg, rgba(168,85,247,0.07), rgba(78,204,163,0.04));
-  border:1px solid rgba(168,85,247,0.15);
-  display:flex; align-items:center; gap:12px; padding:14px 16px; margin-top:16px;
+  background:linear-gradient(135deg, rgba(168,85,247,0.08), rgba(78,204,163,0.05));
+  border:1px solid rgba(168,85,247,0.18);
+  display:flex; align-items:flex-start; gap:14px; padding:18px 16px; margin-top:16px;
   transition:all var(--tr-normal);
 }
 .plan-entry-card:hover {
-  border-color:rgba(168,85,247,0.4);
+  border-color:rgba(168,85,247,0.45);
   transform:translateY(-2px);
-  box-shadow:0 6px 24px rgba(168,85,247,0.15);
+  box-shadow:0 8px 28px rgba(168,85,247,0.18);
 }
 .plan-entry-card::after {
   content:''; position:absolute; inset:-1px; border-radius:15px;
@@ -284,12 +284,16 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
   opacity:0; transition:opacity 0.35s ease; pointer-events:none;
 }
 .plan-entry-card:hover::after { opacity:1; }
-.plan-entry-icon { font-size:32px; flex-shrink:0; line-height:1; }
-.plan-entry-info { flex:1; min-width:0; }
+.plan-entry-icon { font-size:34px; flex-shrink:0; line-height:1; margin-top:2px; }
+.plan-entry-body { flex:1; min-width:0; }
 .plan-entry-title { font-size:17px; font-weight:700; color:var(--text-primary); margin-bottom:2px; }
-.plan-entry-sub { font-size:11px; color:var(--text-tertiary); }
-.plan-entry-arrow { font-size:18px; color:var(--text-quaternary); flex-shrink:0; transition:transform 0.3s ease; }
-.plan-entry-card:hover .plan-entry-arrow { transform:translateX(4px); }
+.plan-entry-sub { font-size:12px; color:var(--text-tertiary); margin-bottom:6px; }
+.plan-entry-prog { display:none; }
+.pep-bar { height:5px; background:rgba(255,255,255,0.08); border-radius:4px; overflow:hidden; margin-bottom:4px; }
+.pep-fill { height:100%; background:linear-gradient(90deg, var(--purple), var(--amber)); border-radius:4px; transition:width 0.4s ease; }
+.pep-info { display:flex; justify-content:space-between; font-size:10px; color:var(--text-quaternary); }
+.plan-entry-arrow { font-size:20px; color:var(--text-quaternary); flex-shrink:0; margin-top:2px; transition:transform 0.3s ease; }
+.plan-entry-card:hover .plan-entry-arrow { transform:translateX(5px); }
 
 /* 设置页卡片 */
 .settings-card {
@@ -1365,16 +1369,16 @@ html { overflow:hidden; }
 
 </div>
 
-  <!-- ◉ 节奏五：学习计划卡片入口 -->
+  <!-- ◉ 节奏五：学习计划大卡片入口（取代独立计划卡片） -->
   <div class="plan-entry-card" onclick="closePlanModal();go('studyplan')">
     <div class="plan-entry-icon">📋</div>
-    <div class="plan-entry-info">
+    <div class="plan-entry-body">
       <div class="plan-entry-title">我的学习计划</div>
       <div class="plan-entry-sub" id="planEntrySub">点击查看学习进度</div>
+      <div class="plan-entry-prog" id="planEntryProg"></div>
     </div>
     <div class="plan-entry-arrow">→</div>
   </div>
-  <div id="planList" style="margin-top:10px"></div>
 
   <!-- 底部版权信息 -->
   <div style="text-align:center;padding:20px 20px 80px;color:#64748b;font-size:11px;border-top:1px solid rgba(106,130,175,0.1);background:rgba(10,10,26,0.5);">
@@ -1832,7 +1836,7 @@ html { overflow:hidden; }
 <script src="grammar_data.js?v=3"></script>
 <script src="quiz_data_high.js?v=3"></script>
 <script src="quiz_data_normal.js?v=3"></script>
-<script src="inline.js?v=89"></script>
+<script src="inline.js?v=90"></script>
 <script src="game/tower-climb.js?v=6"></script>
 
 

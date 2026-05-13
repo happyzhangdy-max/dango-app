@@ -34,7 +34,7 @@ function go(p){closeD();closePlanModal();
   if(tt){tt.textContent=titleMap[p]||'';tt.classList.toggle('show',!!titleMap[p])}
   var tb=document.getElementById('topbarBack');
   if(tb)tb.classList.toggle('show',!!titleMap[p]);
-  closeSubmenu();if(p==='home'){upH();upP();var _pl=document.getElementById('planList');if(_pl)_pl.style.display='';var _ds=document.querySelector('.plan-entry-card');if(_ds)_ds.style.display='';}else{var _ds=document.querySelector('.plan-entry-card');if(_ds)_ds.style.display='none';var _pl=document.getElementById('planList');if(_pl)_pl.style.display='none';}if(p==='vocab'){renderV();showPlanFilterBanner();clearTimeout(_vocabTrackingTimer);_vocabTrackingTimer=setTimeout(function(){initVocabTracking()},50)}if(p==='grammar')renderG();if(p==='quiz'){document.getElementById('quizStart').style.display='block';document.getElementById('quizArea').style.display='none';document.getElementById('quizResult').style.display='none'};if(p==='review')renderR();if(p==='book')renderBook();if(p==='wrong')renderWrong();if(p==='autoplay')renderAutoPlayOptions();if(p==='scan'){loadScanHistory()}if(p==='studyplan'){renderStudyPlan()}}
+  closeSubmenu();if(p==='home'){upH();upP();var _ds=document.querySelector('.plan-entry-card');if(_ds)_ds.style.display='';}else{var _ds=document.querySelector('.plan-entry-card');if(_ds)_ds.style.display='none';}if(p==='vocab'){renderV();showPlanFilterBanner();clearTimeout(_vocabTrackingTimer);_vocabTrackingTimer=setTimeout(function(){initVocabTracking()},50)}if(p==='grammar')renderG();if(p==='quiz'){document.getElementById('quizStart').style.display='block';document.getElementById('quizArea').style.display='none';document.getElementById('quizResult').style.display='none'};if(p==='review')renderR();if(p==='book')renderBook();if(p==='wrong')renderWrong();if(p==='autoplay')renderAutoPlayOptions();if(p==='scan'){loadScanHistory()}if(p==='studyplan'){renderStudyPlan()}}
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function startQuiz(){quizIdx=0;quizRight=0;window._lastPassage='';var src=(typeof QUIZ_DATA_HIGH!=='undefined'?QUIZ_DATA_HIGH:[]).concat(typeof QUIZ_DATA_NORMAL!=='undefined'?QUIZ_DATA_NORMAL:[]);quizData=shuffle([...src]).slice(0,Math.min(10,src.length));document.getElementById('quizStart').style.display='none';document.getElementById('quizResult').style.display='none';document.getElementById('quizArea').style.display='block';showQuiz()}
 function showQuiz(){const q=quizData[quizIdx];document.getElementById('quizProg').textContent=(quizIdx+1)+'/'+quizData.length;document.getElementById('quizBar').style.width=((quizIdx)/quizData.length*100)+'%';const pEl=document.getElementById('quizPassage');if(q.passage&&q.passage!==window._lastPassage){pEl.innerHTML='<div style="background:#1a2a4a;border-left:3px solid #f5a623;border-radius:0 10px 10px 0;padding:10px 14px;margin-bottom:12px;font-size:12px;line-height:1.9;white-space:pre-wrap;color:#c8d6e5;max-height:300px;overflow-y:auto"><b style="color:#f5a623;font-size:10px;display:block;margin-bottom:4px">📖 阅读原文</b>'+q.passage.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>')+'</div>';pEl.style.display='block';window._lastPassage=q.passage}else{pEl.style.display='none'};document.getElementById('quizQ').innerHTML='<div style="display:flex;align-items:flex-start;gap:8px">'+q.question+'<button onclick="speakQuizQ()" style="flex-shrink:0;background:none;border:none;font-size:18px;cursor:pointer;opacity:0.7;padding:2px" title="读题">🔊</button></div>';const optDiv=document.getElementById('quizOpts');optDiv.innerHTML='';q.options.forEach((o,i)=>{const b=document.createElement('button');b.className='btn bs';b.style.textAlign='left';b.style.fontSize='13px';b.style.padding='10px 14px';var hasJa=/[\u3040-\u309F\u30A0-\u30FF\uFF00-\uFFEF\u4E00-\u9FAF]/.test(o);b.innerHTML='<span style="flex:1">'+(i+1)+'. '+o+'</span>'+(hasJa?'<span onclick="event.stopPropagation();speakQuizOpt('+i+')" style="flex-shrink:0;cursor:pointer;opacity:0.7;margin-left:8px;font-size:15px" title="朗读选项">🔊</span>':'');b.style.display='flex';b.style.alignItems='center';b.onclick=()=>answerQuiz(i);optDiv.appendChild(b)});document.getElementById('quizFeedback').style.display='none';document.getElementById('quizNextBtn').style.display='none'}
@@ -603,41 +603,26 @@ function getPlans(){try{return JSON.parse(localStorage.getItem(PLAN_KEY)||'[]')}
 function savePlans(p){localStorage.setItem(PLAN_KEY,JSON.stringify(p))}
 function upP(){
   var plans=getPlans();
-  // 更新卡片副标题
   var sub=document.getElementById('planEntrySub');
+  var prog=document.getElementById('planEntryProg');
   var active=plans.filter(function(p){return!p.finished});
-  if(sub)sub.textContent=active.length>0?active.length+' 个进行中计划':'点击创建学习计划';
-  // 计划列表
-  var list=document.getElementById('planList');
-  if(!list)return;
-  var active=plans.filter(function(p){return!p.finished});
+  if(!sub)return;
   if(active.length===0){
-    list.innerHTML='<div style="text-align:center;color:#555;padding:12px 0;font-size:12px">还没有学习计划，新建一个开始吧</div>';
-    return;}
-  list.innerHTML='';
-  active.forEach(function(plan,idx){
-    var d=document.createElement('div');d.className='plan-card';
-    var ls=plan.levels.map(function(l){return l.toUpperCase()}).join(' + ');
-    var total,pct,completedDays;
-    if(plan.wordOrder){
-      total=plan.wordOrder.length;
-      completedDays=Math.floor(plan.learnedIndex/plan.daily);
-      pct=Math.min(100,plan.learnedIndex/total*100);
-    }else{
-      // 兼容旧计划（无 wordOrder）
-      total=plan.daily*plan.days;
-      completedDays=plan.completedDays||0;
-      pct=Math.min(100,completedDays/plan.days*100);
-    }
-    var realIdx=plans.indexOf(plan);
-    d.innerHTML='<div class="plan-level" onclick="event.stopPropagation();startPlanStudy('+realIdx+')" style="cursor:pointer">'+ls+' · 每日 '+plan.daily+' 词</div>'
-      +'<div class="plan-meta" onclick="event.stopPropagation();startPlanStudy('+realIdx+')" style="cursor:pointer">共 '+total+' 词 · '+plan.days+' 天 · 已完成 '+completedDays+' 天</div>'
-      +'<div class="plan-bar" onclick="event.stopPropagation();startPlanStudy('+realIdx+')" style="cursor:pointer"><div class="plan-fill" style="width:'+pct+'%"></div></div>'
-      +'<div class="plan-actions">'
-      +'<button class="btn bs" style="font-size:10px;padding:3px 8px" onclick="event.stopPropagation();startPlanStudy('+realIdx+')">▶ 今日学习</button>'
-      +'<button class="btn br" style="font-size:10px;padding:3px 8px" onclick="event.stopPropagation();deletePlan('+realIdx+')">🗑 删除</button>'
-      +'</div>';
-    list.appendChild(d);});
+    sub.textContent='点击创建学习计划';
+    if(prog)prog.style.display='none';
+    return;
+  }
+  sub.textContent=active.length+' 个计划进行中';
+  if(!prog)return;
+  prog.style.display='block';
+  var totalWords=0,totalLearned=0;
+  active.forEach(function(p){
+    if(p.wordOrder){totalWords+=p.wordOrder.length;totalLearned+=p.learnedIndex||0}
+  });
+  var pct=totalWords>0?Math.min(100,totalLearned/totalWords*100):0;
+  var levels=active.map(function(p){return p.levels.map(function(l){return l.toUpperCase()}).join('+')}).join(' · ');
+  prog.innerHTML='<div class="pep-bar"><div class="pep-fill" style="width:'+pct+'%"></div></div>'
+    +'<div class="pep-info"><span>'+levels+'</span><span>'+Math.round(pct)+'%</span></div>';
 }
 function showPlanModal(){document.getElementById('planModal').classList.add('open');document.getElementById('planModal').querySelector('.dw').classList.add('open');planCalcEstimate()}
 function closePlanModal(){document.getElementById('planModal').classList.remove('open');document.getElementById('planModal').querySelector('.dw').classList.remove('open')}
