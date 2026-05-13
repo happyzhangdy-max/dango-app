@@ -1312,7 +1312,7 @@ function init() {
         100% { transform:translateY(0); opacity:1; }
       }
     </style>
-    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:30px;text-align:center;background:radial-gradient(ellipse at 50% 30%, #1a1a2e, #0a0a18)">
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:30px;text-align:center;background:radial-gradient(ellipse at 50% 30%, #1a1a2e, #0a0a18)">
       <div style="font-size:48px;margin-bottom:10px;animation:bxBounceIn 0.6s cubic-bezier(0.34,1.56,0.64,1) both">🥊</div>
       <div style="font-size:20px;font-weight:800;color:#e2e8f0;margin-bottom:4px;background:linear-gradient(135deg,#ef4444,#fbbf24);-webkit-background-clip:text;-webkit-text-fill-color:transparent">单词拳击</div>
       <div style="font-size:12px;color:#94a3b8;margin-bottom:16px;line-height:1.8">

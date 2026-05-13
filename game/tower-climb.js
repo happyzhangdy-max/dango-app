@@ -1724,14 +1724,14 @@ function showTowerClimb() {
       .game-char.fall .gc-head { transform:translateX(-50%) scale(1.2,0.8); }
       .game-char.fall .gc-body { transform:translateX(-50%) scale(1,0.6); }
     </style>
-    <div style="display:flex;flex-direction:column;height:100%;position:relative">
+    <div style="display:flex;flex-direction:column;flex:1;position:relative">
       <div style="display:flex;justify-content:space-between;padding:7px 14px;background:rgba(0,0,0,0.35);backdrop-filter:blur(8px);border-bottom:1px solid rgba(255,255,255,0.05);flex-shrink:0;font-size:12px;z-index:10">
         <span id="gh-hud-floor">🏔️ 1F</span>
         <span id="gh-hud-hp">❤️❤️❤️❤️❤️</span>
         <span id="gh-heal-progress" style="font-size:11px;transition:all 0.3s;color:#64748b">💊 --</span>
         <span id="gh-hud-score">🎯 0</span>
       </div>
-      <div id="gh-world" style="flex:1;overflow:hidden;min-height:0">
+      <div id="gh-world" style="flex:1;overflow:hidden">
         <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:20px">
           <div style="font-size:40px;margin-bottom:8px;animation:bounceIn 0.8s cubic-bezier(0.34,1.56,0.64,1)">🏔️</div>
           <div style="font-size:18px;font-weight:700;color:#e2e8f0">爬塔挑战 · 是男人就上100层</div>
