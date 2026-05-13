@@ -562,7 +562,7 @@ html { overflow:hidden; }
 /* 汉字切换：三级模式（不影响定位的元素） */
 .vh1 .vm { display:none; }
 .vh2 .vw { visibility:hidden; }
-.vh2 .vr { font-size:22px; font-weight:700; color:#fff; margin-bottom:6px; padding:4px 0; }
+.vh2 .vr { font-size:36px; font-weight:700; color:#fff; margin-bottom:6px; padding:4px 0; }
 .vh2 .vm { display:none; }
 .ol { position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:200; opacity:0; pointer-events:none; transition:opacity 0.3s; display:none; }
 .ol.open { opacity:1; pointer-events:all; display:block; }
@@ -693,7 +693,7 @@ html { overflow:hidden; }
 
 /* --- 浏览学习：卡片折叠状态 --- */
 .vc-fold .vw { visibility:hidden; }
-.vc-fold .vr { font-size:22px; font-weight:700; color:#fff; margin-bottom:6px; padding:4px 0; }
+.vc-fold .vr { font-size:36px; font-weight:700; color:#fff; margin-bottom:6px; padding:4px 0; }
 .vc-fold .vm { display:none; }
 /* ===== 移动端适配 ===== */
 @media(max-width:768px){
@@ -708,7 +708,7 @@ html { overflow:hidden; }
   .vg{ grid-template-columns:1fr 1fr; gap:6px; }
   .vg .vc{ padding:10px 8px; }
   .vg .vc .vw{ font-size:24px; margin-top:6px; }
-  .vg .vc .vr{ font-size:20px; }
+  .vg .vc .vr{ font-size:28px; }
   .vg .vc .vm{ font-size:15px; }
   .vg .vc .vb-freq{ font-size:9px; }
   .vg .vc{ padding:10px 55px 38px 8px; }
@@ -1220,13 +1220,13 @@ html { overflow:hidden; }
 
 /* Fold state */
 .vc-fold .vw { visibility: hidden; }
-.vc-fold .vr { font-size: 22px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px; padding: 4px 0; }
+.vc-fold .vr { font-size: 36px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px; padding: 4px 0; }
 .vc-fold .vm { display: none; }
 
 /* Kanji modes */
 .vc.vh1 .vr { display: none; }
 .vc.vh2 .vw { display: none; }
-.vc.vh2 .vr { font-size: 26px; font-weight: 700; color: var(--text-primary); }
+.vc.vh2 .vr { font-size: 36px; font-weight: 700; color: var(--text-primary); }
 
 /* Category headers */
 .vc-h {
@@ -1866,7 +1866,7 @@ html { overflow:hidden; }
 <script src="grammar_data.js?v=3"></script>
 <script src="quiz_data_high.js?v=3"></script>
 <script src="quiz_data_normal.js?v=3"></script>
-<script src="inline.js?v=99"></script>
+<script src="inline.js?v=100"></script>
 <script src="game/tower-climb.js?v=6"></script>
 
 
@@ -1917,20 +1917,38 @@ html { overflow:hidden; }
       var wordText=wordEl.textContent.trim();
       var link=document.createElement('span');
       link.className='al-link';
-      link.textContent='➕今日复习';
-      link.style.cssText='display:inline-block;font-size:9px;color:#4ecca3;cursor:pointer;margin-left:4px;padding:0 5px;border:1px solid rgba(78,204,163,0.3);border-radius:4px;background:rgba(78,204,163,0.08);vertical-align:middle;line-height:1.6';
-      link.title='将此词加入今日复习';
+      var todayStr=new Date().toISOString().split('T')[0];
+      var wordId=VOCAB.find(function(v){return v.word===wordText||v.reading===wordText})?.id;
+      var alreadyReviewed=wordId&&lp()[wordId]?.nextDate===todayStr;
+      link.textContent=alreadyReviewed?'✅':'➕今日复习';
+      link.style.cssText='display:inline-block;font-size:9px;cursor:pointer;margin-left:4px;padding:0 5px;border:1px solid '+(alreadyReviewed?'rgba(78,204,163,0.6)':'rgba(78,204,163,0.3)')+';border-radius:4px;background:rgba(78,204,163,0.08);vertical-align:middle;line-height:1.6;color:'+(alreadyReviewed?'#6ee7b7':'#4ecca3');
+      link.title=alreadyReviewed?'点击取消今日复习':'将此词加入今日复习';
       link.onclick=function(e){
         e.stopPropagation();
         var w=VOCAB.find(function(v){return v.word===wordText||v.reading===wordText});
         if(w){
           var p=lp();
-          if(!p[w.id])p[w.id]={id:w.id,count:0,nextDate:new Date().toISOString().split('T')[0]};
-          p[w.id].nextDate=new Date().toISOString().split('T')[0];
+          var today=new Date().toISOString().split('T')[0];
+          var existing=p[w.id];
+          // 已加入今日复习 → 取消
+          if(existing&&existing.nextDate===today){
+            existing.nextDate=null;
+            if(!existing.count&&!existing.viewCount)delete p[w.id];
+            try{lp(p,1)}catch(e){}
+            link.textContent='➕今日复习';
+            link.style.borderColor='rgba(78,204,163,0.3)';
+            link.style.color='#4ecca3';
+            link.title='将此词加入今日复习';
+            return;
+          }
+          // 未加入 → 加入
+          if(!existing)p[w.id]={id:w.id,count:0,nextDate:today};
+          else p[w.id].nextDate=today;
           try{lp(p,1)}catch(e){}
           link.textContent='✅';
           link.style.borderColor='rgba(78,204,163,0.6)';
           link.style.color='#6ee7b7';
+          link.title='点击取消今日复习';
         }
       };
       // put link before .va-stack
