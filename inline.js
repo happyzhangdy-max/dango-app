@@ -657,6 +657,7 @@ function createPlan(){
   var daily=parseInt(dlyInput.value)||10;if(daily<1)daily=1;
   // 分页式顺序学习：生成完整单词池，一次打乱
   var pool=VOCAB.filter(function(v){return levels.indexOf(v.level)>=0});
+  if(pool.length===0){showT('所选级别暂无单词，请选择其他级别');closePlanModal();return}
   var wordOrder=[...pool].sort(function(){return Math.random()-0.5}).map(function(v){return v.id});
   var days=Math.ceil(wordOrder.length/daily);
   var plan={id:Date.now(),levels:levels,daily:daily,days:days,wordOrder:wordOrder,learnedIndex:0,created:new Date().toISOString().split('T')[0],startDate:new Date().toISOString().split('T')[0],finished:false};
@@ -1039,7 +1040,7 @@ function vApStop(){
     var plans=getPlans();
     var plan=plans[saved.planStudyIdx];
     if(plan&&!plan.finished&&plan.wordOrder){
-      plan.learnedIndex+=plan.daily;
+      plan.learnedIndex+=shown;
       if(plan.learnedIndex>=plan.wordOrder.length){
         plan.finished=true;
         showT('🎉 计划全部完成！共 '+plan.wordOrder.length+' 词');
