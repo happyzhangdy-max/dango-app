@@ -101,6 +101,7 @@ let state = {
   startTime: 0,
   totalAnswered: 0,
   totalCorrect: 0,
+  wrongWords: [],
   // 嘲讽
   roundsSinceTaunt: 0,
 };
@@ -788,6 +789,9 @@ function onWrong(index) {
   state.totalAnswered++;
   state.combo = 0;
   state.consecutiveCorrect = 0;
+  if (currentQuestion && currentQuestion.word) {
+    state.wrongWords.push(currentQuestion.word);
+  }
   tryTaunt();
   
   // 方向系统：对方随机攻1方向 vs 我方随机防1方向
@@ -1020,6 +1024,9 @@ function onTimeout() {
   if (state.animating) return;
   state.animating = true;
   state.totalAnswered++;
+  if (currentQuestion && currentQuestion.word) {
+    state.wrongWords.push(currentQuestion.word);
+  }
   state.consecutiveCorrect = 0;
   SFX.wrong();
   
@@ -1058,6 +1065,37 @@ function victoryScreen() {
   const accuracy = state.totalAnswered > 0
     ? Math.round(state.totalCorrect / state.totalAnswered * 100)
     : 0;
+  
+  // 错词去重 → 加入生词本
+  const uniqueWrong = [];
+  const seenIds = new Set();
+  for (const w of state.wrongWords) {
+    if (w && w.id && !seenIds.has(w.id)) {
+      seenIds.add(w.id);
+      uniqueWrong.push(w);
+    }
+  }
+  let bookAddCount = 0;
+  try {
+    var bookKey = 'jp_book';
+    var book = JSON.parse(localStorage.getItem(bookKey) || '[]');
+    var idSet = new Set();
+    for (var bi = 0; bi < book.length; bi++) {
+      if (book[bi].type === 'vocab' && book[bi].id) idSet.add(book[bi].id);
+      else if (book[bi].type === 'ai' && book[bi].word) idSet.add('ai:' + book[bi].word);
+    }
+    for (var wi = 0; wi < uniqueWrong.length; wi++) {
+      var w = uniqueWrong[wi];
+      if (w && w.id && !idSet.has(w.id)) {
+        book.unshift({type:'vocab', id: w.id});
+        idSet.add(w.id);
+        bookAddCount++;
+      }
+    }
+    if (bookAddCount > 0) {
+      localStorage.setItem(bookKey, JSON.stringify(book));
+    }
+  } catch(e) { /* 静默失败 */ }
   
   const container = document.getElementById('p-game');
   if (!container) return;
@@ -1117,9 +1155,15 @@ function victoryScreen() {
       
       ${isHighScore ? '<div style="font-size:14px;color:#fbbf24;font-weight:700;margin-bottom:12px">🏆 新纪录！</div>' : ''}
       
-      <div style="font-size:12px;color:#64748b;margin-bottom:14px">
-        🏆 最高分 ${localStorage.getItem('bx_high_score') || state.score}
-      </div>
+      ${uniqueWrong.length > 0 ? `
+        <div style="width:260px;margin-bottom:10px;background:rgba(239,68,68,0.06);border-radius:10px;padding:8px 10px;border:1px solid rgba(239,68,68,0.12)">
+          <div style="font-size:11px;color:#f87171;font-weight:600;margin-bottom:4px">📝 错词 (${state.wrongWords.length}) · 已加入生词本 ✅</div>
+          <div style="max-height:50px;overflow-y:auto;font-size:10px;color:#fca5a5;line-height:1.8">
+            ${uniqueWrong.slice(0,25).map(w => '<span style="display:inline-block;margin:0 3px;padding:0 6px;background:rgba(239,68,68,0.08);border-radius:4px">' + w.word + '</span>').join('')}
+            ${uniqueWrong.length > 25 ? '<span style="color:#64748b;font-size:9px"> +' + (uniqueWrong.length - 25) + ' 更多</span>' : ''}
+          </div>
+        </div>
+      ` : ''}
       
       <div style="display:flex;gap:10px">
         <button onclick="GameBoxing.start()" style="padding:14px 32px;border-radius:24px;border:none;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#1a1a2e;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 24px rgba(251,191,36,0.3);transition:all 0.2s">🔄 再来一局</button>
@@ -1142,6 +1186,37 @@ function gameOver() {
   const isHighScore = state.score > (parseInt(localStorage.getItem('bx_high_score') || '0'));
   if (isHighScore) localStorage.setItem('bx_high_score', state.score);
   
+  // 错词去重 → 加入生词本
+  const uniqueWrong = [];
+  const seenIds = new Set();
+  for (const w of state.wrongWords) {
+    if (w && w.id && !seenIds.has(w.id)) {
+      seenIds.add(w.id);
+      uniqueWrong.push(w);
+    }
+  }
+  let bookAddCount = 0;
+  try {
+    var bookKey = 'jp_book';
+    var book = JSON.parse(localStorage.getItem(bookKey) || '[]');
+    var idSet = new Set();
+    for (var bi = 0; bi < book.length; bi++) {
+      if (book[bi].type === 'vocab' && book[bi].id) idSet.add(book[bi].id);
+      else if (book[bi].type === 'ai' && book[bi].word) idSet.add('ai:' + book[bi].word);
+    }
+    for (var wi = 0; wi < uniqueWrong.length; wi++) {
+      var w = uniqueWrong[wi];
+      if (w && w.id && !idSet.has(w.id)) {
+        book.unshift({type:'vocab', id: w.id});
+        idSet.add(w.id);
+        bookAddCount++;
+      }
+    }
+    if (bookAddCount > 0) {
+      localStorage.setItem(bookKey, JSON.stringify(book));
+    }
+  } catch(e) { /* 静默失败 */ }
+  
   container.innerHTML = `
     <style>
       @keyframes bxGameOver {
@@ -1156,9 +1231,20 @@ function gameOver() {
       ${state.opponentIndex < OPPONENTS.length - 1 ? '<div style="font-size:13px;color:#94a3b8;margin-bottom:16px">坚持了 ' + state.round + ' 回合 · ' + state.score + ' 分</div>' : ''}
       <div style="font-size:13px;color:#94a3b8;margin-bottom:16px">✅ 正确率 ${state.totalAnswered > 0 ? Math.round(state.totalCorrect / state.totalAnswered * 100) : 0}% · ⏱ ${Math.floor((Date.now() - state.startTime) / 1000)}s</div>
       ${isHighScore ? '<div style="font-size:14px;color:#fbbf24;font-weight:700;margin-bottom:10px">🏆 新纪录！</div>' : ''}
-      <div style="font-size:12px;color:#64748b;margin-bottom:16px">
+      <div style="font-size:12px;color:#64748b;margin-bottom:8px">
         🔥 最高连击 ${state.maxCombo} · 📝 ${state.totalAnswered} 题
       </div>
+      ${uniqueWrong.length > 0 ? `
+        <div style="width:100%;max-width:280px;margin-bottom:10px;background:rgba(239,68,68,0.06);border-radius:10px;padding:8px 10px;border:1px solid rgba(239,68,68,0.12)">
+          <div style="font-size:11px;color:#f87171;font-weight:600;margin-bottom:4px">📝 错词 (${state.wrongWords.length}) · 已加入生词本 ✅</div>
+          <div style="max-height:50px;overflow-y:auto;font-size:10px;color:#fca5a5;line-height:1.8">
+            ${uniqueWrong.slice(0,25).map(w => '<span style="display:inline-block;margin:0 3px;padding:0 6px;background:rgba(239,68,68,0.08);border-radius:4px">' + w.word + '</span>').join('')}
+            ${uniqueWrong.length > 25 ? '<span style="color:#64748b;font-size:9px"> +' + (uniqueWrong.length - 25) + ' 更多</span>' : ''}
+          </div>
+        </div>
+      ` : `
+        <div style="margin:6px 0 12px;font-size:11px;color:#22c55e">🎉 没有错词！太棒了！</div>
+      `}
       <div style="display:flex;gap:10px">
         <button onclick="GameBoxing.start()" style="padding:12px 28px;border-radius:24px;border:none;background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;font-size:15px;font-weight:600;cursor:pointer;box-shadow:0 4px 24px rgba(239,68,68,0.3);transition:all 0.2s">🔄 再来一局</button>
         <button onclick="window.GameBoxing.backToMenu()" style="padding:12px 20px;border-radius:24px;border:1px solid rgba(255,255,255,0.1);background:transparent;color:#94a3b8;font-size:13px;cursor:pointer;transition:all 0.2s">🔙 返回</button>
@@ -1204,6 +1290,7 @@ function start() {
   state.startTime = Date.now();
   state.totalAnswered = 0;
   state.totalCorrect = 0;
+  state.wrongWords = [];
   
   pickOpponent();
   renderRing();

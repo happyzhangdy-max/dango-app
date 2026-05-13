@@ -1181,7 +1181,7 @@ function gameOver() {
   state.isPlaying = false;
   clearTimeout(timerId);
   
-  // 保存错词到生词本（localStorage）
+  // 保存错词到爬塔专属生词本（localStorage）
   const saved = JSON.parse(localStorage.getItem('towerWrongWords') || '[]');
   const existingIds = new Set(saved.map(w => w.id));
   for (const w of state.wrongWords) {
@@ -1191,6 +1191,30 @@ function gameOver() {
     }
   }
   localStorage.setItem('towerWrongWords', JSON.stringify(saved));
+  
+  // 保存错词到主生词本（jp_book）
+  let bookAddCount = 0;
+  try {
+    var bookKey = 'jp_book';
+    var book = JSON.parse(localStorage.getItem(bookKey) || '[]');
+    // 扁平化去重检查（支持 vocab 和 ai 两种格式）
+    var idSet = new Set();
+    for (var bi = 0; bi < book.length; bi++) {
+      if (book[bi].type === 'vocab' && book[bi].id) idSet.add(book[bi].id);
+      else if (book[bi].type === 'ai' && book[bi].word) idSet.add('ai:' + book[bi].word);
+    }
+    for (var wi = 0; wi < state.wrongWords.length; wi++) {
+      var w = state.wrongWords[wi];
+      if (w && w.id && !idSet.has(w.id)) {
+        book.unshift({type:'vocab', id: w.id});
+        idSet.add(w.id);
+        bookAddCount++;
+      }
+    }
+    if (bookAddCount > 0) {
+      localStorage.setItem(bookKey, JSON.stringify(book));
+    }
+  } catch(e) { /* 静默失败 */ }
   
   // 保存最高楼层
   const prev = parseInt(localStorage.getItem('tower_high_floor') || '0');
@@ -1210,21 +1234,22 @@ function gameOver() {
           <span>🔥 <span style="color:#a855f7;font-weight:700">${state.maxCombo}</span></span>
           <span>⭐ <span style="color:#fbbf24;font-weight:700">${state.score}</span></span>
           <span>🎯 <span style="color:#22c55e;font-weight:700">${state.answeredWords > 0 ? Math.round(state.correctWords/state.answeredWords*100) : 0}%</span></span>
+          <span>📝 <span style="color:#f87171;font-weight:700">${state.answeredWords}题</span></span>
         </div>
         ${wrongList.length > 0 ? `
           <div style="width:100%;max-width:280px;margin-top:8px;background:rgba(239,68,68,0.06);border-radius:10px;padding:8px 10px;border:1px solid rgba(239,68,68,0.12)">
-            <div style="font-size:11px;color:#f87171;font-weight:600;margin-bottom:4px">📝 本局错词 (${state.wrongWords.length})</div>
+            <div style="font-size:11px;color:#f87171;font-weight:600;margin-bottom:4px">📝 本局错词 (${state.wrongWords.length}) · 已加入生词本 ✅</div>
             <div style="max-height:60px;overflow-y:auto;font-size:10px;color:#fca5a5;line-height:1.8">
               ${wrongList.map(w => `<span style="display:inline-block;margin:0 3px;padding:0 6px;background:rgba(239,68,68,0.08);border-radius:4px">${w.word}</span>`).join('')}
             </div>
           </div>
-          <div style="margin-top:6px;font-size:10px;color:#64748b">生词本已保存 · 累计 ${totalSaved} 词</div>
+          <div style="margin-top:6px;font-size:10px;color:#64748b">累计存档 ${totalSaved} 词 · ${bookAddCount > 0 ? '生词本 +' + bookAddCount : ''}</div>
         ` : `
           <div style="margin-top:8px;font-size:11px;color:#22c55e">🎉 没有错词！太棒了！</div>
         `}
         <div style="display:flex;gap:8px;margin-top:10px">
           <button onclick="Game.start()" style="padding:7px 22px;border-radius:18px;border:1px solid #a855f7;background:rgba(168,85,247,0.15);color:#a855f7;font-size:12px;cursor:pointer;transition:all 0.2s">🔄 再来一次</button>
-          <button onclick="Game.showWrongBook()" style="padding:7px 18px;border-radius:18px;border:1px solid #f87171;background:rgba(248,113,113,0.1);color:#f87171;font-size:12px;cursor:pointer;transition:all 0.2s">📖 生词本 (${totalSaved})</button>
+          <button onclick="Game.showWrongBook()" style="padding:7px 18px;border-radius:18px;border:1px solid #f87171;background:rgba(248,113,113,0.1);color:#f87171;font-size:12px;cursor:pointer;transition:all 0.2s">📖 爬塔错词 (${totalSaved})</button>
         </div>
       </div>
     `;
