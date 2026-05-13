@@ -156,7 +156,7 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 .brand-section { padding:24px 0 20px; text-align:center; position:relative; }
 .brand-title {
   font-family:var(--font-jp); font-size:36px; font-weight:900;
-  background:linear-gradient(135deg,#fafafa 0%,var(--amber) 40%,var(--coral) 100%);
+  background:linear-gradient(135deg,#818cf8 0%,#a855f7 50%,#c084fc 100%);
   -webkit-background-clip:text; -webkit-text-fill-color:transparent;
   letter-spacing:6px; line-height:1.2; margin-bottom:12px;
 }
@@ -217,6 +217,7 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 }
 .pair-card-scan::after { background:linear-gradient(135deg, rgba(233,69,96,0.12), transparent 50%, rgba(245,158,11,0.08)); }
 .pair-card-autoplay::after { background:linear-gradient(135deg, rgba(245,158,11,0.12), transparent 50%, rgba(78,204,163,0.08)); }
+.pair-card-plan::after { background:linear-gradient(135deg, rgba(168,85,247,0.12), transparent 50%, rgba(78,204,163,0.08)); }
 .pair-card:hover::after, .game-wide:hover::after { opacity:1; }
 
 /* 游戏宽区 — 玻璃质感 + 紫珀光晕 */
@@ -876,14 +877,25 @@ html { overflow:hidden; }
   padding: 0 16px;
   gap: 12px;
 }
-.topbar__logo { display: flex; flex-direction: column; line-height: 1.2; flex-shrink: 0; }
+.topbar__logo {
+  display: flex; flex-direction: column; line-height: 1.2; flex-shrink: 0;
+  padding: 3px 14px; margin: 2px 0;
+  border-radius: 8px;
+  background: rgba(168, 85, 247, 0.08);
+  border: 1px solid rgba(168, 85, 247, 0.10);
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+.topbar__logo:hover {
+  background: rgba(168, 85, 247, 0.14);
+  border-color: rgba(168, 85, 247, 0.20);
+}
 .topbar__main {
-  font-size: 12px; font-weight: 500;
-  color: rgba(255,255,255,0.4);
+  font-size: 12px; font-weight: 600;
+  color: rgba(168, 85, 247, 0.75);
   letter-spacing: 2.5px;
   transition: color 0.3s ease;
 }
-.topbar__logo:hover .topbar__main { color: rgba(255,255,255,0.75); }
+.topbar__logo:hover .topbar__main { color: rgba(168, 85, 247, 1.0); }
 .topbar__sub { font-size: 10px; color: var(--text-tertiary); letter-spacing: 2px; font-weight: 500; }
 .topbar__title {
   font-size: var(--fs-small); color: var(--text-secondary);
@@ -1367,6 +1379,14 @@ html { overflow:hidden; }
       </div>
       <div class="pair-card-arrow">→</div>
     </div>
+    <div class="pair-card pair-card-plan" onclick="go('studyplan')">
+      <div class="pair-card-icon">📋</div>
+      <div class="pair-card-text">
+        <div class="pair-card-title">我的学习计划</div>
+        <div class="pair-card-sub" id="pairPlanSub">点击查看学习进度</div>
+      </div>
+      <div class="pair-card-arrow">→</div>
+    </div>
   </div>
 
   <!-- ◉ 节奏四：游戏宽区 -->
@@ -1388,17 +1408,6 @@ html { overflow:hidden; }
 
 
 </div>
-
-  <!-- ◉ 节奏五：学习计划大卡片入口（取代独立计划卡片） -->
-  <div class="plan-entry-card" onclick="closePlanModal();go('studyplan')">
-    <div class="plan-entry-icon">📋</div>
-    <div class="plan-entry-body">
-      <div class="plan-entry-title">我的学习计划</div>
-      <div class="plan-entry-sub" id="planEntrySub">点击查看学习进度</div>
-      <div class="plan-entry-prog" id="planEntryProg"></div>
-    </div>
-    <div class="plan-entry-arrow">→</div>
-  </div>
 
   <!-- 底部版权信息 -->
   <div style="text-align:center;padding:20px 20px 80px;color:#475569;font-size:11px;margin-top:32px;border-top:1px solid rgba(106,130,175,0.06);">
@@ -1857,7 +1866,7 @@ html { overflow:hidden; }
 <script src="grammar_data.js?v=3"></script>
 <script src="quiz_data_high.js?v=3"></script>
 <script src="quiz_data_normal.js?v=3"></script>
-<script src="inline.js?v=93"></script>
+<script src="inline.js?v=94"></script>
 <script src="game/tower-climb.js?v=6"></script>
 
 

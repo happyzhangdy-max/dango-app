@@ -621,26 +621,20 @@ function getPlans(){try{return JSON.parse(localStorage.getItem(PLAN_KEY)||'[]')}
 function savePlans(p){localStorage.setItem(PLAN_KEY,JSON.stringify(p))}
 function upP(){
   var plans=getPlans();
-  var sub=document.getElementById('planEntrySub');
-  var prog=document.getElementById('planEntryProg');
+  var sub=document.getElementById('pairPlanSub');
   var active=plans.filter(function(p){return!p.finished});
   if(!sub)return;
   if(active.length===0){
     sub.textContent='点击创建学习计划';
-    if(prog)prog.style.display='none';
     return;
   }
-  sub.textContent=active.length+' 个计划进行中';
-  if(!prog)return;
-  prog.style.display='block';
   var totalWords=0,totalLearned=0;
   active.forEach(function(p){
     if(p.wordOrder){totalWords+=p.wordOrder.length;totalLearned+=p.learnedIndex||0}
   });
   var pct=totalWords>0?Math.min(100,totalLearned/totalWords*100):0;
   var levels=active.map(function(p){return p.levels.map(function(l){return l.toUpperCase()}).join('+')}).join(' · ');
-  prog.innerHTML='<div class="pep-bar"><div class="pep-fill" style="width:'+pct+'%"></div></div>'
-    +'<div class="pep-info"><span>'+levels+'</span><span>'+Math.round(pct)+'%</span></div>';
+  sub.textContent=levels+' · '+Math.round(pct)+'% · '+active.length+'个计划';
 }
 // ── 学习计划常驻窄条（非首页页面顶部） ──
 function injectPlanStrip(p){
