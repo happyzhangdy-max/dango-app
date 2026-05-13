@@ -335,7 +335,7 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 #p-vocab.active, #p-grammar.active, #p-quiz.active, #p-review.active,
 #p-book.active, #p-wrong.active, #p-autoplay.active, #p-scan.active {
   position: fixed; top:52px; left:50%; transform:translateX(-50%);
-  width:100%; max-width:960px; bottom:62px;
+  width:100%; max-width:960px; bottom:62px; z-index:10;
   overflow-y:auto; padding:16px; padding-bottom:80px;
   background:var(--bg-primary);
 }
@@ -1766,7 +1766,7 @@ html { overflow:hidden; }
 <script src="grammar_data.js?v=3"></script>
 <script src="quiz_data_high.js?v=3"></script>
 <script src="quiz_data_normal.js?v=3"></script>
-<script src="inline.js?v=87"></script>
+<script src="inline.js?v=88"></script>
 <script src="game/tower-climb.js?v=6"></script>
 
 
