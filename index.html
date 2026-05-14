@@ -839,7 +839,9 @@ html { overflow:hidden; }
 .scan-result-tab:hover { color:#eaeaea; border-color:rgba(255,255,255,0.15); }
 .scan-result-tab.active { background:#1a1a3e; border-color:rgba(16,185,129,0.3); color:#10b981; }
 
-.scan-columns { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.scan-analysis { display:block; background:#1a1a2e; border-radius:10px; border:1px solid rgba(255,255,255,0.06); padding:16px; min-height:100px; }
+.scan-analysis .scan-analysis-loading { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px 0; gap:12px; }
+
 .scan-col { background:#1a1a2e; border-radius:10px; border:1px solid rgba(255,255,255,0.06); padding:14px; min-height:100px; }
 .scan-col-title { font-size:11px; font-weight:600; color:#6b7280; margin-bottom:8px; letter-spacing:1px; }
 .scan-col-content { font-size:13px; line-height:1.9; white-space:pre-wrap; word-break:break-word; color:#d1d5db; }
@@ -851,7 +853,6 @@ html { overflow:hidden; }
 .scan-result-actions { display:flex; gap:8px; justify-content:center; margin-top:12px; flex-wrap:wrap; }
 
 @media(max-width:768px) {
-  .scan-columns { grid-template-columns:1fr; }
   .scan-upload-area { padding:30px 14px; }
   .scan-upload-icon { font-size:36px; }
   .scan-header-icon { font-size:28px; }
@@ -1680,14 +1681,11 @@ html { overflow:hidden; }
       <button class="scan-result-tab" onclick="switchScanView('trans',this)">🀄 译文</button>
     </div>
     <div class="scan-result-body" id="scanResultBody">
-      <div class="scan-columns" id="scanParallel">
-        <div class="scan-col">
-          <div class="scan-col-title">🈸 日文原文</div>
-          <div class="scan-col-content" id="scanJpText"></div>
-        </div>
-        <div class="scan-col">
-          <div class="scan-col-title">🀄 中文译文</div>
-          <div class="scan-col-content" id="scanCnText"></div>
+      <div class="scan-analysis" id="scanParallel">
+        <div id="scanAnalysisContent" style="display:none"></div>
+        <div id="scanAnalysisLoading" class="scan-analysis-loading">
+          <div class="scan-loading-spinner"></div>
+          <div class="scan-loading-text">正在解析日文内容...</div>
         </div>
       </div>
       <div class="scan-full" id="scanFullOrig" style="display:none">
@@ -1866,7 +1864,7 @@ html { overflow:hidden; }
 <script src="grammar_data.js?v=3"></script>
 <script src="quiz_data_high.js?v=3"></script>
 <script src="quiz_data_normal.js?v=3"></script>
-<script src="inline.js?v=101"></script>
+<script src="inline.js?v=102"></script>
 <script src="game/tower-climb.js?v=6"></script>
 
 

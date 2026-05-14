@@ -1231,12 +1231,14 @@ function doAISearch(q,localResults){
   // 根据语言选择不同的 prompt
   var prompt;
   if (isChinese) {
-    prompt='翻译以下中文到地道的日语口语/书面表达，格式严格如下（每行一个字段）：\n'+
+    prompt='翻译以下中文到地道自然的日语表达，格式严格如下（每行一个字段）：\n'+
       '日语翻译：\n'+
+      '读音注音：\n'+
       '中文解释：\n'+
       '说明：\n\n'+
       '规则：\n'+
-      '- 日语翻译写最自然、最常用的日语表达（必要时用汉字+假名）\n'+
+      '- 日语翻译写最自然、最常用的日语表达（尽量用汉字，地道自然）\n'+
+      '- 读音注音：给日语翻译中所有汉字标注读音，每个汉字词用括号标注读音（例：美味しい（おいしい） 行く（いく） 友達（ともだち））\n'+
       '- 中文解释写简洁的中文释义\n'+
       '- 说明写语境或使用注意\n\n'+
       '中文：'+q;
@@ -1276,25 +1278,24 @@ function doAISearch(q,localResults){
     var _le=document.getElementById('aiSearchLoading');if(_le)_le.remove();
     // 解析 AI 返回的字段
     // 解析 AI 返回的字段
-    var cn='',src='',kanji='',note='';
+    var cn='',src='',kanji='',note='',furigana='';
     
     if (isChinese) {
       // 中文→日语模式
       txt.split('\n').forEach(function(line){
         var m=line.match(/^日语翻译[：:]?\s*(.*)/);if(m)cn=m[1];
-        // cn 暂时存日语翻译结果
+        m=line.match(/^读音注音[：:]?\s*(.*)/);if(m)furigana=m[1];
         m=line.match(/^中文解释[：:]?\s*(.*)/);if(m)kanji=m[1];
         m=line.match(/^说明[：:]?\s*(.*)/);if(m)note=m[1];
       });
       // 容错
       if(!cn&&txt.trim())cn=txt.trim();
+      if(furigana==='无'||furigana==='なし')furigana='';
       if(kanji==='无'||kanji==='なし')kanji='';
       if(note==='无'||note==='なし')note='';
       
       var jpText = cn;    // 日语翻译文本（发音用）
       var chText = kanji; // 中文解释
-      var displayWord = jpText;
-      var displayReading = '';
       var meaningText = chText || q; // 显示中文解释或原文
       
       // 检查收藏状态
@@ -1307,14 +1308,12 @@ function doAISearch(q,localResults){
         '<span class="search-result-word">'+escHtml(jpText)+'</span>'+
         '<span class="search-result-level sl-ai" style="background:#e6f7ff;color:#1890ff;border:1px solid #91d5ff;font-size:11px;padding:2px 8px;border-radius:6px;font-weight:600">中→日</span>'+
         '</div>'+
+        (furigana ? '<div class="search-result-furigana" style="font-size:13px;color:#888;margin-top:2px">🔊 '+escHtml(furigana)+'</div>' : '')+
         '<div class="search-result-meaning" style="color:#d46b08;font-size:15px;margin-top:6px">→ '+escHtml(meaningText)+'</div>'+
         '<div class="search-result-tags" style="margin-top:6px">'+
         (note ? '<span class="search-result-tag" style="font-size:13px;padding:3px 10px">💡 '+escHtml(note)+'</span>' : '')+
         '</div>'+
-        (breakdown ? '<div class="search-result-breakdown" style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.06);font-size:12px;line-height:1.6"><div style="color:#a78bfa;font-weight:600;margin-bottom:4px">📝 单词解析</div><div style="color:#cbd5e1;white-space:pre-wrap">'+escHtml(breakdown)+'</div></div>' : '')+
-        (grammar ? '<div class="search-result-grammar" style="margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.06);font-size:12px;line-height:1.6"><div style="color:#4ecca3;font-weight:600;margin-bottom:4px">🔧 语法点</div><div style="color:#cbd5e1;white-space:pre-wrap">'+escHtml(grammar)+'</div></div>' : '')+
         '</div>'+
-        '<div class="search-result-actions" style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;align-items:center">'+
         '<button onclick="event.stopPropagation();speak(\''+escHtml(jpText)+'\')" style="background:none;border:none;cursor:pointer;font-size:18px;padding:4px;color:#888" title="发音">🔊</button>'+
         '<span class="search-book-btn" onclick="event.stopPropagation();toggleBook({type:\'ai\', word:\''+escHtml(jpText)+'\', reading:\'\', meaning:\''+escHtml(meaningText)+'\', level:\'\'});this.textContent=this.textContent==\'★\'?\'☆\':\'★\';return false" style="cursor:pointer;font-size:18px;opacity:0.4;transition:opacity 0.2s" title="收藏到生词本">'+(alreadyInBook?'★':'☆')+'</span>'+
         '</div>'+
@@ -1668,7 +1667,10 @@ function doScan(){
       clearScanImage();
       return;
     }
+    // 显示 OCR 结果，同时发起深度分析
     showScanResult(result.jp,result.cn);
+    document.getElementById('scanLoadingText').textContent='正在解析日文内容...';
+    analyzeScanText(result.jp,result.cn);
   }).catch(function(err){
     var msg=err.message||'';
     if(msg.indexOf('balance')>=0||msg.indexOf('insufficient')>=0){
@@ -1738,29 +1740,93 @@ function showScanResult(jpText,cnText){
   document.getElementById('scanResult').style.display='block';
   document.getElementById('scanPreview').style.display='none';
   
-  document.getElementById('scanJpText').textContent=jpText;
-  document.getElementById('scanCnText').textContent=cnText;
+  // 填充原文/译文数据
   document.getElementById('scanFullJp').textContent=jpText;
   document.getElementById('scanFullCn').textContent=cnText;
   
-  // 默认显示对照视图
+  // 解析解答 tab：先显示 loading
+  document.getElementById('scanAnalysisContent').style.display='none';
+  document.getElementById('scanAnalysisLoading').style.display='flex';
+  document.getElementById('scanAnalysisContent').innerHTML='';
+  
+  // 默认显示解析解答视图
   switchScanView('parallel',document.querySelector('.scan-result-tab.active'));
   
   // 保存历史
   saveScanHistory(jpText,cnText);
 }
 
+function analyzeScanText(jpText,cnText){
+  // 用 deepseek 分析日文内容
+  var prompt='请对以下日文内容进行详细解析，格式严格如下（每行一个字段，没有就写「无」）：\n'+
+    '中文翻译：\n'+
+    '单词解析：\n'+
+    '语法分析：\n\n'+
+    '规则：\n'+
+    '- 中文翻译：写完整流畅的中文翻译\n'+
+    '- 单词解析：分解每个重要单词，格式：「词/读音/中文释义」，每行一个\n'+
+    '- 语法分析：标注关键语法结构并简要说明含义\n\n'+
+    '日文：'+jpText;
+  
+  callAI(_searchConfig.apiUrl,_searchConfig.model,[{role:'user',content:prompt}],1024,'').then(function(txt){
+    // 解析返回
+    var cn='',wd='',gr='';
+    txt.split('\n').forEach(function(line){
+      var m=line.match(/^中文翻译[：:]?\s*(.*)/);if(m)cn=m[1];
+      m=line.match(/^单词解析[：:]?\s*(.*)/);if(m)wd=m[1];
+      m=line.match(/^语法分析[：:]?\s*(.*)/);if(m)gr=m[1];
+    });
+    if(!cn&&txt.trim())cn=txt.trim();
+    if(wd==='无'||wd==='なし')wd='';
+    if(gr==='无'||gr==='なし')gr='';
+    // 提取多行字段
+    var wdMatch=txt.match(/单词解析[：:]\s*([\s\S]*?)(?=\n(语法分析|$))/);
+    if(wdMatch)wd=wdMatch[1].trim();
+    var grMatch=txt.match(/语法分析[：:]\s*([\s\S]*?)$/);
+    if(grMatch)gr=grMatch[1].trim();
+    if(wd==='无'||wd==='なし')wd='';
+    if(gr==='无'||gr==='なし')gr='';
+    
+    // 渲染解析解答
+    var html='<div style="color:#10b981;font-size:13px;font-weight:600;margin-bottom:10px">📖 解析解答</div>';
+    html+='<div style="margin-bottom:12px">';
+    html+='<div style="color:#d46b08;font-size:15px;font-weight:600">🀄 翻译</div>';
+    html+='<div style="color:#d1d5db;font-size:14px;line-height:1.8;margin-top:4px">'+escHtml(cn||'')+'</div>';
+    html+='</div>';
+    if(wd){
+      html+='<div style="margin-bottom:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.06)">';
+      html+='<div style="color:#a78bfa;font-size:14px;font-weight:600;margin-bottom:6px">📝 单词解析</div>';
+      html+='<div style="color:#cbd5e1;font-size:13px;line-height:1.9;white-space:pre-wrap">'+escHtml(wd)+'</div>';
+      html+='</div>';
+    }
+    if(gr){
+      html+='<div style="padding-top:10px;border-top:1px solid rgba(255,255,255,0.06)">';
+      html+='<div style="color:#4ecca3;font-size:14px;font-weight:600;margin-bottom:6px">🔧 语法分析</div>';
+      html+='<div style="color:#cbd5e1;font-size:13px;line-height:1.8;white-space:pre-wrap">'+escHtml(gr)+'</div>';
+      html+='</div>';
+    }
+    
+    document.getElementById('scanAnalysisContent').innerHTML=html;
+    document.getElementById('scanAnalysisLoading').style.display='none';
+    document.getElementById('scanAnalysisContent').style.display='block';
+    
+    // 自动切换到解析解答 tab（如果当前仍在原文/译文 tab 则不动）
+  }).catch(function(err){
+    document.getElementById('scanAnalysisLoading').innerHTML='<div style="color:#888;font-size:13px">解析失败：'+escHtml(err.message||err)+'</div>';
+  });
+}
+
 function switchScanView(view,btn){
   document.querySelectorAll('.scan-result-tab').forEach(function(t){t.classList.remove('active')});
   if(btn)btn.classList.add('active');
   
-  document.getElementById('scanParallel').style.display=view==='parallel'?'grid':'none';
+  document.getElementById('scanParallel').style.display=view==='parallel'?'block':'none';
   document.getElementById('scanFullOrig').style.display=view==='orig'?'block':'none';
   document.getElementById('scanFullTrans').style.display=view==='trans'?'block':'none';
 }
 
 function copyScanResult(){
-  var cn=document.getElementById('scanCnText').textContent;
+  var cn=document.getElementById('scanFullCn').textContent;
   if(!cn){showT('没有可复制的内容');return}
   // 使用 textarea 方案兼容
   var ta=document.createElement('textarea');
