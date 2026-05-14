@@ -1164,9 +1164,9 @@ function vApToggleBook(){
 function vApToggleMark(c){
   var w=_vApQueue[_vApIdx];
   if(!w)return;
-  var mk=JSON.parse(localStorage.getItem('mk')||'{}');
+  var mk=JSON.parse(localStorage.getItem(MARK_KEY)||'{}');
   mk[w.id]=mk[w.id]===c?null:c;
-  localStorage.setItem('mk',JSON.stringify(mk));
+  localStorage.setItem(MARK_KEY,JSON.stringify(mk));
   vApSyncMarks(w);
 }
 
@@ -1174,7 +1174,7 @@ function vApSyncMarks(w){
   if(!w)return;
   var b=getBook().some(function(x){return x.type==='vocab'&&x.id===w.id});
   document.getElementById('gApBmk').textContent=b?'⭐':'☆';
-  var mk=JSON.parse(localStorage.getItem('mk')||'{}')[w.id];
+  var mk=JSON.parse(localStorage.getItem(MARK_KEY)||'{}')[w.id];
   document.querySelectorAll('#gApScreen .ap-marks .vm-btn').forEach(function(x){
     var c=x.getAttribute('data-color');
     var a=mk===c;
