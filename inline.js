@@ -1766,17 +1766,8 @@ function showScanResult(jpText,cnText,analysisText){
   document.getElementById('scanAnalysisLoading').style.display='none';
   document.getElementById('scanAnalysisContent').style.display='block';
   if(analysisText){
-    // 渲染分析结果
-    var html='';
-    // 翻译
-    if(cnText){
-      html+='<div style="margin-bottom:14px">';
-      html+='<div style="color:#d46b08;font-size:15px;font-weight:600">🀄 翻译</div>';
-      html+='<div style="color:#d1d5db;font-size:14px;line-height:1.8;margin-top:4px;white-space:pre-wrap">'+escHtml(cnText)+'</div>';
-      html+='</div>';
-    }
-    // 单词讲解 + 语法分析
-    html+='<div style="color:#d1d5db;font-size:13px;line-height:1.9;white-space:pre-wrap">'+escHtml(analysisText)+'</div>';
+    // 渲染分析结果（只显示单词讲解 + 语法分析，翻译在译文 tab）
+    var html='<div style="color:#d1d5db;font-size:13px;line-height:1.9;white-space:pre-wrap">'+escHtml(analysisText)+'</div>';
     document.getElementById('scanAnalysisContent').innerHTML=html;
   }else{
     document.getElementById('scanAnalysisContent').innerHTML='<div style="color:#888;font-size:13px">未能生成解析</div>';
