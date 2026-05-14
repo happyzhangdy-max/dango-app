@@ -1641,9 +1641,9 @@ var _searchConfig={
 };
 
 var _scanConfig={
-  // 硅基流动（通过 Worker 代理，Key 在服务端）
-  apiUrl:_scanWorkerUrl + '/v1/chat/completions',
-  model:'Qwen/Qwen3-VL-8B-Instruct',
+  // OpenRouter（通过 Worker 代理，Key 在服务端）
+  apiUrl:_scanWorkerUrl + '/v1/or/chat/completions',
+  model:'google/gemini-2.0-flash-001',
   apiKey:''
 };
 
@@ -1672,7 +1672,9 @@ function doScan(){
   }).catch(function(err){
     var msg=err.message||'';
     if(msg.indexOf('balance')>=0||msg.indexOf('insufficient')>=0){
-      showT('⚠️ 硅基流动账户余额不足，请先充值或领取免费额度');
+      showT('⚠️ API 账户余额不足或额度已用完');
+    }else if(msg.indexOf('403')>=0||msg.indexOf('forbidden')>=0){
+      showT('⚠️ Gemini API 暂时不可用，请稍后再试');
     }else{
       showT('识别失败：'+msg);
     }
@@ -1681,7 +1683,7 @@ function doScan(){
 }
 
 function callScanAnalyze(imageBase64){
-  // 用 Qwen3-VL-8B 一次性完成 OCR + 翻译 + 讲解（像 ChatGPT/Gemini 识图解答）
+  // 用 Gemini 2.0 Flash 一次性完成 OCR + 翻译 + 讲解（像 ChatGPT/Gemini 识图解答）
   var prompt='你是一位日语老师。用户上传了一张包含日文的图片，请直接解答：\n'+
     '1. 先完整提取图片中所有日文文字\n'+
     '2. 翻译成中文\n'+
