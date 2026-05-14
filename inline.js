@@ -1658,20 +1658,17 @@ function doScan(){
   document.getElementById('scanPreview').style.display='none';
   document.getElementById('scanLoading').style.display='block';
   document.getElementById('scanResult').style.display='none';
-  document.getElementById('scanLoadingText').textContent='正在识别图片中的日文...';
+  document.getElementById('scanLoadingText').textContent='🤔 正在思考...';
   
   compressImage(_scanImageData,1200).then(function(compressed){
-    return callOCRandTranslate(compressed);
+    return callScanAnalyze(compressed);
   }).then(function(result){
-    if(!result||!result.jp){
-      showT('未识别到日文文字，请换一张图片试试');
+    if(!result||(!result.jp&&!result.analysis)){
+      showT('未能识别图片内容，请换一张图片试试');
       clearScanImage();
       return;
     }
-    // 显示 OCR 结果，同时发起深度分析
-    showScanResult(result.jp,result.cn);
-    document.getElementById('scanLoadingText').textContent='正在解析日文内容...';
-    analyzeScanText(result.jp,result.cn);
+    showScanResult(result.jp||'',result.cn||'',result.analysis||'');
   }).catch(function(err){
     var msg=err.message||'';
     if(msg.indexOf('balance')>=0||msg.indexOf('insufficient')>=0){
@@ -1683,26 +1680,44 @@ function doScan(){
   });
 }
 
-function callOCRandTranslate(imageBase64){
-  // 用 Qwen3-VL-8B 一步完成 OCR + 翻译（¥0.5/M 输入）
-  var prompt='你识别图片中日文并翻译。\n规则：先逐行输出图片中日文原文，再逐行输出中文翻译。\n不要分析语法，不要解释，不要加任何多余内容。\n\n格式：\n【日文原文】\n（第一行原文）\n（第二行原文）\n【中文翻译】\n（第一行译文）\n（第二行译文）';
+function callScanAnalyze(imageBase64){
+  // 用 Qwen3-VL-8B 一次性完成 OCR + 翻译 + 讲解（像 ChatGPT/Gemini 识图解答）
+  var prompt='你是一位日语老师。用户上传了一张包含日文的图片，请直接解答：\n'+
+    '1. 先完整提取图片中所有日文文字\n'+
+    '2. 翻译成中文\n'+
+    '3. 讲解关键单词：每个汉字词标注读音（例：駅（えき）、勉強（べんきょう））\n'+
+    '4. 分析语法结构：说明句中关键语法点的含义和用法\n\n'+
+    '按以下格式输出（每个字段若没有则写「无」）：\n\n'+
+    '【日文原文】\n（完整日文原文）\n\n'+
+    '【中文翻译】\n（中文翻译）\n\n'+
+    '【单词讲解】\n（单词（读音）= 释义\n 单词（读音）= 释义）\n\n'+
+    '【语法分析】\n（语法点讲解）';
   return new Promise(function(resolve,reject){
     callAI(_scanConfig.apiUrl,_scanConfig.model,
       [{role:'user',content:[{type:'image_url',image_url:{url:imageBase64}},{type:'text',text:prompt}]}],
       4096).then(function(text){
-        // 解析返回格式
-        var jp='',cn='';
+        // 解析各字段
+        var jp='',cn='',wd='',gr='';
         var parts=text.split('【');
         for(var i=0;i<parts.length;i++){
           var p=parts[i];
           if(p.indexOf('日文原文】')===0){jp=p.replace('日文原文】','').trim()}
           if(p.indexOf('中文翻译】')===0){cn=p.replace('中文翻译】','').trim()}
+          if(p.indexOf('单词讲解】')===0){wd=p.replace('单词讲解】','').trim()}
+          if(p.indexOf('语法分析】')===0){gr=p.replace('语法分析】','').trim()}
         }
-        if(!jp&&!cn){
-          // 格式不匹配，全部当原文
+        // 如果没解析到格式化的字段，整段都当分析结果
+        var analysis='';
+        if(jp||wd||gr){
+          var parts2=[];
+          if(wd)parts2.push('📝 单词讲解\n'+wd);
+          if(gr)parts2.push('🔧 语法分析\n'+gr);
+          analysis=parts2.join('\n\n');
+        }else{
+          analysis=text;
           jp=text;
         }
-        resolve({jp:jp,cn:cn||'(翻译中...)'});
+        resolve({jp:jp||'(未能识别)',cn:cn||'',analysis:analysis});
       }).catch(function(err){reject(err)});
   });
 }
@@ -1736,86 +1751,40 @@ function callAI(url,model,messages,maxTokens,apiKey){
   });
 }
 
-function showScanResult(jpText,cnText){
+function showScanResult(jpText,cnText,analysisText){
   document.getElementById('scanLoading').style.display='none';
   document.getElementById('scanResult').style.display='block';
   document.getElementById('scanPreview').style.display='none';
   
   // 填充原文/译文数据
   document.getElementById('scanFullJp').textContent=jpText;
-  document.getElementById('scanFullCn').textContent=cnText;
+  document.getElementById('scanFullCn').textContent=cnText||jpText;
   
-  // 解析解答 tab：先显示 loading
-  document.getElementById('scanAnalysisContent').style.display='none';
-  document.getElementById('scanAnalysisLoading').style.display='flex';
-  document.getElementById('scanAnalysisContent').innerHTML='';
+  // 解析解答 tab：显示 VL 模型的分析结果
+  document.getElementById('scanAnalysisLoading').style.display='none';
+  document.getElementById('scanAnalysisContent').style.display='block';
+  if(analysisText){
+    // 渲染分析结果
+    var html='';
+    // 翻译
+    if(cnText){
+      html+='<div style="margin-bottom:14px">';
+      html+='<div style="color:#d46b08;font-size:15px;font-weight:600">🀄 翻译</div>';
+      html+='<div style="color:#d1d5db;font-size:14px;line-height:1.8;margin-top:4px;white-space:pre-wrap">'+escHtml(cnText)+'</div>';
+      html+='</div>';
+    }
+    // 单词讲解 + 语法分析
+    html+='<div style="color:#d1d5db;font-size:13px;line-height:1.9;white-space:pre-wrap">'+escHtml(analysisText)+'</div>';
+    document.getElementById('scanAnalysisContent').innerHTML=html;
+  }else{
+    document.getElementById('scanAnalysisContent').innerHTML='<div style="color:#888;font-size:13px">未能生成解析</div>';
+  }
   
   // 默认显示解析解答视图
   switchScanView('parallel',document.querySelector('.scan-result-tab.active'));
   
   // 保存历史
   saveScanHistory(jpText,cnText);
-}
-
-function analyzeScanText(jpText,cnText){
-  // 用 deepseek 分析日文内容
-  var prompt='请对以下日文内容进行详细解析，格式严格如下（每行一个字段，没有就写「无」）：\n'+
-    '中文翻译：\n'+
-    '单词解析：\n'+
-    '语法分析：\n\n'+
-    '规则：\n'+
-    '- 中文翻译：写完整流畅的中文翻译\n'+
-    '- 单词解析：分解每个重要单词，格式：「词/读音/中文释义」，每行一个\n'+
-    '- 语法分析：标注关键语法结构并简要说明含义\n\n'+
-    '日文：'+jpText;
-  
-  callAI(_searchConfig.apiUrl,_searchConfig.model,[{role:'user',content:prompt}],1024,'').then(function(txt){
-    // 解析返回
-    var cn='',wd='',gr='';
-    var secs=txt.split(/\n(?=单词解析|语法分析)/);
-    cn=(secs[0]||'').replace(/^中文翻译[：:]\s*/,'').trim();
-    for(var si=1;si<secs.length;si++){
-      var s=secs[si];
-      if(/^单词解析/.test(s)){wd=s.replace(/^单词解析[：:]\s*/,'').trim()}
-      else if(/^语法分析/.test(s)){gr=s.replace(/^语法分析[：:]\s*/,'').trim()}
-    }
-    if(wd==='无'||wd==='なし')wd='';
-    if(gr==='无'||gr==='なし')gr='';
-    // 提取多行字段
-    var wdMatch=txt.match(/单词解析[：:]\s*([\s\S]*?)(?=\n(语法分析|$))/);
-    if(wdMatch)wd=wdMatch[1].trim();
-    var grMatch=txt.match(/语法分析[：:]\s*([\s\S]*?)$/);
-    if(grMatch)gr=grMatch[1].trim();
-    if(wd==='无'||wd==='なし')wd='';
-    if(gr==='无'||gr==='なし')gr='';
-    
-    // 渲染解析解答
-    var html='<div style="color:#10b981;font-size:13px;font-weight:600;margin-bottom:10px">📖 解析解答</div>';
-    html+='<div style="margin-bottom:12px">';
-    html+='<div style="color:#d46b08;font-size:15px;font-weight:600">🀄 翻译</div>';
-    html+='<div style="color:#d1d5db;font-size:14px;line-height:1.8;margin-top:4px">'+escHtml(cn||'')+'</div>';
-    html+='</div>';
-    if(wd){
-      html+='<div style="margin-bottom:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.06)">';
-      html+='<div style="color:#a78bfa;font-size:14px;font-weight:600;margin-bottom:6px">📝 单词解析</div>';
-      html+='<div style="color:#cbd5e1;font-size:13px;line-height:1.9;white-space:pre-wrap">'+escHtml(wd)+'</div>';
-      html+='</div>';
-    }
-    if(gr){
-      html+='<div style="padding-top:10px;border-top:1px solid rgba(255,255,255,0.06)">';
-      html+='<div style="color:#4ecca3;font-size:14px;font-weight:600;margin-bottom:6px">🔧 语法分析</div>';
-      html+='<div style="color:#cbd5e1;font-size:13px;line-height:1.8;white-space:pre-wrap">'+escHtml(gr)+'</div>';
-      html+='</div>';
-    }
-    
-    document.getElementById('scanAnalysisContent').innerHTML=html;
-    document.getElementById('scanAnalysisLoading').style.display='none';
-    document.getElementById('scanAnalysisContent').style.display='block';
-    
-    // 自动切换到解析解答 tab（如果当前仍在原文/译文 tab 则不动）
-  }).catch(function(err){
-    document.getElementById('scanAnalysisLoading').innerHTML='<div style="color:#888;font-size:13px">解析失败：'+escHtml(err.message||err)+'</div>';
-  });
 }
 
 function switchScanView(view,btn){
