@@ -1281,14 +1281,15 @@ function doAISearch(q,localResults){
     var cn='',src='',kanji='',note='',furigana='';
     
     if (isChinese) {
-      // 中文→日语模式
-      txt.split('\n').forEach(function(line){
-        var m=line.match(/^日语翻译[：:]?\s*(.*)/);if(m)cn=m[1];
-        m=line.match(/^读音注音[：:]?\s*(.*)/);if(m)furigana=m[1];
-        m=line.match(/^中文解释[：:]?\s*(.*)/);if(m)kanji=m[1];
-        m=line.match(/^说明[：:]?\s*(.*)/);if(m)note=m[1];
-      });
-      // 容错
+      // 中文→日语模式：用 section 解析替代逐行
+      var secs=txt.split(/\n(?=读音注音|中文解释|说明)/);
+      cn=(secs[0]||'').replace(/^日语翻译[：:]\s*/,'').trim();
+      for(var si=1;si<secs.length;si++){
+        var s=secs[si];
+        if(/^读音注音/.test(s)){furigana=s.replace(/^读音注音[：:]\s*/,'').trim()}
+        else if(/^中文解释/.test(s)){kanji=s.replace(/^中文解释[：:]\s*/,'').trim()}
+        else if(/^说明/.test(s)){note=s.replace(/^说明[：:]\s*/,'').trim()}
+      }
       if(!cn&&txt.trim())cn=txt.trim();
       if(furigana==='无'||furigana==='なし')furigana='';
       if(kanji==='无'||kanji==='なし')kanji='';
@@ -1771,12 +1772,13 @@ function analyzeScanText(jpText,cnText){
   callAI(_searchConfig.apiUrl,_searchConfig.model,[{role:'user',content:prompt}],1024,'').then(function(txt){
     // 解析返回
     var cn='',wd='',gr='';
-    txt.split('\n').forEach(function(line){
-      var m=line.match(/^中文翻译[：:]?\s*(.*)/);if(m)cn=m[1];
-      m=line.match(/^单词解析[：:]?\s*(.*)/);if(m)wd=m[1];
-      m=line.match(/^语法分析[：:]?\s*(.*)/);if(m)gr=m[1];
-    });
-    if(!cn&&txt.trim())cn=txt.trim();
+    var secs=txt.split(/\n(?=单词解析|语法分析)/);
+    cn=(secs[0]||'').replace(/^中文翻译[：:]\s*/,'').trim();
+    for(var si=1;si<secs.length;si++){
+      var s=secs[si];
+      if(/^单词解析/.test(s)){wd=s.replace(/^单词解析[：:]\s*/,'').trim()}
+      else if(/^语法分析/.test(s)){gr=s.replace(/^语法分析[：:]\s*/,'').trim()}
+    }
     if(wd==='无'||wd==='なし')wd='';
     if(gr==='无'||gr==='なし')gr='';
     // 提取多行字段
