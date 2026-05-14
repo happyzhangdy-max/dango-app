@@ -1279,8 +1279,6 @@ function doAISearch(q,localResults){
     // 解析 AI 返回的字段
     // 解析 AI 返回的字段
     var cn='',src='',kanji='',note='',furigana='';
-    // debug: save raw AI response
-    try{localStorage.setItem('_ai_debug',txt)}catch(e){}
     
     if (isChinese) {
       // 中文→日语模式：用 section 解析替代逐行
