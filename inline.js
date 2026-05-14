@@ -1244,17 +1244,14 @@ function doAISearch(q,localResults){
     prompt='分析以下日文并输出信息，格式严格如下（每行一个字段，没有就写「无」）：\n'+
       '中文翻译：\n'+
       '外来语原词：\n'+
-      '日文汉字：\n'+
-      (isSentence ? '单词解析：\n每个单词的【读音】+【中文释义】\n'+
-      '语法点：\n' : '')+
-      '说明：\n\n'+
+      (isSentence ? '语法点：\n' : '日文汉字：\n')+
+      (isSentence ? '' : '说明：\n\n')+
+      (isSentence ? '\n' : '')+
       '规则：\n'+
       '- 外来语原词：如果是片假名词汇→写出外语原词（如 switch on）；否则写「无」\n'+
       (isSentence ?
       '- 中文翻译：写完整流畅的中文翻译\n'+
-      '- 单词解析：按顺序分解每个单词，每行一个词，格式「词/读音/中文释义」\n'+
-      '- 语法点：标注句中关键语法结构（如 うちに、ている、なければならない）并简要说明含义\n'+
-      '- 说明：写语境、使用场景或注意点\n'
+      '- 语法点：标注句中关键语法结构（如 うちに、ている、なければならない）并简要说明含义\n'
       :
       '- 日文汉字：平假名词汇有对应的日文汉字时写出汉字形式（如 おいしい→美味しい）\n'+
       '- 中文翻译：写简洁的中文释义\n'+
@@ -1337,32 +1334,22 @@ function doAISearch(q,localResults){
         toggleBook({type:'ai', word:jpText, reading:'', meaning:meaningText, level:''});
       }
     } else {
-      // 日文→中文模式（原逻辑）
-      var breakdown='',grammar='';
+      // 日文→中文模式
+      var grammar='';
       txt.split('\n').forEach(function(line){
         var m=line.match(/^中文翻译[：:]?\s*(.*)/);if(m)cn=m[1];
         m=line.match(/^外来语原词[：:]?\s*(.*)/);if(m)src=m[1];
-        m=line.match(/^日文汉字[：:]?\s*(.*)/);if(m)kanji=m[1];
-        m=line.match(/^说明[：:]?\s*(.*)/);if(m)note=m[1];
-        m=line.match(/^单词解析[：:]?\s*(.*)/);if(m)breakdown=m[1];
         m=line.match(/^语法点[：:]?\s*(.*)/);if(m)grammar=m[1];
       });
-      // 如果解析字段中含有换行后的多行内容，收集后续行直到遇到下一个字段
-      // 用更简单的方式：直接从txt提取单词解析和语法点节
-      if(!breakdown||breakdown==='无'||breakdown==='なし')breakdown='';
       if(!grammar||grammar==='无'||grammar==='なし')grammar='';
       // 如果字段内容跨多行，从原始txt中提取完整段
-      var breakdownMatch = txt.match(/单词解析[：:]\s*([\s\S]*?)(?=\n(语法点|说明|$))/);
-      if(breakdownMatch)breakdown=breakdownMatch[1].trim();
-      var grammarMatch = txt.match(/语法点[：:]\s*([\s\S]*?)(?=\n(说明|$))/);
-      if(grammarMatch)grammar=grammarMatch[1].trim();
+      if(isSentence){
+        var grammarMatch = txt.match(/语法点[：:]\s*([\s\S]*?)$/);
+        if(grammarMatch)grammar=grammarMatch[1].trim();
+        if(grammar==='无'||grammar==='なし')grammar='';
+      }
       if(!cn&&txt.trim())cn=txt.trim();
       if(src==='无'||src==='なし')src='';
-      if(kanji==='无'||kanji==='なし')kanji='';
-      if(note==='无'||note==='なし')note='';
-      
-      var displayWord = (kanji && kanji!=='无' && kanji!=='なし') ? kanji : q;
-      var displayReading = (kanji && kanji!==q && kanji!=='无' && kanji!=='なし') ? q : '';
       
       var book = getBook();
       var alreadyInBook = book.some(function(x){ return x.type==='ai' && x.word===q; });
@@ -1370,21 +1357,18 @@ function doAISearch(q,localResults){
       var aiHtml='<div class="search-result-item" style="cursor:default">'+
         '<div class="search-result-info" style="flex:1;min-width:0">'+
         '<div class="search-result-wordrow">'+
-        '<span class="search-result-word">'+escHtml(displayWord)+'</span>'+
-        (displayReading ? '<span class="search-result-reading">'+escHtml(displayReading)+'</span>' : '')+
+        '<span class="search-result-word">'+escHtml(q)+'</span>'+
         '<span class="search-result-level sl-ai" style="background:#e6f7ff;color:#1890ff;border:1px solid #91d5ff;font-size:11px;padding:2px 8px;border-radius:6px;font-weight:600">AI</span>'+
         '</div>'+
         '<div class="search-result-meaning" style="color:#d46b08;font-size:15px;margin-top:6px">→ '+escHtml(cn||'')+'</div>'+
         '<div class="search-result-tags" style="margin-top:6px">'+
         (src ? '<span class="search-result-tag" style="font-size:13px;padding:3px 10px">语源：'+escHtml(src)+'</span>' : '')+
-        (note ? '<span class="search-result-tag" style="font-size:13px;padding:3px 10px">💡 '+escHtml(note)+'</span>' : '')+
         '</div>'+
-        (breakdown ? '<div class="search-result-breakdown" style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.06);font-size:14px;line-height:1.8"><div style="color:#a78bfa;font-weight:700;margin-bottom:6px;font-size:15px">📝 单词解析</div><div style="color:#cbd5e1;white-space:pre-wrap">'+escHtml(breakdown)+'</div></div>' : '')+
         (grammar ? '<div class="search-result-grammar" style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.06);font-size:14px;line-height:1.8"><div style="color:#4ecca3;font-weight:700;margin-bottom:6px;font-size:15px">🔧 语法点</div><div style="color:#cbd5e1;white-space:pre-wrap">'+escHtml(grammar)+'</div></div>' : '')+
         '</div>'+
         '<div class="search-result-actions" style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;align-items:center">'+
         '<button onclick="event.stopPropagation();speak(\''+escHtml(q)+'\')" style="background:none;border:none;cursor:pointer;font-size:18px;padding:4px;color:#888" title="发音">🔊</button>'+
-        '<span class="search-book-btn" onclick="event.stopPropagation();toggleBook({type:\'ai\', word:\''+escHtml(q)+'\', reading:\''+escHtml(kanji||'')+'\', meaning:\''+escHtml(cn||'')+'\', level:\'\'});this.textContent=this.textContent==\'★\'?\'☆\':\'★\';return false" style="cursor:pointer;font-size:18px;opacity:0.4;transition:opacity 0.2s" title="收藏到生词本">'+(alreadyInBook?'★':'☆')+'</span>'+
+        '<span class="search-book-btn" onclick="event.stopPropagation();toggleBook({type:\'ai\', word:\''+escHtml(q)+'\', reading:\'\', meaning:\''+escHtml(cn||'')+'\', level:\'\'});this.textContent=this.textContent==\'★\'?\'☆\':\'★\';return false" style="cursor:pointer;font-size:18px;opacity:0.4;transition:opacity 0.2s" title="收藏到生词本">'+(alreadyInBook?'★':'☆')+'</span>'+
         '</div>'+
         '</div>';
       
