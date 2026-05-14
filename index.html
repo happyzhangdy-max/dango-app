@@ -642,6 +642,8 @@ html { overflow:hidden; }
 .ap-nav:active { transform:translateY(-50%) scale(0.95); }
 .ap-nav-left { left:24px; }
 .ap-nav-right { right:24px; }
+.ap-nav.disabled { opacity:0.2; cursor:default; pointer-events:none; }
+.ap-nav.disabled:hover { color:rgba(255,255,255,0.35); background:rgba(255,255,255,0.04); transform:translateY(-50%); }
 #gApScreen { display:none; position:fixed; inset:0; z-index:203; background:#0f0f1a; flex-direction:column; align-items:center; justify-content:center; padding:40px 20px; user-select:none; }
 #gApScreen.show { display:flex; }
 .ap-card { text-align:center; max-width:600px; width:100%; }
@@ -1864,7 +1866,7 @@ html { overflow:hidden; }
 <script src="grammar_data.js?v=3"></script>
 <script src="quiz_data_high.js?v=3"></script>
 <script src="quiz_data_normal.js?v=3"></script>
-<script src="inline.js?v=109"></script>
+<script src="inline.js?v=110"></script>
 <script src="game/tower-climb.js?v=6"></script>
 
 
