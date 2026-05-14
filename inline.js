@@ -1279,6 +1279,8 @@ function doAISearch(q,localResults){
     // 解析 AI 返回的字段
     // 解析 AI 返回的字段
     var cn='',src='',kanji='',note='',furigana='';
+    // debug: save raw AI response
+    try{localStorage.setItem('_ai_debug',txt)}catch(e){}
     
     if (isChinese) {
       // 中文→日语模式：用 section 解析替代逐行
@@ -1290,7 +1292,7 @@ function doAISearch(q,localResults){
         else if(/^中文解释/.test(s)){kanji=s.replace(/^中文解释[：:]\s*/,'').trim()}
         else if(/^说明/.test(s)){note=s.replace(/^说明[：:]\s*/,'').trim()}
       }
-      if(!cn&&txt.trim())cn=txt.trim();
+      if(!cn&&txt.trim()){cn=txt.trim()}
       if(furigana==='无'||furigana==='なし')furigana='';
       if(kanji==='无'||kanji==='なし')kanji='';
       if(note==='无'||note==='なし')note='';
