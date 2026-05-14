@@ -1091,137 +1091,12 @@ function doAISearch(q,localResults){
   var cacheData = JSON.parse(localStorage.getItem('_search_cache')||'{}');
   var cached = cacheData[cacheKey];
   if(cached && Date.now() - cached.ts < 1800000){ // 30 min TTL
-    var _le=document.getElementById('aiSearchLoading');if(_le)_le.remove();
-    var ls=el.innerHTML;
-    if(ls){el.innerHTML=cached.html+'<div style="margin:6px 4px 2px;border-top:1px solid rgba(255,255,255,0.06)"></div>'+ls;}
-    else{el.innerHTML=cached.html;}
+    _renderAiSearchResult(cached.txt, cached.q, cached.isChinese, localResults, null, true);
     return;
   }
   
   callAI(_searchConfig.apiUrl,_searchConfig.model,[{role:'user',content:prompt}],maxTk,_searchConfig.apiKey).then(function(txt){
-    // 移除 AI 加载骨架屏
-    var _le=document.getElementById('aiSearchLoading');if(_le)_le.remove();
-    // 解析 AI 返回的字段
-    // 解析 AI 返回的字段
-    var cn='',src='',kanji='',note='';
-    
-    if (isChinese) {
-      // 中文→日语模式
-      txt.split('\n').forEach(function(line){
-        var m=line.match(/^日语翻译[：:]?\s*(.*)/);if(m)cn=m[1];
-        // cn 暂时存日语翻译结果
-        m=line.match(/^中文解释[：:]?\s*(.*)/);if(m)kanji=m[1];
-        m=line.match(/^说明[：:]?\s*(.*)/);if(m)note=m[1];
-      });
-      // 容错
-      if(!cn&&txt.trim())cn=txt.trim();
-      if(kanji==='无'||kanji==='なし')kanji='';
-      if(note==='无'||note==='なし')note='';
-      
-      var jpText = cn;    // 日语翻译文本（发音用）
-      var chText = kanji; // 中文解释
-      var displayWord = jpText;
-      var displayReading = '';
-      var meaningText = chText || q; // 显示中文解释或原文
-      
-      // 检查收藏状态
-      var book = getBook();
-      var alreadyInBook = book.some(function(x){ return x.type==='ai' && x.word===jpText; });
-      
-      var aiHtml='<div class="search-result-item" style="cursor:default">'+
-        '<div class="search-result-info" style="flex:1;min-width:0">'+
-        '<div class="search-result-wordrow">'+
-        '<span class="search-result-word">'+escHtml(jpText)+'</span>'+
-        '<span class="search-result-level sl-ai" style="background:#e6f7ff;color:#1890ff;border:1px solid #91d5ff;font-size:11px;padding:2px 8px;border-radius:6px;font-weight:600">中→日</span>'+
-        '</div>'+
-        '<div class="search-result-meaning" style="color:#d46b08;font-size:15px;margin-top:6px">→ '+escHtml(meaningText)+'</div>'+
-        '<div class="search-result-tags" style="margin-top:6px">'+
-        (note ? '<span class="search-result-tag" style="font-size:13px;padding:3px 10px">💡 '+escHtml(note)+'</span>' : '')+
-        '</div>'+
-        (breakdown ? '<div class="search-result-breakdown" style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.06);font-size:12px;line-height:1.6"><div style="color:#a78bfa;font-weight:600;margin-bottom:4px">📝 单词解析</div><div style="color:#cbd5e1;white-space:pre-wrap">'+escHtml(breakdown)+'</div></div>' : '')+
-        (grammar ? '<div class="search-result-grammar" style="margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.06);font-size:12px;line-height:1.6"><div style="color:#4ecca3;font-weight:600;margin-bottom:4px">🔧 语法点</div><div style="color:#cbd5e1;white-space:pre-wrap">'+escHtml(grammar)+'</div></div>' : '')+
-        '</div>'+
-        '<div class="search-result-actions" style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;align-items:center">'+
-        '<button onclick="event.stopPropagation();speak(\''+escHtml(jpText)+'\')" style="background:none;border:none;cursor:pointer;font-size:18px;padding:4px;color:#888" title="发音">🔊</button>'+
-        '<span class="search-book-btn" onclick="event.stopPropagation();toggleBook({type:\'ai\', word:\''+escHtml(jpText)+'\', reading:\'\', meaning:\''+escHtml(meaningText)+'\', level:\'\'});this.textContent=this.textContent==\'★\'?\'☆\':\'★\';return false" style="cursor:pointer;font-size:18px;opacity:0.4;transition:opacity 0.2s" title="收藏到生词本">'+(alreadyInBook?'★':'☆')+'</span>'+
-        '</div>'+
-        '</div>';
-      
-      // 插入到现有结果前面
-      if(!localResults||localResults.length===0){
-        el.innerHTML=aiHtml;
-      }else{
-        el.innerHTML=aiHtml+'<div style="margin:6px 4px 2px;border-top:1px solid rgba(255,255,255,0.06)"></div>'+el.innerHTML;
-      }
-      // 缓存 AI 结果
-      try{var _c=JSON.parse(localStorage.getItem('_search_cache')||'{}');_c[cacheKey]={html:aiHtml,ts:Date.now()};localStorage.setItem('_search_cache',JSON.stringify(_c))}catch(e){}
-      
-      // 自动加入生词本
-      if (!alreadyInBook && !VOCAB.some(function(x){ return x.word===jpText; })) {
-        toggleBook({type:'ai', word:jpText, reading:'', meaning:meaningText, level:''});
-      }
-    } else {
-      // 日文→中文模式（原逻辑）
-      var breakdown='',grammar='';
-      txt.split('\n').forEach(function(line){
-        var m=line.match(/^中文翻译[：:]?\s*(.*)/);if(m)cn=m[1];
-        m=line.match(/^外来语原词[：:]?\s*(.*)/);if(m)src=m[1];
-        m=line.match(/^日文汉字[：:]?\s*(.*)/);if(m)kanji=m[1];
-        m=line.match(/^说明[：:]?\s*(.*)/);if(m)note=m[1];
-        m=line.match(/^单词解析[：:]?\s*(.*)/);if(m)breakdown=m[1];
-        m=line.match(/^语法点[：:]?\s*(.*)/);if(m)grammar=m[1];
-      });
-      // 如果解析字段中含有换行后的多行内容，收集后续行直到遇到下一个字段
-      // 用更简单的方式：直接从txt提取单词解析和语法点节
-      if(!breakdown||breakdown==='无'||breakdown==='なし')breakdown='';
-      if(!grammar||grammar==='无'||grammar==='なし')grammar='';
-      // 如果字段内容跨多行，从原始txt中提取完整段
-      var breakdownMatch = txt.match(/单词解析[：:]\s*([\s\S]*?)(?=\n(语法点|说明|$))/);
-      if(breakdownMatch)breakdown=breakdownMatch[1].trim();
-      var grammarMatch = txt.match(/语法点[：:]\s*([\s\S]*?)(?=\n(说明|$))/);
-      if(grammarMatch)grammar=grammarMatch[1].trim();
-      if(!cn&&txt.trim())cn=txt.trim();
-      if(src==='无'||src==='なし')src='';
-      if(kanji==='无'||kanji==='なし')kanji='';
-      if(note==='无'||note==='なし')note='';
-      
-      var displayWord = (kanji && kanji!=='无' && kanji!=='なし') ? kanji : q;
-      var displayReading = (kanji && kanji!==q && kanji!=='无' && kanji!=='なし') ? q : '';
-      
-      var book = getBook();
-      var alreadyInBook = book.some(function(x){ return x.type==='ai' && x.word===q; });
-      
-      var aiHtml='<div class="search-result-item" style="cursor:default">'+
-        '<div class="search-result-info" style="flex:1;min-width:0">'+
-        '<div class="search-result-wordrow">'+
-        '<span class="search-result-word">'+escHtml(displayWord)+'</span>'+
-        (displayReading ? '<span class="search-result-reading">'+escHtml(displayReading)+'</span>' : '')+
-        '<span class="search-result-level sl-ai" style="background:#e6f7ff;color:#1890ff;border:1px solid #91d5ff;font-size:11px;padding:2px 8px;border-radius:6px;font-weight:600">AI</span>'+
-        '</div>'+
-        '<div class="search-result-meaning" style="color:#d46b08;font-size:15px;margin-top:6px">→ '+escHtml(cn||'')+'</div>'+
-        '<div class="search-result-tags" style="margin-top:6px">'+
-        (src ? '<span class="search-result-tag" style="font-size:13px;padding:3px 10px">语源：'+escHtml(src)+'</span>' : '')+
-        (note ? '<span class="search-result-tag" style="font-size:13px;padding:3px 10px">💡 '+escHtml(note)+'</span>' : '')+
-        '</div>'+
-        (breakdown ? '<div class="search-result-breakdown" style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.06);font-size:14px;line-height:1.8"><div style="color:#a78bfa;font-weight:700;margin-bottom:6px;font-size:15px">📝 单词解析</div><div style="color:#cbd5e1;white-space:pre-wrap">'+escHtml(breakdown)+'</div></div>' : '')+
-        (grammar ? '<div class="search-result-grammar" style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.06);font-size:14px;line-height:1.8"><div style="color:#4ecca3;font-weight:700;margin-bottom:6px;font-size:15px">🔧 语法点</div><div style="color:#cbd5e1;white-space:pre-wrap">'+escHtml(grammar)+'</div></div>' : '')+
-        '</div>'+
-        '<div class="search-result-actions" style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;align-items:center">'+
-        '<button onclick="event.stopPropagation();speak(\''+escHtml(q)+'\')" style="background:none;border:none;cursor:pointer;font-size:18px;padding:4px;color:#888" title="发音">🔊</button>'+
-        '<span class="search-book-btn" onclick="event.stopPropagation();toggleBook({type:\'ai\', word:\''+escHtml(q)+'\', reading:\''+escHtml(kanji||'')+'\', meaning:\''+escHtml(cn||'')+'\', level:\'\'});this.textContent=this.textContent==\'★\'?\'☆\':\'★\';return false" style="cursor:pointer;font-size:18px;opacity:0.4;transition:opacity 0.2s" title="收藏到生词本">'+(alreadyInBook?'★':'☆')+'</span>'+
-        '</div>'+
-        '</div>';
-      
-      if(!localResults||localResults.length===0){
-        el.innerHTML=aiHtml;
-      }else{
-        el.innerHTML=aiHtml+el.innerHTML;
-      }
-      // 缓存 AI 结果
-      try{var _c=JSON.parse(localStorage.getItem('_search_cache')||'{}');_c[cacheKey]={html:aiHtml,ts:Date.now()};localStorage.setItem('_search_cache',JSON.stringify(_c))}catch(e){}
-      
-      // 不自动加生词本，用户可手动点收藏按钮
-    }
+    _renderAiSearchResult(txt, q, isChinese, localResults, cacheKey, false);
   }).catch(function(err){
     console.log('AI search error:',err);
   });
@@ -1249,13 +1124,13 @@ function showSearchLoading(){
 
 function showSearchEmpty(txt){
   var el=document.getElementById('searchResults');
-  el.innerHTML='<div class="search-empty">'+txt+'</div>';
+  el.innerHTML='<div class="search-empty">'+escHtml(txt)+'</div>';
   el.classList.add('visible');
 }
 
 function showSearchTip(txt,ai){
   var el=document.getElementById('searchResults');
-  el.innerHTML='<div class="search-tip-text">'+txt+'</div>';
+  el.innerHTML='<div class="search-tip-text">'+escHtml(txt)+'</div>';
   el.classList.add('visible');
 }
 
@@ -1365,6 +1240,117 @@ function goToGrammar(id){
     var g=GRAMMAR_DATA.find(function(x){return x.id===id});
     if(g){showGDetail(g);}
   },100);
+}
+
+// 提取AI搜索结果渲染（从原始txt重建DOM，而非使用缓存的HTML）
+function _renderAiSearchResult(txt, q, isChinese, localResults, cacheKey, skipAutoAdd){
+  var el=document.getElementById('searchResults');
+  var _le=document.getElementById('aiSearchLoading');if(_le)_le.remove();
+  var cn='',src='',kanji='',note='';
+  
+  if(isChinese){
+    txt.split('\n').forEach(function(line){
+      var m=line.match(/^日语翻译[：:]?\s*(.*)/);if(m)cn=m[1];
+      m=line.match(/^中文解释[：:]?\s*(.*)/);if(m)kanji=m[1];
+      m=line.match(/^说明[：:]?\s*(.*)/);if(m)note=m[1];
+    });
+    if(!cn&&txt.trim())cn=txt.trim();
+    if(kanji==='无'||kanji==='なし')kanji='';
+    if(note==='无'||note==='なし')note='';
+    
+    var jpText=cn;
+    var meaningText=kanji||q;
+    var book=getBook();
+    var alreadyInBook=book.some(function(x){return x.type==='ai'&&x.word===jpText});
+    
+    var aiHtml='<div class="search-result-item" style="cursor:default">'+
+      '<div class="search-result-info" style="flex:1;min-width:0">'+
+      '<div class="search-result-wordrow">'+
+      '<span class="search-result-word">'+escHtml(jpText)+'</span>'+
+      '<span class="search-result-level sl-ai" style="background:#e6f7ff;color:#1890ff;border:1px solid #91d5ff;font-size:11px;padding:2px 8px;border-radius:6px;font-weight:600">中→日</span>'+
+      '</div>'+
+      '<div class="search-result-meaning" style="color:#d46b08;font-size:15px;margin-top:6px">→ '+escHtml(meaningText)+'</div>'+
+      '<div class="search-result-tags" style="margin-top:6px">'+
+      (note?'<span class="search-result-tag" style="font-size:13px;padding:3px 10px">💡 '+escHtml(note)+'</span>':'')+
+      '</div>'+
+      '</div>'+
+      '<div class="search-result-actions" style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;align-items:center">'+
+      '<button onclick="event.stopPropagation();speak(\''+escHtml(jpText)+'\')" style="background:none;border:none;cursor:pointer;font-size:18px;padding:4px;color:#888" title="发音">🔊</button>'+
+      '<span class="search-book-btn" onclick="event.stopPropagation();toggleBook({type:\'ai\', word:\''+escHtml(jpText)+'\', reading:\'\', meaning:\''+escHtml(meaningText)+'\', level:\'\'});this.textContent=this.textContent==\'★\'?\'☆\':\'★\';return false" style="cursor:pointer;font-size:18px;opacity:0.4;transition:opacity 0.2s" title="收藏到生词本">'+(alreadyInBook?'★':'☆')+'</span>'+
+      '</div>'+
+      '</div>';
+    
+    if(!localResults||localResults.length===0){
+      el.innerHTML=aiHtml;
+    }else{
+      el.innerHTML=aiHtml+'<div style="margin:6px 4px 2px;border-top:1px solid rgba(255,255,255,0.06)"></div>'+el.innerHTML;
+    }
+    
+    // 缓存原始txt（不缓存html）
+    if(cacheKey&&!skipAutoAdd){
+      try{var _c=JSON.parse(localStorage.getItem('_search_cache')||'{}');_c[cacheKey]={txt:txt,q:q,isChinese:isChinese,ts:Date.now()};localStorage.setItem('_search_cache',JSON.stringify(_c))}catch(e){}
+    }
+    
+    // 自动加入生词本（仅首次AI响应，非缓存命中）
+    if(!skipAutoAdd&&!alreadyInBook&&!VOCAB.some(function(x){return x.word===jpText})){
+      toggleBook({type:'ai',word:jpText,reading:'',meaning:meaningText,level:''});
+    }
+  }else{
+    var breakdown='',grammar='';
+    txt.split('\n').forEach(function(line){
+      var m=line.match(/^中文翻译[：:]?\s*(.*)/);if(m)cn=m[1];
+      m=line.match(/^外来语原词[：:]?\s*(.*)/);if(m)src=m[1];
+      m=line.match(/^日文汉字[：:]?\s*(.*)/);if(m)kanji=m[1];
+      m=line.match(/^说明[：:]?\s*(.*)/);if(m)note=m[1];
+      m=line.match(/^单词解析[：:]?\s*(.*)/);if(m)breakdown=m[1];
+      m=line.match(/^语法点[：:]?\s*(.*)/);if(m)grammar=m[1];
+    });
+    if(!breakdown||breakdown==='无'||breakdown==='なし')breakdown='';
+    if(!grammar||grammar==='无'||grammar==='なし')grammar='';
+    var breakdownMatch=txt.match(/单词解析[：:]\s*([\s\S]*?)(?=\n(语法点|说明|$))/);
+    if(breakdownMatch)breakdown=breakdownMatch[1].trim();
+    var grammarMatch=txt.match(/语法点[：:]\s*([\s\S]*?)(?=\n(说明|$))/);
+    if(grammarMatch)grammar=grammarMatch[1].trim();
+    if(!cn&&txt.trim())cn=txt.trim();
+    if(src==='无'||src==='なし')src='';
+    if(kanji==='无'||kanji==='なし')kanji='';
+    if(note==='无'||note==='なし')note='';
+    
+    var displayWord=(kanji&&kanji!=='无'&&kanji!=='なし')?kanji:q;
+    var displayReading=(kanji&&kanji!==q&&kanji!=='无'&&kanji!=='なし')?q:'';
+    
+    var aiHtml='<div class="search-result-item" style="cursor:default">'+
+      '<div class="search-result-info" style="flex:1;min-width:0">'+
+      '<div class="search-result-wordrow">'+
+      '<span class="search-result-word">'+escHtml(displayWord)+'</span>'+
+      (displayReading?'<span class="search-result-reading">'+escHtml(displayReading)+'</span>':'')+
+      '<span class="search-result-level sl-ai" style="background:#e6f7ff;color:#1890ff;border:1px solid #91d5ff;font-size:11px;padding:2px 8px;border-radius:6px;font-weight:600">AI</span>'+
+      '</div>'+
+      '<div class="search-result-meaning" style="color:#d46b08;font-size:15px;margin-top:6px">→ '+escHtml(cn||'')+'</div>'+
+      '<div class="search-result-tags" style="margin-top:6px">'+
+      (src?'<span class="search-result-tag" style="font-size:13px;padding:3px 10px">语源：'+escHtml(src)+'</span>':'')+
+      (note?'<span class="search-result-tag" style="font-size:13px;padding:3px 10px">💡 '+escHtml(note)+'</span>':'')+
+      '</div>'+
+      (breakdown?'<div class="search-result-breakdown" style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.06);font-size:14px;line-height:1.8"><div style="color:#a78bfa;font-weight:700;margin-bottom:6px;font-size:15px">📝 单词解析</div><div style="color:#cbd5e1;white-space:pre-wrap">'+escHtml(breakdown)+'</div></div>':'')+
+      (grammar?'<div class="search-result-grammar" style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.06);font-size:14px;line-height:1.8"><div style="color:#4ecca3;font-weight:700;margin-bottom:6px;font-size:15px">🔧 语法点</div><div style="color:#cbd5e1;white-space:pre-wrap">'+escHtml(grammar)+'</div></div>':'')+
+      '</div>'+
+      '<div class="search-result-actions" style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;align-items:center">'+
+      '<button onclick="event.stopPropagation();speak(\''+escHtml(q)+'\')" style="background:none;border:none;cursor:pointer;font-size:18px;padding:4px;color:#888" title="发音">🔊</button>'+
+      '<span class="search-book-btn" onclick="event.stopPropagation();toggleBook({type:\'ai\', word:\''+escHtml(q)+'\', reading:\''+escHtml(kanji||'')+'\', meaning:\''+escHtml(cn||'')+'\', level:\'\'});this.textContent=this.textContent==\'★\'?\'☆\':\'★\';return false" style="cursor:pointer;font-size:18px;opacity:0.4;transition:opacity 0.2s" title="收藏到生词本">☆</span>'+
+      '</div>'+
+      '</div>';
+    
+    if(!localResults||localResults.length===0){
+      el.innerHTML=aiHtml;
+    }else{
+      el.innerHTML=aiHtml+el.innerHTML;
+    }
+    
+    // 缓存原始txt
+    if(cacheKey&&!skipAutoAdd){
+      try{var _c=JSON.parse(localStorage.getItem('_search_cache')||'{}');_c[cacheKey]={txt:txt,q:q,isChinese:isChinese,ts:Date.now()};localStorage.setItem('_search_cache',JSON.stringify(_c))}catch(e){}
+    }
+  }
 }
 
 function escHtml(s){
@@ -1695,6 +1681,25 @@ document.addEventListener('DOMContentLoaded',function(){
         e.preventDefault();
         return false;
     });
+})();
+
+// 导航更多下拉
+function toggleSubmenu(){
+  var m=document.getElementById('navMore');
+  if(m)m.classList.toggle('show');
+}
+function closeSubmenu(){
+  var m=document.getElementById('navMore');
+  if(m)m.classList.remove('show');
+}
+// 点击外部关闭下拉
+(function(){
+  document.addEventListener('click',function(e){
+    var m=document.getElementById('navMore');
+    if(m&&m.classList.contains('show')&&!e.target.closest('.nav-dropdown')){
+      m.classList.remove('show');
+    }
+  });
 })();
 
 // Init
