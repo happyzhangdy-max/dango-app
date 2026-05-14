@@ -1576,11 +1576,15 @@ function handleScanFile(input){
 
 function loadScanImage(dataUrl){
   _scanImageData=dataUrl;
+  // 不显示预览区，直接进入加载状态 → 自动识别
   document.getElementById('scanEmpty').style.display='none';
-  document.getElementById('scanPreview').style.display='block';
+  document.getElementById('scanPreview').style.display='none';
   document.getElementById('scanResult').style.display='none';
-  document.getElementById('scanLoading').style.display='none';
+  document.getElementById('scanLoading').style.display='block';
+  document.getElementById('scanLoadingText').textContent='🤔 正在思考...';
   document.getElementById('scanImage').src=dataUrl;
+  // 自动开始识图解答
+  setTimeout(doScan, 100);
 }
 
 function clearScanImage(){
@@ -1589,13 +1593,13 @@ function clearScanImage(){
   document.getElementById('scanPreview').style.display='none';
   document.getElementById('scanResult').style.display='none';
   document.getElementById('scanLoading').style.display='none';
-  document.getElementById('scanDoBtn').disabled=false;
-  document.getElementById('scanDoBtn').textContent='🔍 识别并翻译';
+  var btn=document.getElementById('scanDoBtn');
+  if(btn){btn.disabled=false;btn.textContent='🔍 识别并翻译'}
 }
 
 // 监听粘贴事件：支持用户粘贴截图到扫描页
 document.addEventListener('paste',function(e){
-  if(document.getElementById('p-scan').style.display==='none')return;
+  if(!document.getElementById('p-scan').classList.contains('active'))return;
   var items=e.clipboardData&&e.clipboardData.items;
   if(!items)return;
   for(var i=0;i<items.length;i++){
@@ -1654,7 +1658,7 @@ function doScan(){
     return;
   }
   document.getElementById('scanDoBtn').disabled=true;
-  document.getElementById('scanDoBtn').textContent='⏳ 处理中...';
+  document.getElementById('scanDoBtn').textContent='处理中...';
   document.getElementById('scanPreview').style.display='none';
   document.getElementById('scanLoading').style.display='block';
   document.getElementById('scanResult').style.display='none';
@@ -1683,15 +1687,19 @@ function doScan(){
 }
 
 function callScanAnalyze(imageBase64){
-  // 用 Gemini 2.0 Flash 一次性完成 OCR + 翻译 + 讲解（像 ChatGPT/Gemini 识图解答）
-  var prompt='你是一位日语老师。用户上传了一张包含日文的图片，请直接解答：\n'+
-    '1. 先完整提取图片中所有日文文字\n'+
-    '2. 翻译成中文\n'+
-    '3. 讲解关键单词：每个汉字词标注读音（例：駅（えき）、勉強（べんきょう））\n'+
-    '4. 分析语法结构：说明句中关键语法点的含义和用法\n\n'+
+  // 用 Gemini 2.0 Flash 一次性完成识图讲解（像老师一样讲解这张图片）
+  var prompt='你是一位日语老师。用户上传了一张包含日文的图片（可能是试题、文章、句子等），请像老师一样全面讲解：\n'+
+    '1. **识图提取**：先完整写出图片中所有日文文字\n'+
+    '2. **中文翻译**：逐句翻译成中文\n'+
+    '3. **语境讲解**：这段话是什么意思，在什么场景下使用，表达了什么语气\n'+
+    '4. **题目解析**：如果图片中是试题/练习题，请解析题目要求和解题思路、正确答案\n'+
+    '5. **单词讲解**：讲解关键单词，每个汉字词标注读音（例：駅（えき）、勉強（べんきょう））\n'+
+    '6. **语法分析**：说明句中关键语法点的含义和用法\n\n'+
     '按以下格式输出（每个字段若没有则写「无」）：\n\n'+
     '【日文原文】\n（完整日文原文）\n\n'+
     '【中文翻译】\n（中文翻译）\n\n'+
+    '【语境讲解】\n（语境语义、使用场景等）\n\n'+
+    '【题目解析】\n（如果是试题则写解析，否则写「无」）\n\n'+
     '【单词讲解】\n（单词（读音）= 释义\n 单词（读音）= 释义）\n\n'+
     '【语法分析】\n（语法点讲解）';
   return new Promise(function(resolve,reject){
@@ -1699,20 +1707,24 @@ function callScanAnalyze(imageBase64){
       [{role:'user',content:[{type:'image_url',image_url:{url:imageBase64}},{type:'text',text:prompt}]}],
       4096).then(function(text){
         // 解析各字段
-        var jp='',cn='',wd='',gr='';
+        var jp='',cn='',ctx='',quiz='',wd='',gr='';
         var parts=text.split('【');
         for(var i=0;i<parts.length;i++){
           var p=parts[i];
           if(p.indexOf('日文原文】')===0){jp=p.replace('日文原文】','').trim()}
           if(p.indexOf('中文翻译】')===0){cn=p.replace('中文翻译】','').trim()}
+          if(p.indexOf('语境讲解】')===0){ctx=p.replace('语境讲解】','').trim()}
+          if(p.indexOf('题目解析】')===0){quiz=p.replace('题目解析】','').trim()}
           if(p.indexOf('单词讲解】')===0){wd=p.replace('单词讲解】','').trim()}
           if(p.indexOf('语法分析】')===0){gr=p.replace('语法分析】','').trim()}
         }
-        // 如果没解析到格式化的字段，整段都当分析结果
+        // 组装分析结果（不含翻译，翻译在译文 tab）
         var analysis='';
-        if(jp||wd||gr){
+        if(wd||gr||ctx||quiz){
           var parts2=[];
-          if(wd)parts2.push('📝 单词讲解\n'+wd);
+          if(ctx)parts2.push('💬 语境讲解\n'+ctx);
+          if(quiz&&quiz!=='无')parts2.push('📝 题目解析\n'+quiz);
+          if(wd)parts2.push('📖 单词讲解\n'+wd);
           if(gr)parts2.push('🔧 语法分析\n'+gr);
           analysis=parts2.join('\n\n');
         }else{
@@ -1853,12 +1865,6 @@ document.addEventListener('paste',function(e){
       break;
     }
   }
-});
-
-// 上传区点击触发选图
-document.addEventListener('DOMContentLoaded',function(){
-  var ua=document.getElementById('scanUploadArea');
-  if(ua){ua.addEventListener('click',function(){triggerUpload()})}
 });
 
 // =====================
