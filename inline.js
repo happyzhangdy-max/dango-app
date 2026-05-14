@@ -1115,6 +1115,18 @@ function vApStop(){
   
   // 如果是从学习计划进入且学完了今日全部词汇 → 推进 learnedIndex
   var saved=JSON.parse(localStorage.getItem('ap_settings')||'{}');
+  // 学习计划模式：为已显示的词写入 SM-2 复习数据（仅新词，q=3=被动学习）
+  if(saved.planStudyIdx!==undefined){
+    var jpData=lp(),_jpChanged=false;
+    for(var _si=0;_si<shown;_si++){
+      var _sw=_vApQueue[_si];
+      if(_sw&&!jpData[_sw.id]){
+        jpData[_sw.id]=sm2({},3);
+        _jpChanged=true;
+      }
+    }
+    if(_jpChanged)sp(jpData);
+  }
   if(saved.planStudyIdx!==undefined&&shown>=total){
     var plans=getPlans();
     var plan=plans[saved.planStudyIdx];
