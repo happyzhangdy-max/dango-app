@@ -16,6 +16,9 @@ function bindDrag(onMove,onEnd){_dragMove=onMove;_dragEnd=onEnd;document.addEven
 function unbindDrag(){if(_dragMove){document.removeEventListener('mousemove',_dragMove);_dragMove=null}if(_dragEnd){document.removeEventListener('mouseup',_dragEnd);document.removeEventListener('touchmove',_dragEnd);document.removeEventListener('touchend',_dragEnd);_dragEnd=null}}
 let quizData=[],quizIdx=0,quizRight=0;
 function go(p){closeD();closePlanModal();
+  // 抢救自动播放数据（防止清timer导致vApStop/apDone丢失）
+  if(_vApActive){var _vg=_vApQueue,_vn=Math.min(_vApIdx+1,_vg.length);if(_vn>0)_recSm2(_vg,_vn);_vApActive=false}
+  if(_apQueue.length>0&&!_apStop){var _an=Math.min(_apIdx,_apQueue.length);if(_an>0)_recSm2(_apQueue,_an);_apStop=true}
   // 清理所有自动播放定时器
   clearTimeout(_apTimer);_apTimer=null;
   clearTimeout(_vApTimer);_vApTimer=null;
@@ -611,7 +614,7 @@ function closeAutoPlayOptions(){document.getElementById('autoPlayModal').classLi
 function saveAutoPlayOptions(){var iv=document.querySelector('input[name=apInterval]:checked');if(iv)_apInterval=parseInt(iv.value);var ct=document.querySelector('input[name=apContent]:checked');_apBoth=ct&&ct.value==='both';closeAutoPlayOptions();showT('⏱ 选项已保存');startAutoPlay()}
 function startAutoPlay(){var g=document.getElementById('vocabG');if(!g){showT('请先进入词汇页');return}var cards=g.querySelectorAll('.vc[data-id]');if(!cards||cards.length===0){showT('当前词汇列表为空');return}_apQueue=[];cards.forEach(function(c){var id=parseInt(c.getAttribute('data-id'));if(!isNaN(id)){var v=findVocabById(id);if(v)_apQueue.push(v)}});if(_apQueue.length===0){showT('获取词汇数据失败');return}_apIdx=0;_apStop=false;_apPaused=false;document.getElementById('apScreen').classList.add('show');document.getElementById('sp').style.display='none';document.getElementById('lm').style.display='block';var pbar=document.querySelector('#apScreen .ap-progress');pbar.onmousedown=function(e){apSeek(e);window._apDragging=true};bindDrag(function(e){if(window._apDragging)apSeek(e)},function(){window._apDragging=false;unbindDrag()});pbar.ontouchstart=function(e){apSeek(e.touches[0]);window._apDragging=true};apSyncNavDisabled();_apTimer=setTimeout(apShowCard,500)}
 function apSeek(e){clearTimeout(_apTimer);_apTimer=null;var bar=document.querySelector('#apScreen .ap-progress');var rect=bar.getBoundingClientRect();var pct=Math.max(0,Math.min(1,(e.clientX-rect.left)/rect.width));_apIdx=Math.floor(pct*_apQueue.length);if(_apIdx>=_apQueue.length)_apIdx=_apQueue.length-1;if(_apIdx<0)_apIdx=0;var pct2=Math.round((_apIdx+1)/_apQueue.length*100);document.querySelector('#apScreen .ap-progress-bar').style.width=pct2+'%';document.querySelector('#apScreen .ap-counter').textContent=(_apIdx+1)+'/'+_apQueue.length;clearTimeout(_apTimer);_apTimer=setTimeout(apShowCard,200)}
-function apShowCard(){if(_apStop||_apIdx>=_apQueue.length){apDone();return}if(_apPaused){_apTimer=setTimeout(apShowCard,200);return}var v=_apQueue[_apIdx];var el=document.getElementById('apScreen');el.querySelector('.ap-word').textContent=v.word;el.querySelector('.ap-read').textContent=v.reading;el.querySelector('.ap-mean').textContent=v.meaning;var ex=el.querySelector('.ap-exjp');var exc=el.querySelector('.ap-excn');if(_apBoth&&v.ex_jp){ex.textContent=v.ex_jp;ex.style.display='block';exc.textContent=v.ex_cn||'';exc.style.display=v.ex_cn?'block':'none'}else{ex.style.display='none';exc.style.display='none'}var pct=Math.round((_apIdx+1)/_apQueue.length*100);el.querySelector('.ap-progress-bar').style.width=pct+'%';el.querySelector('.ap-counter').textContent=(_apIdx+1)+'/'+_apQueue.length;apSyncMarks(v);clearSpeechQueue();queueSpeak(v.word);if(_apBoth&&v.ex_jp)queueSpeak(v.ex_jp);var totalSpeechTime=_apBoth&&v.ex_jp?5000:2500;_apIdx++;apSyncNavDisabled();clearTimeout(_apTimer);_apTimer=setTimeout(apShowCard,totalSpeechTime+_apInterval)}
+function apShowCard(){if(_apStop||_apIdx>=_apQueue.length){apDone();return}if(_apPaused){_apTimer=setTimeout(apShowCard,200);return}var v=_apQueue[_apIdx];var el=document.getElementById('apScreen');el.querySelector('.ap-word').textContent=v.word;el.querySelector('.ap-read').textContent=v.reading;el.querySelector('.ap-mean').textContent=v.meaning;var ex=el.querySelector('.ap-exjp');var exc=el.querySelector('.ap-excn');if(_apBoth&&v.ex_jp){ex.textContent=v.ex_jp;ex.style.display='block';exc.textContent=v.ex_cn||'';exc.style.display=v.ex_cn?'block':'none'}else{ex.style.display='none';exc.style.display='none'}var pct=Math.round((_apIdx+1)/_apQueue.length*100);el.querySelector('.ap-progress-bar').style.width=pct+'%';el.querySelector('.ap-counter').textContent=(_apIdx+1)+'/'+_apQueue.length;apSyncMarks(v);clearSpeechQueue();queueSpeak(v.word);if(_apBoth&&v.ex_jp)queueSpeak(v.ex_jp);var totalSpeechTime=_apBoth&&v.ex_jp?5000:2500;_apIdx++;if(_apIdx>=_apQueue.length)_recSm2(_apQueue,_apQueue.length);apSyncNavDisabled();clearTimeout(_apTimer);_apTimer=setTimeout(apShowCard,totalSpeechTime+_apInterval)}
 function apTogglePause(){_apPaused=!_apPaused;var btn=document.querySelector('.ap-controls .btn:first-child');if(btn)btn.textContent=_apPaused?'▶ 继续':'⏸ 暂停';if(!_apPaused&&_apTimer===null)_apTimer=setTimeout(apShowCard,200)}
 function apStop(){_recSm2(_apQueue,_apIdx);_apStop=true;clearTimeout(_apTimer);_apTimer=null;unbindDrag();document.getElementById('apScreen').classList.remove('show');go('vocab')}
 function apDone(){_recSm2(_apQueue,_apQueue.length);clearTimeout(_apTimer);_apTimer=null;unbindDrag();document.getElementById('apScreen').classList.remove('show');showT('🎉 自动播放完成！共 '+_apQueue.length+' 个词');go('vocab')}
@@ -1020,7 +1023,7 @@ function startVocabAutoPlay(){
     localStorage.setItem('ap_settings',JSON.stringify(saved));
   }
   
-  _vApQueue=pool;_vApIdx=0;_vApPaused=false;_vApActive=true;
+  _vApQueue=pool;_vApIdx=0;_vApPaused=false;_vApActive=true;_vApPlanAdv=false;
   
   // 绑定控制按钮到单词自动播放
   var screen=document.getElementById('gApScreen');
@@ -1046,6 +1049,7 @@ function startVocabAutoPlay(){
 }
 
 var _vApSpeed=1;
+var _vApPlanAdv=false; // 标记vApShowCard已提前推进learnedIndex，防止vApStop重复
 
 function vApShowCard(){
   if(!_vApQueue||_vApQueue.length===0)return;
@@ -1074,7 +1078,19 @@ function vApShowCard(){
   if(!_vApPaused&&_vApIdx<_vApQueue.length-1){
     _vApTimer=setTimeout(function(){if(!_vApPaused&&_vApActive){_vApIdx++;vApShowCard()}},delay);
   }else if(!_vApPaused&&_vApIdx>=_vApQueue.length-1){
-    // 最后一个词展示完后结束
+    // 最后一个词展示完后结束 — 提前保存数据，避免go()清timer导致丢失
+    var _vs=_vApQueue.length>0?_recSm2(_vApQueue,_vApQueue.length):null;
+    var _vsaved=JSON.parse(localStorage.getItem('ap_settings')||'{}');
+    if(_vsaved.planStudyIdx!==undefined){
+      var _vplans=getPlans();
+      var _vplan=_vplans[_vsaved.planStudyIdx];
+      if(_vplan&&!_vplan.finished&&_vplan.wordOrder){
+        _vplan.learnedIndex+=_vApQueue.length;
+        if(_vplan.learnedIndex>=_vplan.wordOrder.length)_vplan.finished=true;
+        savePlans(_vplans);upP();
+        _vApPlanAdv=true;  // 标记已提前推进，vApStop不再重复
+      }
+    }
     _vApTimer=setTimeout(function(){if(_vApActive)vApStop()},delay+1000);
   }
 }
@@ -1119,7 +1135,7 @@ function vApStop(){
   var saved=JSON.parse(localStorage.getItem('ap_settings')||'{}');
   // 记录已显示词的 SM-2 复习数据
   if(shown>0)_recSm2(_vApQueue,shown);
-  if(saved.planStudyIdx!==undefined&&shown>=total){
+  if(!_vApPlanAdv&&saved.planStudyIdx!==undefined&&shown>=total){
     var plans=getPlans();
     var plan=plans[saved.planStudyIdx];
     if(plan&&!plan.finished&&plan.wordOrder){
@@ -1141,7 +1157,7 @@ function vApStop(){
     showT('⏹ 已停止（'+shown+'/'+total+' 词）');
   }
   
-  _vApQueue=[];_vApIdx=0;
+  _vApQueue=[];_vApIdx=0;_vApPlanAdv=false;
 }
 
 function vApPrev(){
