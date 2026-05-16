@@ -778,6 +778,17 @@ function resumeLastSession(){
 function renderStudyPlan(){
   var plans=getPlans();var active=plans.filter(function(p){return!p.finished});var c=document.getElementById('p-studyplan');if(!c)return;
   var todayIds=[],learnedIds=[],reviewIds=[],toStudyIds=[];var today=new Date().toISOString().split('T')[0];var jpData=lp();
+  
+  // 一次性迁移：同步 learnedIndex 到实际 SM-2 数据（修复 v120 前已存在的不同步）
+  var _needsSync=false;
+  plans.forEach(function(p){
+    if(!p.wordOrder)return;
+    var _m=0;
+    for(var _i=0;_i<p.wordOrder.length;_i++){if(jpData[p.wordOrder[_i]])_m=_i+1}
+    if(_m>(p.learnedIndex||0)){p.learnedIndex=_m;if(p.learnedIndex>=p.wordOrder.length)p.finished=true;_needsSync=true}
+  });
+  if(_needsSync){savePlans(plans);upP();active=plans.filter(function(p){return!p.finished})}
+  
   active.forEach(function(plan){if(!plan.wordOrder)return;var start=plan.learnedIndex||0;var daily=plan.daily||10;var end=Math.min(start+daily,plan.wordOrder.length);
     todayIds=todayIds.concat(plan.wordOrder.slice(start,end));
     learnedIds=learnedIds.concat(plan.wordOrder.slice(0,start));
