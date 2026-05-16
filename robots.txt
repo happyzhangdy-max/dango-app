@@ -1,0 +1,9 @@
+User-agent: *
+Disallow: /data.js
+Disallow: /grammar_data.js
+Disallow: /quiz_data_high.js
+Disallow: /quiz_data_normal.js
+Disallow: /inline.js
+Disallow: /game/
+
+Sitemap: https://happyzhangdy-max.github.io/nihongo-corner/

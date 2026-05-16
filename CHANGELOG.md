@@ -5,6 +5,34 @@
 
 ---
 
+## [v3.5] — 2026-05-16
+
+### Added
+- **防盗保护体系** — 四种防护措施上线：
+  - 🛡️ **域名锁定** — 非授权域名（GitHub Pages / localhost 以外的站点）显示警告页并阻止运行
+  - 📜 **版权声明** — 所有 JS 文件头部注入版权信息
+  - 🔒 **代码混淆** — 全部 JS 文件通过 terser minify + mangle 压缩混淆
+  - 🤖 **robots.txt** — 阻止爬虫抓取数据/代码文件
+- **新版本号体系** — 从 v122 跳升到 v3.5，正式版标识
+
+### Changed
+- **数据文件压缩** — data.js 2.8MB → 2.5MB，grammar_data 122KB → 117KB，quiz 文件均压缩约 15-20%
+- **代码体积变化** — inline.js 138KB → 107KB（-22%），boxing.js 56KB → 37KB（-34%），tower-climb.js 88KB → 57KB（-35%）
+- **cache buster 更新** — 全部文件缓存版本统一更新为 v350
+
+### Security
+- 域名白名单：happyzhangdy-max.github.io, localhost, 127.0.0.1, *.github.dev
+- robots 屏蔽路径：/data.js, /grammar_data.js, /quiz_data_*.js, /inline.js, /game/
+
+---
+
+## [v123] — 2026-05-16
+
+### Changed
+- **改名**：SM-2 学习记录 → 学习记录（设置页文字统一）
+
+---
+
 ## [v122] — 2026-05-16
 
 ### Changed
