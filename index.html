@@ -667,6 +667,7 @@ html { overflow:hidden; }
 .ap-card .ap-mean { font-size:24px; color:#f5a623; font-weight:500; }
 .ap-card .ap-exjp { font-size:22px; color:#ccc; margin-top:20px; line-height:1.8; }
 .ap-card .ap-excn { font-size:18px; color:#aaa; margin-top:8px; }
+.ap-freq { font-size:11px; color:#666; margin-top:14px; text-align:center; letter-spacing:0.5px; }
 .ap-progress { position:absolute; top:12px; left:20%; right:20%; height:6px; background:rgba(255,255,255,0.08); cursor:pointer; border-radius:6px; }
 .ap-progress-bar { height:100%; background:linear-gradient(90deg,#e94560,#a855f7); transition:width 0.3s; }
 .ap-controls { position:absolute; bottom:60px; display:flex; gap:20px; align-items:center; }
@@ -1823,6 +1824,7 @@ html { overflow:hidden; }
     <div class="ap-mean"></div>
     <div class="ap-exjp"></div>
     <div class="ap-excn"></div>
+    <div class="ap-freq"></div>
   </div>
   <div class="ap-marks" style="margin-top:16px;display:flex;gap:6px;align-items:center;justify-content:center">
     <button class="vbf ap-bmk" id="apBmk" onclick="apToggleBook()" style="font-size:18px">☆</button>
@@ -1869,6 +1871,7 @@ html { overflow:hidden; }
     <div class="ap-mean"></div>
     <div class="ap-exjp"></div>
     <div class="ap-excn"></div>
+    <div class="ap-freq"></div>
   </div>
   <div class="ap-marks" style="margin-top:16px;display:flex;gap:6px;align-items:center;justify-content:center">
     <button class="vbf ap-bmk" id="gApBmk" onclick="gApToggleBook()" style="font-size:18px">☆</button>
@@ -1958,6 +1961,56 @@ html { overflow:hidden; }
     inp.placeholder='搜单词、搜句子，'+PH[i];
   },6000);
 })();
+
+/* 自动播放：默认按高频排序 */
+(function(){
+  var origStart = startAutoPlay;
+  startAutoPlay = function(){
+    origStart();
+    if(_apQueue&&_apQueue.length>1) _apQueue.sort(function(a,b){return (b.appear||0)-(a.appear||0)});
+  };
+  var origVStart = startVocabAutoPlay;
+  startVocabAutoPlay = function(){
+    origVStart();
+    if(_vApQueue&&_vApQueue.length>1) _vApQueue.sort(function(a,b){return (b.appear||0)-(a.appear||0)});
+  };
+  var origGStart = startGAutoPlay;
+  startGAutoPlay = function(){
+    origGStart();
+    if(_gApQueue&&_gApQueue.length>1) _gApQueue.sort(function(a,b){return (b.appear||0)-(a.appear||0)});
+  };
+})();
+
+/* 自动播放：显示高频等级/频次 */
+(function(){
+  var freqElem = null;
+  function updateFreq(){
+    var screen=document.querySelector('#apScreen.show')||document.querySelector('#gApScreen.show');
+    if(!screen){freqElem=null;return;}
+    var card=screen.querySelector('.ap-card');
+    if(!card){freqElem=null;return;}
+    var wordEl=card.querySelector('.ap-word');
+    if(!wordEl||!wordEl.textContent){freqElem=null;return;}
+    var wordText=wordEl.textContent.trim();
+    if(!wordText){freqElem=null;return;}
+    var newFreq=card.querySelector('.ap-freq');
+    if(!newFreq)return;
+    if(freqElem!==newFreq)freqElem=newFreq;
+    // 只在频次变化时更新
+    var lastWord=freqElem.getAttribute('data-word');
+    if(lastWord===wordText)return;
+    freqElem.setAttribute('data-word',wordText);
+    var w=VOCAB_DATA.find(function(v){return v.word===wordText||v.reading===wordText});
+    if(w&&w.appear){
+      var a=w.appear;
+      var label=a>=7?'🔥 高频':a>=5?'⚡ 较高频':a>=4?'📗 中频':'📘 低频';
+      freqElem.textContent=label+' · 频次 '+a;
+    }else{
+      freqElem.textContent='';
+    }
+  }
+  setInterval(updateFreq,300);
+})();
 // // 团团链路增强：功能间交叉链接
 (function(){
   function doEnhanceVocab(){
@@ -2039,6 +2092,56 @@ html { overflow:hidden; }
   },500);
 })();
 
+/* 自动播放：默认按高频排序 */
+(function(){
+  var origStart = startAutoPlay;
+  startAutoPlay = function(){
+    origStart();
+    if(_apQueue&&_apQueue.length>1) _apQueue.sort(function(a,b){return (b.appear||0)-(a.appear||0)});
+  };
+  var origVStart = startVocabAutoPlay;
+  startVocabAutoPlay = function(){
+    origVStart();
+    if(_vApQueue&&_vApQueue.length>1) _vApQueue.sort(function(a,b){return (b.appear||0)-(a.appear||0)});
+  };
+  var origGStart = startGAutoPlay;
+  startGAutoPlay = function(){
+    origGStart();
+    if(_gApQueue&&_gApQueue.length>1) _gApQueue.sort(function(a,b){return (b.appear||0)-(a.appear||0)});
+  };
+})();
+
+/* 自动播放：显示高频等级/频次 */
+(function(){
+  var freqElem = null;
+  function updateFreq(){
+    var screen=document.querySelector('#apScreen.show')||document.querySelector('#gApScreen.show');
+    if(!screen){freqElem=null;return;}
+    var card=screen.querySelector('.ap-card');
+    if(!card){freqElem=null;return;}
+    var wordEl=card.querySelector('.ap-word');
+    if(!wordEl||!wordEl.textContent){freqElem=null;return;}
+    var wordText=wordEl.textContent.trim();
+    if(!wordText){freqElem=null;return;}
+    var newFreq=card.querySelector('.ap-freq');
+    if(!newFreq)return;
+    if(freqElem!==newFreq)freqElem=newFreq;
+    // 只在频次变化时更新
+    var lastWord=freqElem.getAttribute('data-word');
+    if(lastWord===wordText)return;
+    freqElem.setAttribute('data-word',wordText);
+    var w=VOCAB_DATA.find(function(v){return v.word===wordText||v.reading===wordText});
+    if(w&&w.appear){
+      var a=w.appear;
+      var label=a>=7?'🔥 高频':a>=5?'⚡ 较高频':a>=4?'📗 中频':'📘 低频';
+      freqElem.textContent=label+' · 频次 '+a;
+    }else{
+      freqElem.textContent='';
+    }
+  }
+  setInterval(updateFreq,300);
+})();
+
 /* 只看平假名 toggle */
 function toggleHideKanji(){
   var dw=document.getElementById('dw'),btn=document.getElementById('hideKanjiBtn');
@@ -2083,6 +2186,56 @@ saveViewedWords=function(){startVocabTimer()};
       }
     });
   }
+})();
+
+/* 自动播放：默认按高频排序 */
+(function(){
+  var origStart = startAutoPlay;
+  startAutoPlay = function(){
+    origStart();
+    if(_apQueue&&_apQueue.length>1) _apQueue.sort(function(a,b){return (b.appear||0)-(a.appear||0)});
+  };
+  var origVStart = startVocabAutoPlay;
+  startVocabAutoPlay = function(){
+    origVStart();
+    if(_vApQueue&&_vApQueue.length>1) _vApQueue.sort(function(a,b){return (b.appear||0)-(a.appear||0)});
+  };
+  var origGStart = startGAutoPlay;
+  startGAutoPlay = function(){
+    origGStart();
+    if(_gApQueue&&_gApQueue.length>1) _gApQueue.sort(function(a,b){return (b.appear||0)-(a.appear||0)});
+  };
+})();
+
+/* 自动播放：显示高频等级/频次 */
+(function(){
+  var freqElem = null;
+  function updateFreq(){
+    var screen=document.querySelector('#apScreen.show')||document.querySelector('#gApScreen.show');
+    if(!screen){freqElem=null;return;}
+    var card=screen.querySelector('.ap-card');
+    if(!card){freqElem=null;return;}
+    var wordEl=card.querySelector('.ap-word');
+    if(!wordEl||!wordEl.textContent){freqElem=null;return;}
+    var wordText=wordEl.textContent.trim();
+    if(!wordText){freqElem=null;return;}
+    var newFreq=card.querySelector('.ap-freq');
+    if(!newFreq)return;
+    if(freqElem!==newFreq)freqElem=newFreq;
+    // 只在频次变化时更新
+    var lastWord=freqElem.getAttribute('data-word');
+    if(lastWord===wordText)return;
+    freqElem.setAttribute('data-word',wordText);
+    var w=VOCAB_DATA.find(function(v){return v.word===wordText||v.reading===wordText});
+    if(w&&w.appear){
+      var a=w.appear;
+      var label=a>=7?'🔥 高频':a>=5?'⚡ 较高频':a>=4?'📗 中频':'📘 低频';
+      freqElem.textContent=label+' · 频次 '+a;
+    }else{
+      freqElem.textContent='';
+    }
+  }
+  setInterval(updateFreq,300);
 })();
 </script>
 </body>
