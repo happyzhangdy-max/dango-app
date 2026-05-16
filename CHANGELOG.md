@@ -5,6 +5,14 @@
 
 ---
 
+## [v120] — 2026-05-16
+
+### Fixed
+- **学习计划「待复习」计数不匹配** — SM-2 数据积累数百条但 `learnedIndex` 未同步推进，导致 `renderStudyPlan()` 的 `reviewIds` 过滤条件 `learnedIds.indexOf(id) >= 0` 通过率极低。
+  - `go()` 抢救路径：用户中途切页面时，SM-2 保存后同步推进 `learnedIndex`
+  - `vApStop()` 中途停止路径：点击停止按钮时，同样推进 `learnedIndex`
+  - 使用 `_vApPlanAdv` 标志位防止与 last-word handler 重复计数
+
 ## [v119] — 2026-05-14
 
 ### Added
