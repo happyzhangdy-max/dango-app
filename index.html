@@ -2040,6 +2040,9 @@ function toggleHideKanji(){
   dw.classList.toggle('hide-kanji');
   btn.textContent=dw.classList.contains('hide-kanji')?'👁 显示完整':'👁 只看平假名';
 }
+
+/* 去掉"浏览即已学习"：浏览单词墙不再自动记录SM-2 */
+saveViewedWords=function(){startVocabTimer()};
 </script>
 </body>
 </html>
