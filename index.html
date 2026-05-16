@@ -2069,6 +2069,21 @@ function cycleApDisplayMode(){
 
 /* 去掉"浏览即已学习"：浏览单词墙不再自动记录SM-2 */
 saveViewedWords=function(){startVocabTimer()};
+
+/* 拦截硬件返回键：游戏/非首页按返回时留站内导航，不退出 */
+(function(){
+  if(window.history&&window.history.pushState){
+    history.pushState({p:'in'},'',location.href);
+    window.addEventListener('popstate',function(){
+      var gameActive=document.getElementById('p-game')&&document.getElementById('p-game').classList.contains('active');
+      var homeActive=document.getElementById('p-home')&&document.getElementById('p-home').classList.contains('active');
+      if(gameActive||!homeActive){
+        go('home');
+        history.pushState({p:'in'},'',location.href);
+      }
+    });
+  }
+})();
 </script>
 </body>
 </html>
