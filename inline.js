@@ -17,7 +17,24 @@ function unbindDrag(){if(_dragMove){document.removeEventListener('mousemove',_dr
 let quizData=[],quizIdx=0,quizRight=0;
 function go(p){closeD();closePlanModal();
   // 抢救自动播放数据（防止清timer导致vApStop/apDone丢失）
-  if(_vApActive){var _vg=_vApQueue,_vn=Math.min(_vApIdx+1,_vg.length);if(_vn>0)_recSm2(_vg,_vn);_vApActive=false}
+  if(_vApActive){var _vg=_vApQueue,_vn=Math.min(_vApIdx+1,_vg.length);
+    if(_vn>0){
+      _recSm2(_vg,_vn);
+      // 同步推进学习计划进度（配合 SM-2 数据保存，避免SM-2记录多而learnedIndex停滞）
+      if(!_vApPlanAdv){ // 防止与 last-word handler 重复推进
+        var _vgSaved=JSON.parse(localStorage.getItem('ap_settings')||'{}');
+        if(_vgSaved.planStudyIdx!==undefined){
+          var _vgPlans=getPlans();
+          var _vgPlan=_vgPlans[_vgSaved.planStudyIdx];
+          if(_vgPlan&&!_vgPlan.finished&&_vgPlan.wordOrder){
+            _vgPlan.learnedIndex+=_vn;
+            if(_vgPlan.learnedIndex>=_vgPlan.wordOrder.length)_vgPlan.finished=true;
+            savePlans(_vgPlans)
+          }
+        }
+      }
+    }
+  _vApActive=false}
   if(_apQueue.length>0&&!_apStop){var _an=Math.min(_apIdx,_apQueue.length);if(_an>0)_recSm2(_apQueue,_an);_apStop=true}
   // 清理所有自动播放定时器
   clearTimeout(_apTimer);_apTimer=null;
@@ -1153,6 +1170,17 @@ function vApStop(){
     }
     delete saved.planStudyIdx;
     localStorage.setItem('ap_settings',JSON.stringify(saved));
+  }else if(!_vApPlanAdv&&saved.planStudyIdx!==undefined){
+    // 中途停止也要推进计划进度（配合 SM-2 数据），避免 SM-2 记录积累而 learnedIndex 停滞
+    var plans=getPlans();
+    var plan=plans[saved.planStudyIdx];
+    if(plan&&!plan.finished&&plan.wordOrder){
+      plan.learnedIndex+=shown;
+      if(plan.learnedIndex>=plan.wordOrder.length)plan.finished=true;
+      savePlans(plans);
+      upP();
+    }
+    showT('⏹ 已停止（'+shown+'/'+total+' 词）');
   }else{
     showT('⏹ 已停止（'+shown+'/'+total+' 词）');
   }
