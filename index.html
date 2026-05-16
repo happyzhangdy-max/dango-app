@@ -2070,15 +2070,13 @@ function applyApDisplayMode(){
   if(btn)btn.textContent=labels[_apDisplayMode];
 }
 /* 每次自动播放打开时重新应用模式 */
-document.addEventListener('DOMContentLoaded',function(){
-  var _origStartVocabAutoPlay=window.startVocabAutoPlay;
-  if(_origStartVocabAutoPlay){
-    window.startVocabAutoPlay=function(){
-      _origStartVocabAutoPlay.apply(this,arguments);
-      setTimeout(applyApDisplayMode,100);
-    };
-  }
-});
+var _origStartVocabAutoPlay=window.startVocabAutoPlay;
+if(_origStartVocabAutoPlay){
+  window.startVocabAutoPlay=function(){
+    _origStartVocabAutoPlay.apply(this,arguments);
+    setTimeout(applyApDisplayMode,100);
+  };
+}
 
 /* 去掉"浏览即已学习"：浏览单词墙不再自动记录SM-2 */
 saveViewedWords=function(){startVocabTimer()};
