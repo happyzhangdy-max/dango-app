@@ -680,8 +680,6 @@ html { overflow:hidden; }
 #gApScreen .ap-card.ap-mode-r .ap-mean,
 #gApScreen .ap-card.ap-mode-r .ap-exjp,
 #gApScreen .ap-card.ap-mode-r .ap-excn { display:none; }
-#apDisplayToggle { position:absolute; top:14px; left:14px; background:rgba(255,255,255,0.06); border:none; color:#94a3b8; font-size:11px; padding:4px 10px; border-radius:4px; cursor:pointer; transition:background 0.2s; z-index:10; }
-#apDisplayToggle:hover { background:rgba(255,255,255,0.12); color:#cbd5e1; }
 .gc { background:#1a1a2e; border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:14px; transition:border-color 0.2s; }
 .gc:hover { border-color:rgba(233,69,96,0.4); }
 .gh { display:flex; align-items:center; gap:8px; margin-bottom:6px; flex-wrap:wrap; }
@@ -1823,7 +1821,6 @@ html { overflow:hidden; }
 <div id="apScreen">
   <div class="ap-progress"><div class="ap-progress-bar"></div></div>
   <div class="ap-counter">0/0</div>
-  <button id="apDisplayToggle" onclick="cycleApDisplayMode()">📖 全文 ↻</button>
   <div class="ap-card">
     <div class="ap-word"></div>
     <div class="ap-read"></div>
@@ -1869,7 +1866,6 @@ html { overflow:hidden; }
 <div id="gApScreen">
   <div class="ap-progress"><div class="ap-progress-bar"></div></div>
   <div class="ap-counter">0/0</div>
-  <button id="apDisplayToggle" onclick="cycleApDisplayMode()">📖 全文 ↻</button>
   <div class="ap-card">
     <div class="ap-word" style="font-size:24px"></div>
     <div class="ap-read"></div>
@@ -1885,6 +1881,7 @@ html { overflow:hidden; }
   </div>
   <div class="ap-controls" style="margin-top:20px">
     <button class="btn bs" style="padding:8px 16px" onclick="gApTogglePause()">⏸ 暂停</button>
+    <button class="btn" style="padding:8px 16px;background:rgba(78,204,163,0.12);color:#4ecca3;border:1px solid rgba(78,204,163,0.25);font-size:13px" id="apDisplayToggle" onclick="cycleApDisplayMode()">📖 全文</button>
     <button class="btn br" style="padding:8px 16px" onclick="gApStop()">⏹ 停止</button>
   </div>
   <button class="ap-nav ap-nav-left" onclick="gApPrev()">‹</button>
@@ -2064,7 +2061,7 @@ function applyApDisplayMode(){
   var card=document.querySelector('#gApScreen .ap-card'),btn=document.getElementById('apDisplayToggle');
   if(!card)return;
   card.classList.remove('ap-mode-rm','ap-mode-r');
-  var labels=['📖 全文 ↻','📖 假名+中译 ↻','📖 仅假名 ↻'];
+  var labels=['📖 全文','📖 假名+中译','📖 仅假名'];
   if(_apDisplayMode===1)card.classList.add('ap-mode-rm');
   else if(_apDisplayMode===2)card.classList.add('ap-mode-r');
   if(btn)btn.textContent=labels[_apDisplayMode];
