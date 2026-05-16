@@ -442,6 +442,40 @@ function clearWrong(){
     renderWrong();
     showT('错题本已清空');
 }
+// ── 设置页数据管理 ───────────────
+function clearReviewRecords(){
+  if(!confirm('确定清空复习记录？\n(间隔重复SM-2进度将被移除，单词不会从词库删除)'))return;
+  localStorage.removeItem('jp');
+  showT('✅ 复习记录已清空');
+  setTimeout(function(){location.reload()},800);
+}
+function clearPlanRecords(){
+  if(!confirm('确定清空所有学习计划？'))return;
+  localStorage.removeItem('jp_plans');
+  showT('✅ 学习计划已清空');
+  setTimeout(function(){location.reload()},800);
+}
+function clearMarks(){
+  if(!confirm('确定清空所有单词和语法标记？'))return;
+  ['jp_mark','gc','gm','gb','mk'].forEach(function(k){localStorage.removeItem(k)});
+  showT('✅ 标记已清空');
+}
+function clearSearchHistory(){
+  if(!confirm('确定清空搜索缓存？'))return;
+  ['jp_search_book','_search_cache'].forEach(function(k){localStorage.removeItem(k)});
+  showT('✅ 搜索缓存已清空');
+}
+function clearScanHistory(){
+  if(!confirm('确定清空拍照识图历史？'))return;
+  localStorage.removeItem('scanHist');
+  showT('✅ 识图记录已清空');
+}
+function clearAllData(){
+  if(!confirm('⚠️ 确定清空所有数据？\n(复习记录/学习计划/生词本/错题本/标记/缓存/识图历史，不可恢复)'))return;
+  ['jp','jp_plans','jp_book','jp_wrong','jp_mark','jp_search_book','jp_session','gc','gm','gb','ap_settings','_search_cache','scanHist','mk'].forEach(function(k){localStorage.removeItem(k)});
+  showT('✅ 所有数据已清空');
+  setTimeout(function(){location.reload()},800);
+}
 function renderWrong(){
     var list = getWrong();
     var c = document.getElementById('wrongC');

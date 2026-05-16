@@ -331,6 +331,19 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
   border-color:rgba(233,69,60,0.25);
 }
 .settings-card:active { transform:scale(0.98); }
+/* 设置页行（更紧凑的数据管理项） */
+.settings-row {
+  display:flex; align-items:center; gap:12px;
+  background:rgba(255,255,255,0.03); border-radius:8px;
+  padding:12px; cursor:pointer;
+  border:1px solid rgba(255,255,255,0.04);
+  transition:all 0.2s ease; margin-bottom:4px;
+}
+.settings-row:hover {
+  background:rgba(255,255,255,0.06);
+  border-color:rgba(255,255,255,0.1);
+}
+.settings-row:active { transform:scale(0.98); background:rgba(233,69,60,0.08); }
 
 .nav-more { display:none; position:absolute; top:100%; right:0; background:rgba(26,26,46,0.97); backdrop-filter:blur(10px); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:6px; z-index:200; min-width:160px; box-shadow:0 8px 30px rgba(0,0,0,0.4); }
 .nav-more.show { display:block; }
@@ -1528,13 +1541,47 @@ html { overflow:hidden; }
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
       <div style="font-size:22px;font-weight:700;color:var(--text-primary)">⚙️ 设置</div>
     </div>
-    <div class="settings-card" onclick="if(confirm('确定要清空所有学习记录吗？\n(SM-2进度/学习计划/生词本/错题本/搜索缓存)')){['jp','jp_plans','jp_book','jp_wrong','jp_mark','jp_search_book','jp_session','gc','gm','gb','ap_settings','_search_cache','scanHist','mk'].forEach(function(k){localStorage.removeItem(k)});showT('✅ 学习记录已清空');location.reload()}">
-      <span style="font-size:16px">🗑</span>
-      <div style="flex:1">
-        <div style="font-size:15px;font-weight:600;color:var(--text-primary)">清空学习记录</div>
-        <div style="font-size:11px;color:var(--text-tertiary);margin-top:2px">清除所有学习进度、生词本、错题本和缓存数据</div>
-      </div>
-      <span style="font-size:18px;color:var(--text-quaternary)">›</span>
+    <div style="margin-bottom:16px"><div style="font-size:13px;font-weight:600;color:var(--text-secondary);margin-bottom:8px">🧹 数据管理</div>
+    <div class="settings-row" onclick="clearReviewRecords()">
+      <span style="font-size:16px">🔄</span>
+      <div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--text-primary)">清空复习记录</div><div style="font-size:11px;color:var(--text-tertiary)">清除间隔重复(SM-2)学习进度</div></div>
+      <span style="font-size:14px;color:var(--text-quaternary)">›</span>
+    </div>
+    <div class="settings-row" onclick="clearPlanRecords()">
+      <span style="font-size:16px">📋</span>
+      <div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--text-primary)">清空学习计划</div><div style="font-size:11px;color:var(--text-tertiary)">清除所有学习计划及进度</div></div>
+      <span style="font-size:14px;color:var(--text-quaternary)">›</span>
+    </div>
+    <div class="settings-row" onclick="clearBook()">
+      <span style="font-size:16px">⭐</span>
+      <div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--text-primary)">清空生词本</div><div style="font-size:11px;color:var(--text-tertiary)">清空所有收藏的单词</div></div>
+      <span style="font-size:14px;color:var(--text-quaternary)">›</span>
+    </div>
+    <div class="settings-row" onclick="clearWrong()">
+      <span style="font-size:16px">❌</span>
+      <div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--text-primary)">清空错题本</div><div style="font-size:11px;color:var(--text-tertiary)">清除闯关/模拟题错误记录</div></div>
+      <span style="font-size:14px;color:var(--text-quaternary)">›</span>
+    </div>
+    <div class="settings-row" onclick="clearMarks()">
+      <span style="font-size:16px">🏷️</span>
+      <div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--text-primary)">清空单词标记</div><div style="font-size:11px;color:var(--text-tertiary)">清除红/黄/绿标记和语法标记</div></div>
+      <span style="font-size:14px;color:var(--text-quaternary)">›</span>
+    </div>
+    <div class="settings-row" onclick="clearSearchHistory()">
+      <span style="font-size:16px">🔍</span>
+      <div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--text-primary)">清空搜索缓存</div><div style="font-size:11px;color:var(--text-tertiary)">清除翻译和例句搜索的历史缓存</div></div>
+      <span style="font-size:14px;color:var(--text-quaternary)">›</span>
+    </div>
+    <div class="settings-row" onclick="clearScanHistory()">
+      <span style="font-size:16px">📸</span>
+      <div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--text-primary)">清空识图记录</div><div style="font-size:11px;color:var(--text-tertiary)">清除拍照识图的识别历史</div></div>
+      <span style="font-size:14px;color:var(--text-quaternary)">›</span>
+    </div>
+    <div class="settings-row" onclick="clearAllData()" style="margin-top:8px;border:1px solid rgba(233,69,96,0.3);border-radius:10px">
+      <span style="font-size:16px">☢️</span>
+      <div style="flex:1"><div style="font-size:14px;font-weight:600;color:#e94560">清空所有数据</div><div style="font-size:11px;color:var(--text-tertiary)">清除全部学习记录、生词本、错题本、缓存</div></div>
+      <span style="font-size:14px;color:var(--text-quaternary)">›</span>
+    </div>
     </div>
   </div>
 </div>
