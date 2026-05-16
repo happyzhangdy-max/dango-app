@@ -444,7 +444,7 @@ function clearWrong(){
 }
 // ── 设置页数据管理 ───────────────
 function clearReviewRecords(){
-  if(!confirm('确定清空复习记录？\n(间隔重复SM-2进度将被移除，单词不会从词库删除)'))return;
+  if(!confirm('确定清空学习记录？\n(所有单词的间隔重复SM-2进度和复习数据将被移除，单词不会从词库删除)'))return;
   localStorage.removeItem('jp');
   showT('✅ 复习记录已清空');
   setTimeout(function(){location.reload()},800);
