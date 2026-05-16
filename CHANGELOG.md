@@ -5,6 +5,16 @@
 
 ---
 
+## [v3.5.1] — 2026-05-16
+
+### Fixed
+- **首页上下滑动范围过大** — 删除 `.main { padding-bottom: 72px }` 多余底部留白
+- **下方导航栏缩掉一半（首页滚动到底部时）** — 同一根源：首页底部 padding 从 80px 收窄到 20px
+- **移动端同理** — 媒体查询中 `.page,.main` 的 padding-bottom 从 80px 收窄到 20px
+- 非首页固定 page 保留 padding-bottom:80px 正常滚动缓冲
+
+---
+
 ## [v3.5] — 2026-05-16
 
 ### Added

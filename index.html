@@ -424,8 +424,8 @@ body::after { display:none; } /* 旧overlay拆除，由ambient-glow替代 */
 body { overflow:hidden; }
 html { overflow:hidden; }
 .main { max-height:calc(100vh - 52px - 62px); overflow-y:auto; padding:12px; }
-#p-home { padding-top:0; padding-bottom:80px; }
-@media(max-width:600px){ .page,.main{ padding:12px; padding-top:60px; padding-bottom:80px; } .tab{ font-size:11px; padding:4px 10px; } .vwb{ padding:20px 14px; } .hero{ height:160px; } }
+#p-home { padding-top:0; padding-bottom:20px; }
+@media(max-width:600px){ .page,.main{ padding:12px; padding-top:60px; padding-bottom:20px; } .tab{ font-size:11px; padding:4px 10px; } .vwb{ padding:20px 14px; } .hero{ height:160px; } }
 .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:8px; margin-bottom:16px; }
 .sc { background:linear-gradient(135deg,#1a1a3e,#16213e); border:1px solid rgba(168,85,247,0.2); border-radius:10px; padding:14px; text-align:center; cursor:pointer; transition:opacity 0.2s,transform 0.2s,background 0.2s,border-color 0.2s; }
 .sc:hover { border-color:rgba(168,85,247,0.5); transform:translateY(-2px); box-shadow:0 4px 15px rgba(0,0,0,0.2); }
@@ -1038,9 +1038,6 @@ html { overflow:hidden; }
 .submenu-item .sub-icon { font-size: 24px; }
 .submenu-item .sub-label { font-size: 11px; font-weight: 500; color: var(--text-secondary); line-height: 1.2; }
 .submenu-item:hover .sub-label { color: var(--text-primary); }
-
-/* Page body needs bottom padding for fixed nav */
-.main { padding-bottom: 72px; }
 
 @media(max-width:768px) {
   .submenu-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; }
