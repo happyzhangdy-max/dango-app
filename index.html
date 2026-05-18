@@ -2453,94 +2453,87 @@ function updateBookAiFilterBtn(){
 })();
 </script>
 <script>
-/* Capacitor WebView diagnostic overlay */
+/* Capacitor WebView: comprehensive fix for event dispatch issues */
 (function(){
   if (location.hostname === '' || location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.protocol === 'capacitor:') {
+    /* ── Diagnostic overlay ── */
     var dbg = document.createElement('div');
     dbg.id = 'capDbg';
     dbg.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;background:rgba(233,69,96,0.9);color:#fff;font-size:11px;padding:4px 8px;font-family:monospace;display:none;max-height:60px;overflow-y:auto;pointer-events:none';
     document.body.appendChild(dbg);
-    function showDbg(msg) {
-      if (!dbg) return;
-      dbg.style.display = 'block';
-      dbg.innerHTML = (dbg.innerHTML ? dbg.innerHTML + '<br>' : '') + '[' + new Date().toLocaleTimeString() + '] ' + msg;
-      if (dbg.childElementCount > 5) dbg.innerHTML = dbg.innerHTML.split('<br>').slice(-5).join('<br>');
-    }
-    window.onerror = function(m, s, l, c, e) {
-      showDbg('ERR: ' + m + ' @ ' + (s || '').split('/').pop() + ':' + l);
-      return false;
-    };
-    /* Wrap go() for error logging */
-    var _origGo = window.go;
-    if (_origGo) {
-      window.go = function(p) {
-        showDbg('go(' + p + ')');
-        try { _origGo(p); } catch(e) { showDbg('go ERROR: ' + e.message); }
-      };
-    }
-    showDbg('HOST=' + location.hostname + ' PROTO=' + location.protocol);
-    showDbg('CAPACITOR MODE: diagnostics active');
+    function showDbg(m){dbg.style.display='block';dbg.innerHTML=(dbg.innerHTML?dbg.innerHTML+'<br>':'')+'['+new Date().toLocaleTimeString()+'] '+m;if(dbg.childElementCount>5) dbg.innerHTML=dbg.innerHTML.split('<br>').slice(-5).join('<br>')}
+    window.onerror=function(m,s,l,c,e){showDbg('ERR: '+m+' @ '+(s||'').split('/').pop()+':'+l);return false};
 
-    /* FIX: Force-nav on bottombar buttons using onclick property (works in Capacitor) */
-    setTimeout(function() {
-      var navBtns = document.querySelectorAll('.bottombar__item');
-      showDbg('Found ' + navBtns.length + ' nav buttons');
-      navBtns.forEach(function(btn) {
-        var sec = btn.getAttribute('data-section');
-        /* Remove all existing click handlers */
-        btn.onclick = null;
-        var newClick = btn.cloneNode(true);
-        btn.parentNode.replaceChild(newClick, btn);
-        /* Attach via onclick property (proven to work by test button) */
-        newClick.onclick = function(e) {
-          showDbg('NAV: sec=' + sec);
-          try {
-            if (sec === 'home') { go('home'); }
-            else if (sec === 'learn') { toggleSubmenu('learn'); }
-            else if (sec === 'review') { toggleSubmenu('review'); }
-            else if (sec === 'practice') { toggleSubmenu('practice'); }
-            else if (sec === 'settings') { go('settings'); }
-          } catch(ex) { showDbg('NAV ERR: ' + ex.message); }
-        };
-      });
-      /* Force-nav on submenu items using onclick property */
-      document.querySelectorAll('.submenu-item').forEach(function(item) {
-        var attr = item.getAttribute('onclick');
-        if (!attr) return;
-        item.removeAttribute('onclick');
-        item.onclick = function(e) {
-          showDbg('SUB: ' + (attr || '').slice(0, 40));
-          try {
-            if (attr.includes('showPlanModal')) { closeSubmenu(); showPlanModal(); }
-            else {
-              var m = attr.match(/go\(['"]([^'"]+)['"]\)/);
-              if (m) { go(m[1]); }
-              if (attr.includes('closeSubmenu')) closeSubmenu();
-            }
-          } catch(ex) { showDbg('SUB ERR: ' + ex.message); }
-        };
-      });
-      showDbg('Fix applied: onclick property');
-    }, 200);
+    /* Wrap go() for logging */
+    var _g=window.go;if(_g){window.go=function(p){showDbg('go('+p+')');try{_g(p)}catch(e){showDbg('go ERROR: '+e.message)}}}
+    showDbg('HOST='+location.hostname+' PROTO='+location.protocol);
 
-    /* TEST: Add a direct test button */
-    setTimeout(function() {
-      var testBtn = document.createElement('button');
-      testBtn.textContent = '🧪 TEST: go(vocab)';
-      testBtn.style.cssText = 'position:fixed;bottom:80px;right:8px;z-index:99998;background:#e94560;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-family:monospace;cursor:pointer;pointer-events:auto';
-      testBtn.onclick = function(e) {
-        showDbg('TEST BTN CLICKED');
-        try {
-          showDbg('call go(vocab)');
-          go('vocab');
-          showDbg('go(vocab) returned OK');
-        } catch(ex) {
-          showDbg('go(vocab) THREW: ' + ex.message + ' | stack: ' + (ex.stack || '').slice(0,80));
+    /* ── FIX 1: Bottom nav buttons ── */
+    setTimeout(function(){
+      document.querySelectorAll('.bottombar__item').forEach(function(btn){
+        var sec=btn.getAttribute('data-section');
+        btn.onclick=null;
+        var nc=btn.cloneNode(true);
+        btn.parentNode.replaceChild(nc,btn);
+        nc.onclick=function(e){
+          showDbg('NAV: sec='+sec);
+          try{
+            if(sec==='home')go('home');
+            else if(sec==='learn')toggleSubmenu('learn');
+            else if(sec==='review')toggleSubmenu('review');
+            else if(sec==='practice')toggleSubmenu('practice');
+            else if(sec==='settings')go('settings');
+          }catch(ex){showDbg('NAV ERR: '+ex.message)}
         }
-      };
-      document.body.appendChild(testBtn);
-      showDbg('Test button added');
-    }, 2000);
+      });
+      showDbg('FIX1: nav buttons OK');
+    },200);
+
+    /* ── FIX 2: Submenu items ── */
+    setTimeout(function(){
+      document.querySelectorAll('.submenu-item').forEach(function(item){
+        var a=item.getAttribute('onclick');
+        if(!a)return;
+        item.removeAttribute('onclick');
+        item.onclick=function(e){
+          showDbg('SUB: '+(a||'').slice(0,40));
+          try{
+            if(a.includes('showPlanModal')){closeSubmenu();showPlanModal()}
+            else{var m=a.match(/go\(['"]([^'"]+)['"]\)/);if(m)go(m[1]);if(a.includes('closeSubmenu'))closeSubmenu()}
+          }catch(ex){showDbg('SUB ERR: '+ex.message)}
+        }
+      });
+      showDbg('FIX2: submenu items OK');
+    },200);
+
+    /* ── FIX 3: Search bar (input + keydown + button + clear) ── */
+    setTimeout(function(){
+      var inp=document.getElementById('aiSearchInput');
+      var btn=document.getElementById('searchBtn');
+      var clr=document.getElementById('searchClear');
+      if(inp){
+        inp.oninput=function(){this.value.trim() ? clr&&clr.classList.add('visible') : clr&&clr.classList.remove('visible')};
+        inp.onkeydown=function(e){if(e.key==='Enter'&&typeof doSearch==='function')doSearch()};
+        showDbg('FIX3: search input OK');
+      }
+      if(btn){btn.onclick=function(){if(typeof doSearch==='function')doSearch()};showDbg('FIX3: search btn OK')}
+      if(clr){clr.onclick=function(){if(inp){inp.value='';inp.oninput();var sr=document.getElementById('searchResults');if(sr){sr.innerHTML='';sr.classList.remove('visible')}}}}
+    },200);
+
+    /* ── FIX 4: Inline onclick cards on home page ── */
+    setTimeout(function(){
+      document.querySelectorAll('[onclick^="go("]').forEach(function(el){
+        var a=el.getAttribute('onclick');
+        if(!a||a.includes('closeD'))return;
+        el.removeAttribute('onclick');
+        el.onclick=function(e){
+          showDbg('CARD: '+(a||'').slice(0,30));
+          try{var m=a.match(/go\(['"]([^'"]+)['"]\)/);if(m)go(m[1])}catch(ex){showDbg('CARD ERR: '+ex.message)}
+        }
+      });
+      showDbg('FIX4: home cards '+document.querySelectorAll('[onclick^="go("]').length+' untouched cards OK');
+      showDbg('ALL FIXES APPLIED');
+    },300);
   }
 })();
 </script>
