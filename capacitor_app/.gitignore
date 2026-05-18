@@ -14,3 +14,4 @@ _*.bat
 .vscode/
 .idea/
 *.swp
+!patch_whitelist.py 
