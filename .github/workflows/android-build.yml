@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
     paths:
+      - '.github/workflows/android-build.yml'
       - 'capacitor_app/**'
       - 'index.html'
       - 'data.js'
