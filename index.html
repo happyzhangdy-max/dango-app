@@ -1262,6 +1262,23 @@ html { overflow:hidden; }
   letter-spacing: 0.5px;
 }
 
+/* ===== 搜索结果收藏按钮 ===== */
+.search-book-btn {
+  cursor: pointer !important;
+  user-select: none;
+  transition: opacity 0.2s, transform 0.2s !important;
+}
+.search-book-btn:hover {
+  transform: scale(1.2);
+  opacity: 1 !important;
+}
+.search-book-btn:active {
+  transform: scale(0.9);
+}
+/* ⭐ 已收藏的状态 */
+.search-result-item .search-book-btn[style*="opacity: 1"] {
+  text-shadow: 0 0 8px rgba(245,158,11,0.5);
+}
 
 </style>
 </head>
@@ -1662,10 +1679,13 @@ html { overflow:hidden; }
 
 <!-- 生词本页 -->
 <div class="page" id="p-book">
-  <div style="margin-bottom:14px;display:flex;align-items:center;justify-content:space-between">
+  <div style="margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px">
     <span style="color:#888;font-size:13px" id="bookCount"></span>
-    <button class="btn bp" style="font-size:11px;padding:5px 10px" onclick="startBookAutoPlay()">▶ 自动播放</button>
-    <button class="btn br" style="font-size:11px;padding:5px 10px" onclick="clearBook()">清空生词本</button>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <button class="btn" id="bookAiFilter" style="font-size:11px;padding:5px 10px;border:1px solid rgba(168,85,247,0.4);color:#a855f7;display:none" onclick="toggleBookAiFilter()">🤖 AI搜</button>
+      <button class="btn bp" style="font-size:11px;padding:5px 10px" onclick="startBookAutoPlay()">▶ 自动播放</button>
+      <button class="btn br" style="font-size:11px;padding:5px 10px" onclick="clearBook()">清空生词本</button>
+    </div>
   </div>
   <div id="bookC"></div>
 </div>
@@ -2236,6 +2256,200 @@ saveViewedWords=function(){startVocabTimer()};
     }
   }
   setInterval(updateFreq,300);
+})();
+
+/* 搜索结果收藏星状态修复 — 渲染后校正☆/⭐+点击视觉反馈 */
+(function(){
+  const target = document.getElementById('searchResults');
+  if(!target) return;
+  const updateStars = () => {
+    if(!target.classList.contains('visible')) return;
+    target.querySelectorAll('.search-book-btn').forEach(btn => {
+      const id = btn.getAttribute('data-id');
+      if(!id) return;
+      const book = (function(){try{return JSON.parse(localStorage.getItem('jp_book')||'[]')}catch(e){return[]}})();
+      const starred = book.some(function(b){return b.id==id || (b.type==='vocab'&&b.id==id)});
+      btn.textContent = starred ? '⭐' : '☆';
+      btn.style.opacity = starred ? '1' : '0.4';
+    });
+  };
+  const obs = new MutationObserver(updateStars);
+  obs.observe(target, {childList:true, subtree:true});
+  const origSetItem = localStorage.setItem;
+  localStorage.setItem = function(key, val){
+    origSetItem.call(localStorage, key, val);
+    if(key === 'jp_book') setTimeout(updateStars, 10);
+  };
+})();
+
+/* === Feature 1: 生词本 AI搜索 筛选 === */
+function toggleBookAiFilter(){
+  var active = localStorage.getItem('bookAiFilter') === 'true';
+  localStorage.setItem('bookAiFilter', active ? '' : 'true');
+  renderBook(); // re-render with filter
+}
+
+/* Show/hide AI filter button based on book content */
+function updateBookAiFilterBtn(){
+  var btn = document.getElementById('bookAiFilter');
+  if(!btn) return;
+  var book = getBook();
+  var hasAi = book.some(function(b){ return b.type === 'ai'; });
+  btn.style.display = hasAi ? '' : 'none';
+  if(localStorage.getItem('bookAiFilter') === 'true'){
+    btn.style.background = 'rgba(168,85,247,0.2)';
+    btn.style.border = '1px solid #a855f7';
+    btn.textContent = '🤖 AI搜 ✓';
+  } else {
+    btn.style.background = '';
+    btn.style.border = '1px solid rgba(168,85,247,0.4)';
+    btn.textContent = '🤖 AI搜';
+  }
+}
+
+/* Override renderBook to support AI filter */
+(function(){
+  var origRenderBook = window.renderBook;
+  window.renderBook = function(){
+    origRenderBook();
+    var aiFilter = localStorage.getItem('bookAiFilter') === 'true';
+    if(aiFilter){
+      var bookC = document.getElementById('bookC');
+      if(bookC){
+        var items = bookC.querySelectorAll('.vc');
+        var hidden = 0;
+        items.forEach(function(item){
+          var hasAi = item.innerHTML.indexOf('AI搜') >= 0;
+          item.style.display = hasAi ? '' : 'none';
+          if(!hasAi) hidden++;
+        });
+        /* Also update count */
+        var countEl = document.getElementById('bookCount');
+        if(countEl){
+          var visible = items.length - hidden;
+          countEl.textContent = '共 ' + visible + ' 个 AI搜索结果';
+        }
+      }
+    }
+    updateBookAiFilterBtn();
+  };
+  /* Also override switchBookTab to refresh filter button */
+  var origSwitchTab = window.switchBookTab;
+  if(origSwitchTab){
+    window.switchBookTab = function(tab){
+      origSwitchTab(tab);
+      if(tab === 'book'){
+        var aiFilter = localStorage.getItem('bookAiFilter') === 'true';
+        if(aiFilter) localStorage.setItem('bookAiFilter', '');
+        updateBookAiFilterBtn();
+      }
+    };
+  }
+})();
+
+/* === Feature 2: 自动背单词选项页 — 生词本来源 === */
+(function(){
+  /* Override renderAutoPlayOptions to add 生词本 section */
+  var origRenderAP = window.renderAutoPlayOptions;
+  window.renderAutoPlayOptions = function(){
+    origRenderAP();
+    var e = document.getElementById('p-autoplay');
+    if(!e) return;
+    var sections = e.querySelectorAll('.ap-section');
+    if(sections.length < 2) return;
+    var settings = JSON.parse(localStorage.getItem('ap_settings') || '{}');
+    var bookOn = settings.bookOn || false;
+    /* Insert 生词本 section after the category section (2nd section) */
+    var bookSection = document.createElement('div');
+    bookSection.className = 'ap-section';
+    bookSection.style.cssText = 'padding:14px 16px;background:rgba(255,255,255,0.03);border-radius:10px;margin-bottom:12px;border:1px solid rgba(255,255,255,0.06)';
+    bookSection.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center">'
+      + '<span onclick="_apToggleBookSource()" style="cursor:pointer;display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:#e2e8f0">'
+      + '<span class="ap-checkbox' + (bookOn ? ' ap-checked' : '') + '" id="ap-cb-book">' + (bookOn ? '☑' : '☐') + '</span>'
+      + '📖 生词本来源</span></div>'
+      + '<div id="ap-book-info" style="margin-top:8px;font-size:12px;' + (bookOn ? '' : 'opacity:0.5') + '">'
+      + (bookOn ? '✅ 仅从生词本播放' : '☐ 从全部词库播放')
+      + '</div>';
+    /* Insert after category section (before the first non-ap-section child) */
+    var catSection = sections[1]; /* category section */
+    catSection.parentNode.insertBefore(bookSection, catSection.nextElementSibling);
+  };
+
+  /* Toggle function for 生词本 source */
+  window._apToggleBookSource = function(){
+    var settings = JSON.parse(localStorage.getItem('ap_settings') || '{}');
+    settings.bookOn = !settings.bookOn;
+    localStorage.setItem('ap_settings', JSON.stringify(settings));
+    renderAutoPlayOptions();
+  };
+
+  /* Override startVocabAutoPlay to support book source */
+  window.startVocabAutoPlay = (function(origFn){
+    return function(){
+      var settings = JSON.parse(localStorage.getItem('ap_settings') || '{}');
+      if(settings.bookOn){
+        /* Build queue from 生词本 */
+        var book = getBook();
+        if(!book.length){ showT('生词本为空'); return; }
+        /* Map book items to VOCAB entries (vocab type) + keep AI entries */
+        var queue = [];
+        book.forEach(function(b){
+          if(b.type === 'vocab' && b.id){
+            var v = VOCAB.find(function(x){ return x.id === b.id; });
+            if(v) queue.push(v);
+          } else if(b.type === 'ai'){
+            /* For AI entries, create a pseudo-vocab object */
+            queue.push({
+              id: b.id || 'ai_' + b.word,
+              word: b.word,
+              reading: b.reading || '',
+              meaning: b.meaning || '',
+              level: b.level || 'N3',
+              category: '',
+              type: 'ai'
+            });
+          }
+        });
+        if(!queue.length){ showT('生词本中的词汇不在词库中'); return; }
+        /* Shuffle */
+        queue.sort(function(){ return Math.random() - 0.5; });
+        var count = typeof settings.count === 'number' ? settings.count : 50;
+        if(count > 0 && queue.length > count) queue = queue.slice(0, count);
+        /* Save today's word IDs */
+        settings.todayWordIds = queue.map(function(v){ return v.id; });
+        settings.planDate = new Date().toISOString().split('T')[0];
+        localStorage.setItem('ap_settings', JSON.stringify(settings));
+        /* Start playback using the existing internal setup */
+        _vApQueue = queue;
+        _vApIdx = 0;
+        _vApPaused = false;
+        _vApActive = true;
+        _vApPlanAdv = false;
+        var screen = document.getElementById('gApScreen');
+        if(screen){
+          screen.querySelectorAll('.btn').forEach(function(b){
+            b.textContent.indexOf('暂停') >= 0 || b.textContent.indexOf('继续') >= 0
+              ? (b.onclick = vApTogglePause)
+              : b.textContent.indexOf('停止') >= 0 && (b.onclick = vApStop);
+          });
+          screen.querySelector('.ap-nav-left').onclick = vApPrev;
+          screen.querySelector('.ap-nav-right').onclick = vApNext;
+          document.getElementById('gApBmk').onclick = vApToggleBook;
+          screen.querySelectorAll('.ap-marks .vm-btn').forEach(function(b){
+            var c = b.getAttribute('data-color');
+            b.onclick = function(){ vApToggleMark(c); };
+          });
+          screen.querySelector('.ap-word').style.fontSize = '56px';
+          screen.classList.add('show');
+        }
+        _vApSpeed = settings.speed || 1;
+        vApShowCard();
+      } else {
+        /* Normal flow — call original */
+        origFn();
+      }
+    };
+  })(window.startVocabAutoPlay);
 })();
 </script>
 </body>
