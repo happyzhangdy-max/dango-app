@@ -65,6 +65,10 @@ jobs:
         working-directory: capacitor_app
         run: python3 patch_whitelist.py
 
+      - name: Add Android platform (idempotent)
+        working-directory: capacitor_app
+        run: npx cap add android
+
       - name: Sync to Android project
         working-directory: capacitor_app
         run: npx cap copy android
