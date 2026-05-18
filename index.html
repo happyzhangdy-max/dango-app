@@ -2452,5 +2452,35 @@ function updateBookAiFilterBtn(){
   })(window.startVocabAutoPlay);
 })();
 </script>
+<script>
+/* Capacitor WebView diagnostic overlay */
+(function(){
+  if (location.hostname === '' || location.protocol === 'capacitor:') {
+    var dbg = document.createElement('div');
+    dbg.id = 'capDbg';
+    dbg.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;background:rgba(233,69,96,0.9);color:#fff;font-size:11px;padding:4px 8px;font-family:monospace;display:none;max-height:60px;overflow-y:auto;pointer-events:none';
+    document.body.appendChild(dbg);
+    function showDbg(msg) {
+      if (!dbg) return;
+      dbg.style.display = 'block';
+      dbg.innerHTML = (dbg.innerHTML ? dbg.innerHTML + '<br>' : '') + '[' + new Date().toLocaleTimeString() + '] ' + msg;
+      if (dbg.childElementCount > 5) dbg.innerHTML = dbg.innerHTML.split('<br>').slice(-5).join('<br>');
+    }
+    window.onerror = function(m, s, l, c, e) {
+      showDbg('ERR: ' + m + ' @ ' + (s || '').split('/').pop() + ':' + l);
+      return false;
+    };
+    /* Wrap go() for error logging */
+    var _origGo = window.go;
+    if (_origGo) {
+      window.go = function(p) {
+        showDbg('go(' + p + ')');
+        try { _origGo(p); } catch(e) { showDbg('go ERROR: ' + e.message); }
+      };
+    }
+    showDbg('CAPACITOR MODE: diagnostics active');
+  }
+})();
+</script>
 </body>
 </html>
