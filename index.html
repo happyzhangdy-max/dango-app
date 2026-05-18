@@ -2464,8 +2464,8 @@ function updateBookAiFilterBtn(){
     function showDbg(m){dbg.style.display='block';dbg.innerHTML=(dbg.innerHTML?dbg.innerHTML+'<br>':'')+'['+new Date().toLocaleTimeString()+'] '+m;if(dbg.childElementCount>5) dbg.innerHTML=dbg.innerHTML.split('<br>').slice(-5).join('<br>')}
     window.onerror=function(m,s,l,c,e){showDbg('ERR: '+m+' @ '+(s||'').split('/').pop()+':'+l);return false};
 
-    /* Wrap go() for logging */
-    var _g=window.go;if(_g){window.go=function(p){showDbg('go('+p+')');try{_g(p)}catch(e){showDbg('go ERROR: '+e.message)}}}
+    /* Wrap go() for logging with full stack */
+    var _g=window.go;if(_g){window.go=function(p){showDbg('go('+p+')');try{_g(p)}catch(e){showDbg('go ERROR: '+e.message+' | STACK: '+(e.stack||'').replace(/https:\/\/.*?\//g,'').slice(0,120)));return false}}}
     showDbg('HOST='+location.hostname+' PROTO='+location.protocol);
 
     /* ── FIX 1: Bottom nav buttons ── */
@@ -2534,6 +2534,21 @@ function updateBookAiFilterBtn(){
       showDbg('FIX4: home cards '+document.querySelectorAll('[onclick^="go("]').length+' untouched cards OK');
       showDbg('ALL FIXES APPLIED');
     },300);
+
+    // ── FIX 5: Add defensive wrapper around go() to prevent length access crashes ──
+    var _origGo = window.go;
+    if (_origGo) {
+      window.go = function(page) {
+        // Before calling original go(), check if we're in a problematic state
+        try {
+          // Check _vApActive safely
+          if (typeof _vApActive === 'undefined') _vApActive = false;
+          if (typeof _vApQueue === 'undefined') _vApQueue = [];
+          if (typeof _vApIdx === 'undefined') _vApIdx = 0;
+        } catch(e) { /* silently ignore */ }
+        return _origGo(page);
+      };
+    }
   }
 })();
 </script>
