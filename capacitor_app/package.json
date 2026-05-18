@@ -1,0 +1,20 @@
+{
+  "name": "nihongo-corner",
+  "version": "4.0.0",
+  "description": "日本語コーナー - JLPT Japanese Learning App",
+  "private": true,
+  "scripts": {
+    "sync": "sync_www.bat",
+    "copy": "npx cap copy android",
+    "build": "npx cap build android",
+    "sync:prod": "sync_www.bat && npx cap copy android",
+    "open": "npx cap open android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.0.0",
+    "@capacitor/core": "^7.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.0.0"
+  }
+}

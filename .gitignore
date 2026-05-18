@@ -6,3 +6,9 @@ Thumbs.db
 verify_*.png
 cf-worker/
 *.bak
+
+# Capacitor Android (auto-generated)
+capacitor_app/android/
+capacitor_app/www/
+capacitor_app/node_modules/
+capacitor_app/package-lock.json
