@@ -2481,41 +2481,47 @@ function updateBookAiFilterBtn(){
     showDbg('HOST=' + location.hostname + ' PROTO=' + location.protocol);
     showDbg('CAPACITOR MODE: diagnostics active');
 
-    /* FIX: Force-nav on bottombar buttons */
+    /* FIX: Force-nav on bottombar buttons using onclick property (works in Capacitor) */
     setTimeout(function() {
-      document.querySelectorAll('.bottombar__item[data-section]').forEach(function(btn) {
+      var navBtns = document.querySelectorAll('.bottombar__item');
+      showDbg('Found ' + navBtns.length + ' nav buttons');
+      navBtns.forEach(function(btn) {
         var sec = btn.getAttribute('data-section');
-        var oldClick = btn.onclick;
+        /* Remove all existing click handlers */
         btn.onclick = null;
-        btn.addEventListener('click', function(e) {
-          showDbg('BTN: data-section=' + sec);
-          if (sec === 'home') { go('home'); }
-          else if (sec === 'learn') { toggleSubmenu('learn'); }
-          else if (sec === 'review') { toggleSubmenu('review'); }
-          else if (sec === 'practice') { toggleSubmenu('practice'); }
-          else if (sec === 'settings') { go('settings'); }
-          else if (oldClick) { oldClick.call(btn, e); }
-        });
-      });
-      /* Force-nav on submenu items */
-      document.querySelectorAll('.submenu-item[onclick]').forEach(function(item) {
-        var attr = item.getAttribute('onclick');
-        item.removeAttribute('onclick');
-        item.addEventListener('click', function(e) {
-          showDbg('SUB: ' + attr.slice(0, 40));
+        var newClick = btn.cloneNode(true);
+        btn.parentNode.replaceChild(newClick, btn);
+        /* Attach via onclick property (proven to work by test button) */
+        newClick.onclick = function(e) {
+          showDbg('NAV: sec=' + sec);
           try {
-            /* Execute the onclick JS manually */
-            if (attr.includes('go(')) {
-              var match = attr.match(/go\(['"]([^'"]+)['"]\)/);
-              if (match) go(match[1]);
-            }
-            if (attr.includes('showPlanModal')) showPlanModal();
-            if (attr.includes('closeSubmenu')) closeSubmenu();
-          } catch(ex) { showDbg('SUB ERR: ' + ex.message); }
-        });
+            if (sec === 'home') { go('home'); }
+            else if (sec === 'learn') { toggleSubmenu('learn'); }
+            else if (sec === 'review') { toggleSubmenu('review'); }
+            else if (sec === 'practice') { toggleSubmenu('practice'); }
+            else if (sec === 'settings') { go('settings'); }
+          } catch(ex) { showDbg('NAV ERR: ' + ex.message); }
+        };
       });
-      showDbg('FIX applied: ' + document.querySelectorAll('.bottombar__item[data-section]').length + ' nav buttons');
-    }, 100);
+      /* Force-nav on submenu items using onclick property */
+      document.querySelectorAll('.submenu-item').forEach(function(item) {
+        var attr = item.getAttribute('onclick');
+        if (!attr) return;
+        item.removeAttribute('onclick');
+        item.onclick = function(e) {
+          showDbg('SUB: ' + (attr || '').slice(0, 40));
+          try {
+            if (attr.includes('showPlanModal')) { closeSubmenu(); showPlanModal(); }
+            else {
+              var m = attr.match(/go\(['"]([^'"]+)['"]\)/);
+              if (m) { go(m[1]); }
+              if (attr.includes('closeSubmenu')) closeSubmenu();
+            }
+          } catch(ex) { showDbg('SUB ERR: ' + ex.message); }
+        };
+      });
+      showDbg('Fix applied: onclick property');
+    }, 200);
 
     /* TEST: Add a direct test button */
     setTimeout(function() {
