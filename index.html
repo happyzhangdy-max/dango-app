@@ -2516,6 +2516,25 @@ function updateBookAiFilterBtn(){
       });
       showDbg('FIX applied: ' + document.querySelectorAll('.bottombar__item[data-section]').length + ' nav buttons');
     }, 100);
+
+    /* TEST: Add a direct test button */
+    setTimeout(function() {
+      var testBtn = document.createElement('button');
+      testBtn.textContent = '🧪 TEST: go(vocab)';
+      testBtn.style.cssText = 'position:fixed;bottom:80px;right:8px;z-index:99998;background:#e94560;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-family:monospace;cursor:pointer;pointer-events:auto';
+      testBtn.onclick = function(e) {
+        showDbg('TEST BTN CLICKED');
+        try {
+          showDbg('call go(vocab)');
+          go('vocab');
+          showDbg('go(vocab) returned OK');
+        } catch(ex) {
+          showDbg('go(vocab) THREW: ' + ex.message + ' | stack: ' + (ex.stack || '').slice(0,80));
+        }
+      };
+      document.body.appendChild(testBtn);
+      showDbg('Test button added');
+    }, 2000);
   }
 })();
 </script>
