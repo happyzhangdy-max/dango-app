@@ -2455,7 +2455,7 @@ function updateBookAiFilterBtn(){
 <script>
 /* Capacitor WebView diagnostic overlay */
 (function(){
-  if (location.hostname === '' || location.protocol === 'capacitor:') {
+  if (location.hostname === '' || location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.protocol === 'capacitor:') {
     var dbg = document.createElement('div');
     dbg.id = 'capDbg';
     dbg.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;background:rgba(233,69,96,0.9);color:#fff;font-size:11px;padding:4px 8px;font-family:monospace;display:none;max-height:60px;overflow-y:auto;pointer-events:none';
@@ -2478,6 +2478,7 @@ function updateBookAiFilterBtn(){
         try { _origGo(p); } catch(e) { showDbg('go ERROR: ' + e.message); }
       };
     }
+    showDbg('HOST=' + location.hostname + ' PROTO=' + location.protocol);
     showDbg('CAPACITOR MODE: diagnostics active');
   }
 })();
