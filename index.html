@@ -1938,16 +1938,226 @@ html { overflow:hidden; }
   </div>
 </div>
 
-<script src="data.js?v=352"></script>
-<script src="grammar_data.js?v=352"></script>
-<script src="quiz_data_high.js?v=352"></script>
-<script src="quiz_data_normal.js?v=352"></script>
-<script src="inline.js?v=352"></script>
-<script src="game/tower-climb.js?v=352"></script>
+<script src="data.js?v=352">/* ── Scan history clickable (unconditional) ── */
+(function(){
+  if (typeof renderScanHistory !== 'function' || typeof window._overrodeRenderScanHistory !== 'undefined') return;
+  window._overrodeRenderScanHistory = true;
+  var _orig = renderScanHistory;
+  renderScanHistory = function() {
+    _orig();
+    var list = document.getElementById('scanHistoryList');
+    if (!list) return;
+    var cards = list.querySelectorAll('.plan-card');
+    cards.forEach(function(card, idx) {
+      card.style.cursor = 'pointer';
+      card.onclick = function() {
+        var rec = _scanHistory[idx];
+        if (!rec) return;
+        document.getElementById('scanPreview').style.display = 'none';
+        document.getElementById('scanLoading').style.display = 'none';
+        document.getElementById('scanResult').style.display = 'block';
+        document.getElementById('scanFullJp').textContent = rec.jp || '';
+        document.getElementById('scanFullCn').textContent = rec.cn || '';
+        document.getElementById('scanAnalysisContent').style.display = 'block';
+        document.getElementById('scanAnalysisLoading').style.display = 'none';
+        document.getElementById('scanAnalysisContent').innerHTML = '<div style="color:#d1d5db;font-size:13px;line-height:1.9;white-space:pre-wrap">' + escHtml(rec.jp || '') + '</div>';
+        var tabs = document.querySelectorAll('.scan-result-tab');
+        if (tabs[0] && typeof switchScanView === 'function') switchScanView('parallel', tabs[0]);
+      };
+    });
+  };
+  if (_scanHistory && _scanHistory.length) setTimeout(renderScanHistory, 100);
+})();
+</script>
+<script src="grammar_data.js?v=352">/* ── Scan history clickable (unconditional) ── */
+(function(){
+  if (typeof renderScanHistory !== 'function' || typeof window._overrodeRenderScanHistory !== 'undefined') return;
+  window._overrodeRenderScanHistory = true;
+  var _orig = renderScanHistory;
+  renderScanHistory = function() {
+    _orig();
+    var list = document.getElementById('scanHistoryList');
+    if (!list) return;
+    var cards = list.querySelectorAll('.plan-card');
+    cards.forEach(function(card, idx) {
+      card.style.cursor = 'pointer';
+      card.onclick = function() {
+        var rec = _scanHistory[idx];
+        if (!rec) return;
+        document.getElementById('scanPreview').style.display = 'none';
+        document.getElementById('scanLoading').style.display = 'none';
+        document.getElementById('scanResult').style.display = 'block';
+        document.getElementById('scanFullJp').textContent = rec.jp || '';
+        document.getElementById('scanFullCn').textContent = rec.cn || '';
+        document.getElementById('scanAnalysisContent').style.display = 'block';
+        document.getElementById('scanAnalysisLoading').style.display = 'none';
+        document.getElementById('scanAnalysisContent').innerHTML = '<div style="color:#d1d5db;font-size:13px;line-height:1.9;white-space:pre-wrap">' + escHtml(rec.jp || '') + '</div>';
+        var tabs = document.querySelectorAll('.scan-result-tab');
+        if (tabs[0] && typeof switchScanView === 'function') switchScanView('parallel', tabs[0]);
+      };
+    });
+  };
+  if (_scanHistory && _scanHistory.length) setTimeout(renderScanHistory, 100);
+})();
+</script>
+<script src="quiz_data_high.js?v=352">/* ── Scan history clickable (unconditional) ── */
+(function(){
+  if (typeof renderScanHistory !== 'function' || typeof window._overrodeRenderScanHistory !== 'undefined') return;
+  window._overrodeRenderScanHistory = true;
+  var _orig = renderScanHistory;
+  renderScanHistory = function() {
+    _orig();
+    var list = document.getElementById('scanHistoryList');
+    if (!list) return;
+    var cards = list.querySelectorAll('.plan-card');
+    cards.forEach(function(card, idx) {
+      card.style.cursor = 'pointer';
+      card.onclick = function() {
+        var rec = _scanHistory[idx];
+        if (!rec) return;
+        document.getElementById('scanPreview').style.display = 'none';
+        document.getElementById('scanLoading').style.display = 'none';
+        document.getElementById('scanResult').style.display = 'block';
+        document.getElementById('scanFullJp').textContent = rec.jp || '';
+        document.getElementById('scanFullCn').textContent = rec.cn || '';
+        document.getElementById('scanAnalysisContent').style.display = 'block';
+        document.getElementById('scanAnalysisLoading').style.display = 'none';
+        document.getElementById('scanAnalysisContent').innerHTML = '<div style="color:#d1d5db;font-size:13px;line-height:1.9;white-space:pre-wrap">' + escHtml(rec.jp || '') + '</div>';
+        var tabs = document.querySelectorAll('.scan-result-tab');
+        if (tabs[0] && typeof switchScanView === 'function') switchScanView('parallel', tabs[0]);
+      };
+    });
+  };
+  if (_scanHistory && _scanHistory.length) setTimeout(renderScanHistory, 100);
+})();
+</script>
+<script src="quiz_data_normal.js?v=352">/* ── Scan history clickable (unconditional) ── */
+(function(){
+  if (typeof renderScanHistory !== 'function' || typeof window._overrodeRenderScanHistory !== 'undefined') return;
+  window._overrodeRenderScanHistory = true;
+  var _orig = renderScanHistory;
+  renderScanHistory = function() {
+    _orig();
+    var list = document.getElementById('scanHistoryList');
+    if (!list) return;
+    var cards = list.querySelectorAll('.plan-card');
+    cards.forEach(function(card, idx) {
+      card.style.cursor = 'pointer';
+      card.onclick = function() {
+        var rec = _scanHistory[idx];
+        if (!rec) return;
+        document.getElementById('scanPreview').style.display = 'none';
+        document.getElementById('scanLoading').style.display = 'none';
+        document.getElementById('scanResult').style.display = 'block';
+        document.getElementById('scanFullJp').textContent = rec.jp || '';
+        document.getElementById('scanFullCn').textContent = rec.cn || '';
+        document.getElementById('scanAnalysisContent').style.display = 'block';
+        document.getElementById('scanAnalysisLoading').style.display = 'none';
+        document.getElementById('scanAnalysisContent').innerHTML = '<div style="color:#d1d5db;font-size:13px;line-height:1.9;white-space:pre-wrap">' + escHtml(rec.jp || '') + '</div>';
+        var tabs = document.querySelectorAll('.scan-result-tab');
+        if (tabs[0] && typeof switchScanView === 'function') switchScanView('parallel', tabs[0]);
+      };
+    });
+  };
+  if (_scanHistory && _scanHistory.length) setTimeout(renderScanHistory, 100);
+})();
+</script>
+<script src="inline.js?v=352">/* ── Scan history clickable (unconditional) ── */
+(function(){
+  if (typeof renderScanHistory !== 'function' || typeof window._overrodeRenderScanHistory !== 'undefined') return;
+  window._overrodeRenderScanHistory = true;
+  var _orig = renderScanHistory;
+  renderScanHistory = function() {
+    _orig();
+    var list = document.getElementById('scanHistoryList');
+    if (!list) return;
+    var cards = list.querySelectorAll('.plan-card');
+    cards.forEach(function(card, idx) {
+      card.style.cursor = 'pointer';
+      card.onclick = function() {
+        var rec = _scanHistory[idx];
+        if (!rec) return;
+        document.getElementById('scanPreview').style.display = 'none';
+        document.getElementById('scanLoading').style.display = 'none';
+        document.getElementById('scanResult').style.display = 'block';
+        document.getElementById('scanFullJp').textContent = rec.jp || '';
+        document.getElementById('scanFullCn').textContent = rec.cn || '';
+        document.getElementById('scanAnalysisContent').style.display = 'block';
+        document.getElementById('scanAnalysisLoading').style.display = 'none';
+        document.getElementById('scanAnalysisContent').innerHTML = '<div style="color:#d1d5db;font-size:13px;line-height:1.9;white-space:pre-wrap">' + escHtml(rec.jp || '') + '</div>';
+        var tabs = document.querySelectorAll('.scan-result-tab');
+        if (tabs[0] && typeof switchScanView === 'function') switchScanView('parallel', tabs[0]);
+      };
+    });
+  };
+  if (_scanHistory && _scanHistory.length) setTimeout(renderScanHistory, 100);
+})();
+</script>
+<script src="game/tower-climb.js?v=352">/* ── Scan history clickable (unconditional) ── */
+(function(){
+  if (typeof renderScanHistory !== 'function' || typeof window._overrodeRenderScanHistory !== 'undefined') return;
+  window._overrodeRenderScanHistory = true;
+  var _orig = renderScanHistory;
+  renderScanHistory = function() {
+    _orig();
+    var list = document.getElementById('scanHistoryList');
+    if (!list) return;
+    var cards = list.querySelectorAll('.plan-card');
+    cards.forEach(function(card, idx) {
+      card.style.cursor = 'pointer';
+      card.onclick = function() {
+        var rec = _scanHistory[idx];
+        if (!rec) return;
+        document.getElementById('scanPreview').style.display = 'none';
+        document.getElementById('scanLoading').style.display = 'none';
+        document.getElementById('scanResult').style.display = 'block';
+        document.getElementById('scanFullJp').textContent = rec.jp || '';
+        document.getElementById('scanFullCn').textContent = rec.cn || '';
+        document.getElementById('scanAnalysisContent').style.display = 'block';
+        document.getElementById('scanAnalysisLoading').style.display = 'none';
+        document.getElementById('scanAnalysisContent').innerHTML = '<div style="color:#d1d5db;font-size:13px;line-height:1.9;white-space:pre-wrap">' + escHtml(rec.jp || '') + '</div>';
+        var tabs = document.querySelectorAll('.scan-result-tab');
+        if (tabs[0] && typeof switchScanView === 'function') switchScanView('parallel', tabs[0]);
+      };
+    });
+  };
+  if (_scanHistory && _scanHistory.length) setTimeout(renderScanHistory, 100);
+})();
+</script>
 
 
 
-<script src="game/boxing.js?v=352"></script>
+<script src="game/boxing.js?v=352">/* ── Scan history clickable (unconditional) ── */
+(function(){
+  if (typeof renderScanHistory !== 'function' || typeof window._overrodeRenderScanHistory !== 'undefined') return;
+  window._overrodeRenderScanHistory = true;
+  var _orig = renderScanHistory;
+  renderScanHistory = function() {
+    _orig();
+    var list = document.getElementById('scanHistoryList');
+    if (!list) return;
+    var cards = list.querySelectorAll('.plan-card');
+    cards.forEach(function(card, idx) {
+      card.style.cursor = 'pointer';
+      card.onclick = function() {
+        var rec = _scanHistory[idx];
+        if (!rec) return;
+        document.getElementById('scanPreview').style.display = 'none';
+        document.getElementById('scanLoading').style.display = 'none';
+        document.getElementById('scanResult').style.display = 'block';
+        document.getElementById('scanFullJp').textContent = rec.jp || '';
+        document.getElementById('scanFullCn').textContent = rec.cn || '';
+        document.getElementById('scanAnalysisContent').style.display = 'block';
+        document.getElementById('scanAnalysisLoading').style.display = 'none';
+        document.getElementById('scanAnalysisContent').innerHTML = '<div style="color:#d1d5db;font-size:13px;line-height:1.9;white-space:pre-wrap">' + escHtml(rec.jp || '') + '</div>';
+        var tabs = document.querySelectorAll('.scan-result-tab');
+        if (tabs[0] && typeof switchScanView === 'function') switchScanView('parallel', tabs[0]);
+      };
+    });
+  };
+  if (_scanHistory && _scanHistory.length) setTimeout(renderScanHistory, 100);
+})();
+</script>
 <script>
 // 搜索框 placeholder 随机轮播
 (function(){
@@ -2112,6 +2322,56 @@ html { overflow:hidden; }
   },500);
 })();
 
+/* 自动播放：默认按高频排序 */
+(function(){
+  var origStart = startAutoPlay;
+  startAutoPlay = function(){
+    origStart();
+    if(_apQueue&&_apQueue.length>1) _apQueue.sort(function(a,b){return (b.appear||0)-(a.appear||0)});
+  };
+  var origVStart = startVocabAutoPlay;
+  startVocabAutoPlay = function(){
+    origVStart();
+    if(_vApQueue&&_vApQueue.length>1) _vApQueue.sort(function(a,b){return (b.appear||0)-(a.appear||0)});
+  };
+  var origGStart = startGAutoPlay;
+  startGAutoPlay = function(){
+    origGStart();
+    if(_gApQueue&&_gApQueue.length>1) _gApQueue.sort(function(a,b){return (b.appear||0)-(a.appear||0)});
+  };
+})();
+
+/* 自动播放：显示高频等级/频次 */
+(function(){
+  var freqElem = null;
+  function updateFreq(){
+    var screen=document.querySelector('#apScreen.show')||document.querySelector('#gApScreen.show');
+    if(!screen){freqElem=null;return;}
+    var card=screen.querySelector('.ap-card');
+    if(!card){freqElem=null;return;}
+    var wordEl=card.querySelector('.ap-word');
+    if(!wordEl||!wordEl.textContent){freqElem=null;return;}
+    var wordText=wordEl.textContent.trim();
+    if(!wordText){freqElem=null;return;}
+    var newFreq=card.querySelector('.ap-freq');
+    if(!newFreq)return;
+    if(freqElem!==newFreq)freqElem=newFreq;
+    // 只在频次变化时更新
+    var lastWord=freqElem.getAttribute('data-word');
+    if(lastWord===wordText)return;
+    freqElem.setAttribute('data-word',wordText);
+    var w=VOCAB_DATA.find(function(v){return v.word===wordText||v.reading===wordText});
+    if(w&&w.appear){
+      var a=w.appear;
+      var label=a>=7?'🔥 高频':a>=5?'⚡ 较高频':a>=4?'📗 中频':'📘 低频';
+      freqElem.textContent=label+' · 频次 '+a;
+    }else{
+      freqElem.textContent='';
+    }
+  }
+  setInterval(updateFreq,300);
+})();
+
 /* 只看平假名 toggle */
 function toggleHideKanji(){
   var dw=document.getElementById('dw'),btn=document.getElementById('hideKanjiBtn');
@@ -2156,6 +2416,56 @@ saveViewedWords=function(){startVocabTimer()};
       }
     });
   }
+})();
+
+/* 自动播放：默认按高频排序 */
+(function(){
+  var origStart = startAutoPlay;
+  startAutoPlay = function(){
+    origStart();
+    if(_apQueue&&_apQueue.length>1) _apQueue.sort(function(a,b){return (b.appear||0)-(a.appear||0)});
+  };
+  var origVStart = startVocabAutoPlay;
+  startVocabAutoPlay = function(){
+    origVStart();
+    if(_vApQueue&&_vApQueue.length>1) _vApQueue.sort(function(a,b){return (b.appear||0)-(a.appear||0)});
+  };
+  var origGStart = startGAutoPlay;
+  startGAutoPlay = function(){
+    origGStart();
+    if(_gApQueue&&_gApQueue.length>1) _gApQueue.sort(function(a,b){return (b.appear||0)-(a.appear||0)});
+  };
+})();
+
+/* 自动播放：显示高频等级/频次 */
+(function(){
+  var freqElem = null;
+  function updateFreq(){
+    var screen=document.querySelector('#apScreen.show')||document.querySelector('#gApScreen.show');
+    if(!screen){freqElem=null;return;}
+    var card=screen.querySelector('.ap-card');
+    if(!card){freqElem=null;return;}
+    var wordEl=card.querySelector('.ap-word');
+    if(!wordEl||!wordEl.textContent){freqElem=null;return;}
+    var wordText=wordEl.textContent.trim();
+    if(!wordText){freqElem=null;return;}
+    var newFreq=card.querySelector('.ap-freq');
+    if(!newFreq)return;
+    if(freqElem!==newFreq)freqElem=newFreq;
+    // 只在频次变化时更新
+    var lastWord=freqElem.getAttribute('data-word');
+    if(lastWord===wordText)return;
+    freqElem.setAttribute('data-word',wordText);
+    var w=VOCAB_DATA.find(function(v){return v.word===wordText||v.reading===wordText});
+    if(w&&w.appear){
+      var a=w.appear;
+      var label=a>=7?'🔥 高频':a>=5?'⚡ 较高频':a>=4?'📗 中频':'📘 低频';
+      freqElem.textContent=label+' · 频次 '+a;
+    }else{
+      freqElem.textContent='';
+    }
+  }
+  setInterval(updateFreq,300);
 })();
 
 /* 搜索结果收藏星状态修复 — 渲染后校正☆/⭐+点击视觉反馈 */
@@ -2478,6 +2788,36 @@ function updateBookAiFilterBtn(){
       };
     }
   }
+})();
+/* ── Scan history clickable (unconditional) ── */
+(function(){
+  if (typeof renderScanHistory !== 'function' || typeof window._overrodeRenderScanHistory !== 'undefined') return;
+  window._overrodeRenderScanHistory = true;
+  var _orig = renderScanHistory;
+  renderScanHistory = function() {
+    _orig();
+    var list = document.getElementById('scanHistoryList');
+    if (!list) return;
+    var cards = list.querySelectorAll('.plan-card');
+    cards.forEach(function(card, idx) {
+      card.style.cursor = 'pointer';
+      card.onclick = function() {
+        var rec = _scanHistory[idx];
+        if (!rec) return;
+        document.getElementById('scanPreview').style.display = 'none';
+        document.getElementById('scanLoading').style.display = 'none';
+        document.getElementById('scanResult').style.display = 'block';
+        document.getElementById('scanFullJp').textContent = rec.jp || '';
+        document.getElementById('scanFullCn').textContent = rec.cn || '';
+        document.getElementById('scanAnalysisContent').style.display = 'block';
+        document.getElementById('scanAnalysisLoading').style.display = 'none';
+        document.getElementById('scanAnalysisContent').innerHTML = '<div style="color:#d1d5db;font-size:13px;line-height:1.9;white-space:pre-wrap">' + escHtml(rec.jp || '') + '</div>';
+        var tabs = document.querySelectorAll('.scan-result-tab');
+        if (tabs[0] && typeof switchScanView === 'function') switchScanView('parallel', tabs[0]);
+      };
+    });
+  };
+  if (_scanHistory && _scanHistory.length) setTimeout(renderScanHistory, 100);
 })();
 </script>
 </body>
