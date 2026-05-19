@@ -2539,15 +2539,49 @@ function updateBookAiFilterBtn(){
     var _origGo = window.go;
     if (_origGo) {
       window.go = function(page) {
-        // Before calling original go(), check if we're in a problematic state
         try {
-          // Check _vApActive safely
           if (typeof _vApActive === 'undefined') _vApActive = false;
           if (typeof _vApQueue === 'undefined') _vApQueue = [];
           if (typeof _vApIdx === 'undefined') _vApIdx = 0;
         } catch(e) { /* silently ignore */ }
         return _origGo(page);
       };
+    }
+
+    // ── FIX 6: Override renderScanHistory with clickable records ──
+    if (typeof renderScanHistory === 'function') {
+      var _origRenderScanHistory = renderScanHistory;
+      renderScanHistory = function() {
+        _origRenderScanHistory();
+        // Add onclick to each history item
+        var list = document.getElementById('scanHistoryList');
+        if (!list) return;
+        var items = list.querySelectorAll('.plan-card');
+        items.forEach(function(card, idx) {
+          card.style.cursor = 'pointer';
+          card.onclick = function() {
+            var rec = _scanHistory[idx];
+            if (!rec) return;
+            // Fill result area with this record's data
+            document.getElementById('scanPreview').style.display = 'none';
+            document.getElementById('scanLoading').style.display = 'none';
+            document.getElementById('scanResult').style.display = 'block';
+            document.getElementById('scanFullJp').textContent = rec.jp || '';
+            document.getElementById('scanFullCn').textContent = rec.cn || '';
+            document.getElementById('scanAnalysisContent').style.display = 'block';
+            document.getElementById('scanAnalysisLoading').style.display = 'none';
+            var analysisDiv = document.getElementById('scanAnalysisContent');
+            analysisDiv.innerHTML = '<div style="color:#d1d5db;font-size:13px;line-height:1.9;white-space:pre-wrap">' + escHtml(rec.jp || '') + '</div>';
+            // Switch to parallel view
+            var tabs = document.querySelectorAll('.scan-result-tab');
+            if (tabs[0]) switchScanView('parallel', tabs[0]);
+            showDbg('HIST: clicked #' + idx + ' ' + (rec.jp || '').slice(0,20));
+          };
+        });
+      };
+      // Re-render to apply
+      if (_scanHistory && _scanHistory.length > 0) renderScanHistory();
+      showDbg('FIX6: scan history clickable');
     }
   }
 })();
