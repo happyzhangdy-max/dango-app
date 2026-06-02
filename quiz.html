@@ -134,10 +134,21 @@ body {
 .loading { text-align:center; padding:60px 20px; color:#666; font-size:14px; }
 
 /* Source badge */
-.badge { display:inline-block; font-size:10px; padding:2px 8px; border-radius:4px; margin-left:8px; }
+.badge { display:inline-block; font-size:10px; padding:2px 8px; border-radius:4px; margin-left:6px; }
 .badge-2024 { background:rgba(233,69,96,0.15); color:#e94560; }
 .badge-2022 { background:rgba(245,166,35,0.15); color:#f5a623; }
 .badge-2025 { background:rgba(168,85,247,0.15); color:#a855f7; }
+.badge-fill { background:rgba(34,197,94,0.15); color:#22c55e; }
+.badge-type { background:rgba(232,121,249,0.15); color:#e879f9; }
+.star-highlight { color:#facc15; font-weight:bold; text-shadow:0 0 8px rgba(250,204,21,0.5); font-size:1.15em; }
+/* Explanation box */
+.explain-box { margin-top:10px; }
+.exp-sec { padding:8px 12px; border-radius:8px; margin-bottom:6px; font-size:12px; line-height:1.7; }
+.exp-sec .exp-label { font-weight:700; margin-right:6px; }
+.exp-reason { background:rgba(59,130,246,0.1); border-left:3px solid #3b82f6; }
+.exp-trap { background:rgba(239,68,68,0.1); border-left:3px solid #ef4444; }
+.exp-tip { background:rgba(250,204,21,0.1); border-left:3px solid #facc15; }
+.exp-plain { background:rgba(255,255,255,0.04); border-left:3px solid #888; }
 </style>
 </head>
 <body>
@@ -344,6 +355,32 @@ function shuffle(a) {
   }
 }
 
+// ── Format Explanation (parse 理由/陷阱/秒杀) ──
+function formatExplanation(exp) {
+  var s = escHtml(exp);
+  // Try to structure by known patterns
+  var sections = [];
+  // Pattern 1: "理由/陷阱/秒杀" format
+  var re = /(理由[：:]\s*[^。]*。?)\s*(陷阱[：:]\s*[^。]*。?)\s*(秒杀[：:]\s*[^。]*。?)/;
+  var m = s.match(re);
+  if (m) {
+    sections.push('<div class="exp-sec exp-reason"><span class="exp-label">📖 理由</span>' + m[1].replace(/^(理由[：:])/,'') + '</div>');
+    sections.push('<div class="exp-sec exp-trap"><span class="exp-label">⚠️ 陷阱</span>' + m[2].replace(/^(陷阱[：:])/,'') + '</div>');
+    sections.push('<div class="exp-sec exp-tip"><span class="exp-label">⚡ 秒杀</span>' + m[3].replace(/^(秒杀[：:])/,'') + '</div>');
+    return sections.join('');
+  }
+  // Pattern 2: "理由：...。陷阱：...。" without 秒杀
+  var re2 = /(理由[：:]\s*[^。]*。?)\s*(陷阱[：:]\s*[^。]*。?)/;
+  var m2 = s.match(re2);
+  if (m2) {
+    sections.push('<div class="exp-sec exp-reason"><span class="exp-label">📖 理由</span>' + m2[1].replace(/^(理由[：:])/,'') + '</div>');
+    sections.push('<div class="exp-sec exp-trap"><span class="exp-label">⚠️ 陷阱</span>' + m2[2].replace(/^(陷阱[：:])/,'') + '</div>');
+    return sections.join('');
+  }
+  // Default: plain text
+  return '<div class="exp-sec exp-plain">' + s + '</div>';
+}
+
 // ── Show Question ──
 function showQuiz() {
   var q = quizData[quizIdx];
@@ -370,8 +407,21 @@ function showQuiz() {
     var yr = q.source.substring(0,4);
     sourceBadge = '<span class="badge badge-' + yr + '">' + q.source + '</span>';
   }
+  // Type badge
+  var typeBadge = '';
+  if (q.type === 'grammar_fill') {
+    typeBadge = '<span class="badge badge-fill">🧩 排序题</span>';
+  } else if (q.type) {
+    var tLabels = {kanji:'漢字', vocab_fill:'語彙', vocab_context:'文脈', synonyms:'言い換え', usage:'使い方', grammar:'文法', reading:'読解', reading_short:'短文', reading_info:'情報検索'};
+    typeBadge = '<span class="badge badge-type">' + (tLabels[q.type] || q.type) + '</span>';
+  }
+  // Highlight ★ in grammar_fill questions
+  var qText = escHtml(q.question);
+  if (q.type === 'grammar_fill') {
+    qText = qText.replace(/★/g, '<span class="star-highlight">★</span>');
+  }
   document.getElementById('qText').innerHTML =
-    '<div class="q-text"><span>' + escHtml(q.question) + sourceBadge + '</span>' +
+    '<div class="q-text"><span>' + qText + typeBadge + sourceBadge + '</span>' +
     '<button class="say-btn" onclick="speakText(\'' + escAttr(q.question) + '\')">🔊</button></div>';
 
   // Options
@@ -426,9 +476,10 @@ function answerQuiz(i) {
     html += '<div class="explain">正解：' + (q.answer + 1) + '. ' + escHtml(q.options[q.answer]) + '</div>';
   }
 
-  // Show explanation (either 'explanation' or 'error_analysis')
+  // Show explanation with structured format
   if (q.explanation) {
-    html += '<div class="explain">' + escHtml(q.explanation) + '</div>';
+    var expHtml = formatExplanation(q.explanation);
+    html += '<div class="explain-box">' + expHtml + '</div>';
   }
 
   // error_analysis (bonus for 2025-07 data)
