@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>JLPT N2 真题题库</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family:'Segoe UI','Microsoft YaHei',sans-serif;
+  background:#0f0f1a; color:#eaeaea;
+  min-height:100vh; display:flex; flex-direction:column; align-items:center;
+}
+.container { max-width:700px; width:100%; padding:16px; flex:1; display:flex; flex-direction:column; }
+
+/* Header */
+.header { text-align:center; padding:20px 0 10px; }
+.header h1 { font-size:22px; background:linear-gradient(135deg,#e94560,#a855f7); -webkit-background-clip:text; -webkit-text-fill-color:transparent; letter-spacing:2px; }
+.header p { font-size:12px; color:#666; margin-top:4px; }
+
+/* Modes */
+.modes { display:grid; gap:10px; margin:16px 0; }
+.mode-card {
+  background:linear-gradient(135deg,#1a1a3e,#0f3460);
+  border:1px solid rgba(168,85,247,0.2); border-radius:12px;
+  padding:18px 16px; cursor:pointer; text-align:center;
+  transition:all 0.3s; position:relative; overflow:hidden;
+}
+.mode-card:hover { border-color:#a855f7; transform:translateY(-2px); box-shadow:0 8px 25px rgba(168,85,247,0.15); }
+.mode-card .icon { font-size:32px; display:block; margin-bottom:4px; }
+.mode-card .title { font-size:17px; font-weight:700; color:#eaeaea; }
+.mode-card .desc { font-size:11px; color:#888; margin-top:4px; }
+.mode-card .count { font-size:10px; color:#a855f7; margin-top:3px; }
+
+/* Quiz Area */
+.quiz-area { flex:1; display:none; flex-direction:column; }
+.quiz-bar { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+.quiz-bar .prog { font-size:11px; color:#888; white-space:nowrap; }
+.quiz-bar .pb { flex:1; height:4px; background:#1a1a2e; border-radius:2px; }
+.quiz-bar .pf { height:100%; background:linear-gradient(90deg,#e94560,#a855f7); border-radius:2px; transition:width 0.4s; }
+.quiz-bar .exit-btn { background:rgba(255,255,255,0.08); border:none; color:#888; cursor:pointer; padding:4px 10px; border-radius:6px; font-size:11px; }
+.quiz-bar .exit-btn:hover { background:rgba(255,255,255,0.15); }
+
+.passage-box {
+  background:#1a2a4a; border-left:3px solid #f5a623;
+  border-radius:0 10px 10px 0; padding:10px 14px; margin-bottom:10px;
+  font-size:12px; line-height:1.9; color:#c8d6e5;
+  white-space:pre-wrap; max-height:260px; overflow-y:auto; display:none;
+}
+.passage-box .label { color:#f5a623; font-size:10px; display:block; margin-bottom:4px; }
+
+.question-box {
+  background:#1a1a2e; border:1px solid rgba(255,255,255,0.08);
+  border-radius:10px; padding:16px; margin-bottom:12px;
+  font-size:14px; line-height:1.8; min-height:60px;
+}
+.question-box .q-text { display:flex; align-items:flex-start; gap:8px; }
+.question-box .q-text .say-btn { flex-shrink:0; background:none; border:none; font-size:18px; cursor:pointer; opacity:0.7; padding:2px; }
+.question-box .q-text .say-btn:hover { opacity:1; }
+
+.options { display:flex; flex-direction:column; gap:6px; margin-bottom:12px; }
+.option-btn {
+  background:#1a1a2e; border:1px solid rgba(255,255,255,0.1);
+  border-radius:8px; padding:10px 14px; cursor:pointer;
+  text-align:left; font-size:13px; color:#eaeaea;
+  display:flex; align-items:center; gap:8px;
+  transition:all 0.2s;
+}
+.option-btn:hover { border-color:rgba(168,85,247,0.5); background:#1e1e36; }
+.option-btn .label { width:22px; height:22px; border-radius:50%; background:rgba(255,255,255,0.06); display:flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0; }
+.option-btn .opt-text { flex:1; }
+.option-btn .opt-say { flex-shrink:0; cursor:pointer; opacity:0.5; font-size:14px; padding:2px; }
+.option-btn .opt-say:hover { opacity:1; }
+.option-btn.selected { border-color:#a855f7; background:rgba(168,85,247,0.08); }
+.option-btn.correct { border-color:#4ecca3; background:rgba(78,204,163,0.12); }
+.option-btn.wrong { border-color:#e94560; background:rgba(233,69,96,0.12); }
+.option-btn.disabled { pointer-events:none; opacity:0.7; }
+
+.feedback {
+  display:none; border-radius:10px; padding:14px; margin-bottom:12px;
+  font-size:13px; line-height:1.7; border-left:4px solid;
+}
+.feedback.correct { background:rgba(78,204,163,0.08); border-color:#4ecca3; }
+.feedback.wrong { background:rgba(233,69,96,0.08); border-color:#e94560; }
+.feedback .result-icon { font-weight:700; }
+.feedback .result-icon.ok { color:#4ecca3; }
+.feedback .result-icon.ng { color:#e94560; }
+.feedback .explain { color:#aaa; margin-top:6px; }
+.feedback .ea-box { margin-top:8px; padding:8px 10px; background:rgba(168,85,247,0.08); border-radius:6px; font-size:12px; border-left:2px solid #a855f7; }
+.feedback .ea-box .ea-cat { color:#a855f7; font-weight:600; }
+.feedback .ea-box .ea-clue { color:#c8d6e5; }
+.feedback .ea-box .ea-action { color:#f5a623; }
+
+.next-btn-wrap { display:flex; justify-content:center; gap:10px; margin-top:auto; padding:10px 0; }
+.next-btn {
+  background:linear-gradient(135deg,#e94560,#a855f7); border:none;
+  color:#fff; padding:10px 28px; border-radius:8px; font-size:14px;
+  cursor:pointer; display:none; font-weight:600;
+  transition:opacity 0.3s;
+}
+.next-btn:hover { opacity:0.85; }
+
+/* Result */
+.result {
+  display:none; text-align:center; padding:40px 20px; flex-direction:column; align-items:center; justify-content:center; flex:1;
+}
+.result .emoji { font-size:52px; margin-bottom:12px; }
+.result .title { font-size:20px; font-weight:700; margin-bottom:6px; }
+.result .score { font-size:14px; color:#888; margin-bottom:10px; }
+.result .detail { font-size:12px; color:#666; margin-bottom:20px; line-height:1.8; }
+.result .retry-btn {
+  background:linear-gradient(135deg,#e94560,#a855f7); border:none;
+  color:#fff; padding:12px 32px; border-radius:8px; font-size:14px;
+  cursor:pointer; font-weight:600; margin-bottom:8px;
+}
+.result .back-btn {
+  background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.1);
+  color:#888; padding:10px 28px; border-radius:8px; font-size:13px;
+  cursor:pointer;
+}
+.result .back-btn:hover { background:rgba(255,255,255,0.12); }
+
+/* Filter */
+.filter-bar { display:flex; gap:6px; margin-bottom:14px; flex-wrap:wrap; }
+.filter-btn {
+  background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.08);
+  padding:6px 14px; border-radius:6px; font-size:11px; color:#888; cursor:pointer;
+  transition:all 0.2s;
+}
+.filter-btn:hover { border-color:rgba(168,85,247,0.3); color:#aaa; }
+.filter-btn.active { border-color:#a855f7; background:rgba(168,85,247,0.12); color:#c084fc; }
+
+/* Loading */
+.loading { text-align:center; padding:60px 20px; color:#666; font-size:14px; }
+
+/* Source badge */
+.badge { display:inline-block; font-size:10px; padding:2px 8px; border-radius:4px; margin-left:8px; }
+.badge-2024 { background:rgba(233,69,96,0.15); color:#e94560; }
+.badge-2022 { background:rgba(245,166,35,0.15); color:#f5a623; }
+.badge-2025 { background:rgba(168,85,247,0.15); color:#a855f7; }
+</style>
+</head>
+<body>
+
+<div class="container" id="app">
+  <div class="header">
+    <h1>📋 JLPT N2 真题题库</h1>
+    <p>言語知識（語彙・文法・読解）</p>
+  </div>
+
+  <!-- Start Screen -->
+  <div id="startScreen">
+    <div class="filter-bar" id="filterBar"></div>
+    <div class="modes" id="modeCards"></div>
+  </div>
+
+  <!-- Quiz Area -->
+  <div class="quiz-area" id="quizArea">
+    <div class="quiz-bar">
+      <span class="prog" id="prog">0/0</span>
+      <div class="pb"><div class="pf" id="progBar" style="width:0"></div></div>
+      <button class="exit-btn" onclick="exitQuiz()">✕ 退出</button>
+    </div>
+    <div class="passage-box" id="passageBox"></div>
+    <div class="question-box"><div class="q-text" id="qText"></div></div>
+    <div class="options" id="optBox"></div>
+    <div class="feedback" id="feedback"></div>
+    <div class="next-btn-wrap">
+      <button class="next-btn" id="nextBtn" onclick="nextQuiz()">下一题 →</button>
+    </div>
+  </div>
+
+  <!-- Result -->
+  <div class="result" id="result">
+    <div class="emoji" id="rEmoji">🎉</div>
+    <div class="title" id="rTitle">完成！</div>
+    <div class="score" id="rScore"></div>
+    <div class="detail" id="rDetail"></div>
+    <button class="retry-btn" onclick="retryQuiz()">再练一次</button>
+    <button class="back-btn" onclick="exitQuiz()">← 返回题库</button>
+  </div>
+</div>
+
+<script>
+// ── Quiz state ──
+var ALL_DATA = [];
+var filteredData = [];
+var quizData = [], quizIdx = 0, quizRight = 0, quizTotal = 0;
+var answered = false;
+var _lastPassage = '';
+
+// ── Load external data ──
+function loadData() {
+  var files = [
+    { name: 'quiz_data_real', path: 'quiz_data_real.js', var: 'QUIZ_DATA_REAL' },
+  ];
+  var loaded = 0;
+  files.forEach(function(f) {
+    var s = document.createElement('script');
+    s.src = f.path + '?v=' + Date.now();
+    s.onload = function() {
+      loaded++;
+      if (loaded === files.length) init();
+    };
+    s.onerror = function() {
+      document.getElementById('startScreen').innerHTML =
+        '<div class="loading">❌ 题库加载失败，请刷新重试</div>';
+    };
+    document.head.appendChild(s);
+  });
+}
+
+// ── Init ──
+function init() {
+  // Collect all data from loaded arrays
+  if (typeof QUIZ_DATA_REAL !== 'undefined') {
+    QUIZ_DATA_REAL.forEach(function(item) {
+      var s = item.source || 'unknown';
+      item._sourceYear = s.substring(0, 4);
+      ALL_DATA.push(item);
+    });
+  }
+
+  if (ALL_DATA.length === 0) {
+    document.getElementById('startScreen').innerHTML =
+      '<div class="loading">❌ 题库数据为空</div>';
+    return;
+  }
+
+  buildFilterBar();
+  buildModeCards();
+}
+
+// ── Filter bar (by year) ──
+function buildFilterBar() {
+  var bar = document.getElementById('filterBar');
+  var years = {};
+  ALL_DATA.forEach(function(d) {
+    var y = d._sourceYear;
+    if (y) years[y] = (years[y] || 0) + 1;
+  });
+
+  var html = '<button class="filter-btn active" data-year="all" onclick="setFilter(\'all\')">📋 全部</button>';
+  Object.keys(years).sort().forEach(function(y) {
+    html += '<button class="filter-btn" data-year="' + y + '" onclick="setFilter(\'' + y + '\')">' + y + '年 (' + years[y] + '题)</button>';
+  });
+  bar.innerHTML = html;
+  window._currentFilter = 'all';
+}
+
+function setFilter(year) {
+  window._currentFilter = year;
+  document.querySelectorAll('.filter-btn').forEach(function(b) {
+    b.classList.toggle('active', b.dataset.year === year);
+  });
+  buildModeCards();
+}
+
+function getFilteredData() {
+  if (window._currentFilter === 'all') return ALL_DATA;
+  return ALL_DATA.filter(function(d) { return d._sourceYear === window._currentFilter; });
+}
+
+// ── Mode cards ──
+function buildModeCards() {
+  var data = getFilteredData();
+  var total = data.length;
+  var vocabCount = data.filter(function(d) { return d.type && d.type.indexOf('vocab') !== -1; }).length;
+  var grammarCount = data.filter(function(d) { return d.type && d.type.indexOf('grammar') !== -1; }).length;
+  var readingCount = data.filter(function(d) { return d.type && d.type.indexOf('reading') !== -1; }).length;
+
+  // Count by source
+  var sources = {};
+  data.forEach(function(d) {
+    var s = d.source || '未知';
+    sources[s] = (sources[s] || 0) + 1;
+  });
+  var sourceLabel = Object.keys(sources).sort().map(function(s) {
+    return s + ' ' + sources[s] + '题';
+  }).join(' · ');
+
+  var cards = document.getElementById('modeCards');
+  cards.innerHTML =
+    '<div class="mode-card" onclick="startQuiz(\'all\')">' +
+      '<span class="icon">📋</span>' +
+      '<div class="title">随机抽题</div>' +
+      '<div class="desc">从当前筛选题库中抽取</div>' +
+      '<div class="count">共 ' + total + ' 题 · ' + sourceLabel + '</div>' +
+    '</div>' +
+    '<div class="mode-card" onclick="startQuiz(\'vocab\')">' +
+      '<span class="icon">📝</span>' +
+      '<div class="title">語彙专项</div>' +
+      '<div class="desc">読解・漢字・語形成・文脈規定・言い換え・使い方</div>' +
+      '<div class="count">' + vocabCount + ' 题</div>' +
+    '</div>' +
+    '<div class="mode-card" onclick="startQuiz(\'grammar\')">' +
+      '<span class="icon">📐</span>' +
+      '<div class="title">文法专项</div>' +
+      '<div class="desc">文法形式判断・排列组合</div>' +
+      '<div class="count">' + grammarCount + ' 题</div>' +
+    '</div>' +
+    '<div class="mode-card" onclick="startQuiz(\'reading\')">' +
+      '<span class="icon">📖</span>' +
+      '<div class="title">読解专项</div>' +
+      '<div class="desc">短文読解</div>' +
+      '<div class="count">' + readingCount + ' 题</div>' +
+    '</div>';
+}
+
+// ── Start Quiz ──
+function startQuiz(mode) {
+  var data = getFilteredData();
+  var pool;
+  if (mode === 'all') {
+    pool = data.slice();
+  } else {
+    pool = data.filter(function(d) {
+      return d.type && d.type.indexOf(mode) !== -1;
+    });
+  }
+
+  if (pool.length === 0) {
+    alert('当前筛选下没有题目');
+    return;
+  }
+
+  shuffle(pool);
+  quizData = pool;
+  quizIdx = 0;
+  quizRight = 0;
+  answered = false;
+  _lastPassage = '';
+
+  document.getElementById('startScreen').style.display = 'none';
+  document.getElementById('result').style.display = 'none';
+  document.getElementById('quizArea').style.display = 'flex';
+  showQuiz();
+}
+
+function shuffle(a) {
+  for (var i = a.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+}
+
+// ── Show Question ──
+function showQuiz() {
+  var q = quizData[quizIdx];
+  answered = false;
+
+  // Progress
+  document.getElementById('prog').textContent = (quizIdx + 1) + '/' + quizData.length;
+  document.getElementById('progBar').style.width = (quizIdx / quizData.length * 100) + '%';
+
+  // Passage
+  var pEl = document.getElementById('passageBox');
+  if (q.passage && q.passage !== _lastPassage) {
+    pEl.innerHTML = '<span class="label">📖 阅读原文</span>' +
+      escHtml(q.passage).replace(/\n/g, '<br>');
+    pEl.style.display = 'block';
+    _lastPassage = q.passage;
+  } else {
+    pEl.style.display = 'none';
+  }
+
+  // Question
+  var sourceBadge = '';
+  if (q.source) {
+    var yr = q.source.substring(0,4);
+    sourceBadge = '<span class="badge badge-' + yr + '">' + q.source + '</span>';
+  }
+  document.getElementById('qText').innerHTML =
+    '<div class="q-text"><span>' + escHtml(q.question) + sourceBadge + '</span>' +
+    '<button class="say-btn" onclick="speakText(\'' + escAttr(q.question) + '\')">🔊</button></div>';
+
+  // Options
+  var optBox = document.getElementById('optBox');
+  optBox.innerHTML = '';
+  q.options.forEach(function(o, i) {
+    var b = document.createElement('button');
+    b.className = 'option-btn';
+    var hasJa = /[\u3040-\u309F\u30A0-\u30FF\uFF00-\uFFEF\u4E00-\u9FAF]/.test(o);
+    b.innerHTML =
+      '<span class="label">' + (i + 1) + '</span>' +
+      '<span class="opt-text">' + escHtml(o) + '</span>' +
+      (hasJa ? '<span class="opt-say" onclick="event.stopPropagation();speakText(\'' + escAttr(o) + '\')">🔊</span>' : '');
+    b.onclick = function() { answerQuiz(i); };
+    optBox.appendChild(b);
+  });
+
+  // Hide feedback & next
+  document.getElementById('feedback').style.display = 'none';
+  document.getElementById('nextBtn').style.display = 'none';
+}
+
+// ── Answer ──
+function answerQuiz(i) {
+  if (answered) return;
+  answered = true;
+
+  var q = quizData[quizIdx];
+  var isRight = (i === q.answer);
+  if (isRight) quizRight++;
+
+  // Highlight options
+  var btns = document.querySelectorAll('.option-btn');
+  btns.forEach(function(b, idx) {
+    b.classList.add('disabled');
+    if (idx === q.answer) b.classList.add('correct');
+    if (idx === i && !isRight) b.classList.add('wrong');
+  });
+
+  // Feedback
+  var fb = document.getElementById('feedback');
+  var html = '';
+  if (isRight) {
+    html += '<div class="result-icon ok">✅ 正解！</div>';
+    fb.className = 'feedback correct';
+  } else {
+    html += '<div class="result-icon ng">❌ 不正解</div>';
+    fb.className = 'feedback wrong';
+  }
+
+  if (!isRight) {
+    html += '<div class="explain">正解：' + (q.answer + 1) + '. ' + escHtml(q.options[q.answer]) + '</div>';
+  }
+
+  // Show explanation (either 'explanation' or 'error_analysis')
+  if (q.explanation) {
+    html += '<div class="explain">' + escHtml(q.explanation) + '</div>';
+  }
+
+  // error_analysis (bonus for 2025-07 data)
+  if (q.error_analysis) {
+    var cats = {A:'词汇不认识',B:'文法功能错',C:'读解定位错',D:'推理过度',E:'听漏关键词',F:'时间管理'};
+    var catLabel = cats[q.error_analysis.category] || q.error_analysis.category;
+    html += '<div class="ea-box">' +
+      '<div class="ea-cat">🔍 ' + catLabel + '</div>' +
+      '<div class="ea-clue">💡 ' + escHtml(q.error_analysis.clue) + '</div>' +
+      '<div class="ea-action">📌 ' + escHtml(q.error_analysis.action) + '</div>' +
+    '</div>';
+  }
+
+  fb.innerHTML = html;
+  fb.style.display = 'block';
+
+  // Show next button
+  document.getElementById('nextBtn').style.display = 'inline-flex';
+}
+
+// ── Next ──
+function nextQuiz() {
+  quizIdx++;
+  if (quizIdx >= quizData.length) {
+    showResult();
+  } else {
+    showQuiz();
+  }
+}
+
+// ── Result ──
+function showResult() {
+  var total = quizData.length;
+  var pct = Math.round(quizRight / total * 100);
+  var emoji, title;
+  if (pct >= 90) { emoji = '🏆'; title = '大神！'; }
+  else if (pct >= 70) { emoji = '🎉'; title = '合格！'; }
+  else if (pct >= 50) { emoji = '👍'; title = '再加把劲'; }
+  else { emoji = '💪'; title = '继续加油'; }
+
+  document.getElementById('quizArea').style.display = 'none';
+  document.getElementById('result').style.display = 'flex';
+  document.getElementById('rEmoji').textContent = emoji;
+  document.getElementById('rTitle').textContent = title;
+  document.getElementById('rScore').textContent = quizRight + ' / ' + total + ' 正确率 ' + pct + '%';
+  document.getElementById('rDetail').textContent = '用时仅供参考，重点是每个错题都看懂原因 💡';
+}
+
+function retryQuiz() {
+  document.getElementById('result').style.display = 'none';
+  startQuiz(window._lastMode || 'all');
+}
+
+function exitQuiz() {
+  document.getElementById('quizArea').style.display = 'none';
+  document.getElementById('result').style.display = 'none';
+  document.getElementById('startScreen').style.display = 'block';
+  buildModeCards();
+}
+
+// ── Text-to-speech ──
+function speakText(text) {
+  if (!('speechSynthesis' in window)) return;
+  var utter = new SpeechSynthesisUtterance(text);
+  utter.lang = 'ja-JP';
+  utter.rate = 0.9;
+  // Try to find Japanese voice
+  var voices = window.speechSynthesis.getVoices();
+  var jpVoice = voices.find(function(v) { return v.lang.startsWith('ja'); });
+  if (jpVoice) utter.voice = jpVoice;
+  window.speechSynthesis.speak(utter);
+}
+
+// ── Helpers ──
+function escHtml(s) {
+  if (!s) return '';
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function escAttr(s) {
+  if (!s) return '';
+  return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+// ── Start ──
+loadData();
+</script>
+</body>
+</html>
