@@ -568,6 +568,46 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
 
 /* ── 粘贴图片 ───────────────── */
 .scan-paste-hint { font-size:11px; color:#555; text-align:center; margin-top:8px; }
+
+/* ── 真题题库增强样式 ── */
+.filter-bar { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px; }
+.filter-btn { padding:6px 14px; font-size:12px; border:1px solid rgba(255,255,255,0.1); border-radius:18px; background:transparent; color:#aaa; cursor:pointer; transition:0.2s; font-family:inherit; }
+.filter-btn:hover { border-color:#a855f7; color:#eaeaea; }
+.filter-btn.active { background:rgba(168,85,247,0.2); border-color:#a855f7; color:#a855f7; }
+.mode-card { background:linear-gradient(135deg,#1a1a3e,#0f3460); border:1px solid rgba(168,85,247,0.2); border-radius:12px; padding:18px 16px; cursor:pointer; text-align:center; transition:all 0.3s; }
+.mode-card:hover { border-color:#a855f7; transform:translateY(-2px); box-shadow:0 8px 25px rgba(168,85,247,0.15); }
+.mode-card .icon { font-size:32px; display:block; margin-bottom:4px; }
+.mode-card .title { font-size:17px; font-weight:700; color:#eaeaea; }
+.mode-card .desc { font-size:11px; color:#888; margin-top:4px; }
+.mode-card .count { font-size:10px; color:#a855f7; margin-top:3px; }
+.badge { display:inline-block; padding:1px 6px; border-radius:6px; font-size:9px; font-weight:600; margin-left:4px; vertical-align:middle; }
+.badge-2022 { background:rgba(233,69,96,0.12); color:#e94560; }
+.badge-2024 { background:rgba(245,166,35,0.12); color:#f5a623; }
+.badge-2025 { background:rgba(168,85,247,0.12); color:#a855f7; }
+.badge-type { background:rgba(232,121,249,0.12); color:#e879f9; }
+.star-highlight { color:#facc15; font-weight:bold; text-shadow:0 0 8px rgba(250,204,21,0.5); }
+.explain-box { margin-top:10px; }
+.exp-sec { padding:8px 12px; border-radius:8px; margin-bottom:6px; font-size:12px; line-height:1.7; }
+.exp-sec .exp-label { font-weight:700; margin-right:6px; }
+.exp-reason { background:rgba(59,130,246,0.1); border-left:3px solid #3b82f6; }
+.exp-trap { background:rgba(239,68,68,0.1); border-left:3px solid #ef4444; }
+.exp-tip { background:rgba(250,204,21,0.1); border-left:3px solid #facc15; }
+.exp-plain { background:rgba(255,255,255,0.04); border-left:3px solid #888; }
+.ea-box { background:rgba(16,185,129,0.08); border:1px solid rgba(16,185,129,0.2); border-radius:8px; padding:10px; margin-top:8px; font-size:12px; line-height:1.7; }
+.ea-cat { color:#34d399; font-weight:600; margin-bottom:4px; }
+.ea-clue { color:#eaeaea; margin-bottom:2px; }
+.ea-action { color:#f5a623; }
+.q-opt-btn { transition:0.2s; }
+.q-opt-btn .opt-label { display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; border-radius:50%; background:rgba(168,85,247,0.12); color:#a855f7; font-weight:600; font-size:12px; flex-shrink:0; }
+.q-opt-btn .opt-text { flex:1; }
+.q-opt-btn .opt-speak { flex-shrink:0; cursor:pointer; opacity:0.6; font-size:14px; margin-left:4px; }
+.q-opt-btn .opt-speak:hover { opacity:1; }
+.q-opt-btn.q-correct { border-color:#4ecca3 !important; background:rgba(78,204,163,0.12) !important; }
+.q-opt-btn.q-correct .opt-label { background:rgba(78,204,163,0.2); color:#4ecca3; }
+.q-opt-btn.q-wrong { border-color:#e94560 !important; background:rgba(233,69,96,0.12) !important; }
+.q-opt-btn.q-wrong .opt-label { background:rgba(233,69,96,0.2); color:#e94560; }
+#quiz-modes-grid { display:grid; gap:10px; }
+@media(min-width:500px){ #quiz-modes-grid { grid-template-columns:1fr 1fr; } }
 </style>
 </head>
 <body>
@@ -638,6 +678,16 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
     </div>
     <div class="h-entry h-entry-quiz" onclick="go('quiz')">
       <div class="h-icon">📋</div>
+    <div class="h-entry" style="border-color:rgba(233,69,96,0.4);grid-column:span 3;background:linear-gradient(135deg,rgba(233,69,96,0.08),rgba(168,85,247,0.05));padding:10px 14px;" onclick="go('quiz')">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="font-size:20px">📋</div>
+        <div style="flex:1">
+          <div style="font-size:14px;font-weight:700;background:linear-gradient(135deg,#e94560,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">🔥 真题练习</div>
+          <div style="font-size:11px;color:#888">2022·2024·2025 三年真题 · 分類专项练习</div>
+        </div>
+        <div style="color:#888;font-size:16px">→</div>
+      </div>
+    </div>
       <div class="h-title">真题模拟</div>
       <div class="h-sub">历年真题 · 高频考点</div>
     </div>
@@ -790,23 +840,10 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
 <!-- 真题模拟训练页 -->
 <div class="page" id="p-quiz">
   <div id="quizStart">
-    <div class="qg" style="margin-bottom:16px">
-      <div class="ac" onclick="startQuiz('high')" style="border-color:rgba(233,69,96,0.3)">
-        <div class="ai">🔥</div>
-        <div class="at">高频真题训练</div>
-        <div class="ad">历年出现8次以上 · 核心考点</div>
-      </div>
-      <div class="ac" onclick="startQuiz('normal')">
-        <div class="ai">📝</div>
-        <div class="at">真题训练</div>
-        <div class="ad">历年出现3-7次 · 全面覆盖</div>
-      </div>
-      <div class="ac" onclick="startQuiz('real')" style="border-color:rgba(78,204,163,0.3)">
-        <div class="ai">📋</div>
-        <div class="at">全套真题练习</div>
-        <div class="ad">2024年7月 N2 全部71题</div>
-      </div>
-    </div>
+    <!-- 筛选栏 -->
+    <div class="filter-bar" id="quizFilterBar"></div>
+    <!-- 模式卡片 -->
+    <div id="quiz-modes-grid"><div id="quizModeCards"></div></div>
   </div>
   <div id="quizArea" style="display:none">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
@@ -827,13 +864,13 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
     <div style="font-size:20px;font-weight:700;margin-bottom:8px;color:#eaeaea" id="quizTitle">完成！</div>
     <div style="font-size:14px;color:#888;margin-bottom:20px" id="quizScore"></div>
     <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-      <button class="btn bp" id="quizRetryBtn" onclick="startQuiz(document.getElementById('quizMode').value)">再练一次</button>
+      <button class="btn bp" onclick="retryQuiz()">再练一次</button>
       <button class="btn bs" onclick="exitQuiz()">返回题库</button>
     </div>
   </div>
 </div>
 
-<!-- 复习页 -->
+<!-- 复习页 --><!-- 复习页 -->
 <div class="page" id="p-review">
   <div id="reviewC"></div>
 </div>
@@ -1098,7 +1135,8 @@ body::after { content:''; position:fixed; inset:0; background:linear-gradient(18
 <script src="quiz_data_high.js?v=3"></script>
 <script src="quiz_data_real.js?v=3"></script>
 <script src="quiz_data_normal.js?v=3"></script>
-<script src="inline.js?v=75"></script>
+<script src="inline.js?v=75">
+<script src="quiz-core.js?v=1"></script></script>
 <script src="game/tower-climb.js?v=1778500000001"></script>
 
 
