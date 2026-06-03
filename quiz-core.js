@@ -87,45 +87,16 @@ function processStarQuestion(q) {
   return q.question.replace(/★/g, '<span class="star-highlight">★</span>');
 }
 
-// ── 构建题目HTML ──
-function buildQuizQuestionHTML(q, idx, total) {
-  var html = '';
-  // 进度条
-  html += '<div id="quizProg" class="quiz-prog">第 ' + (idx+1) + '/' + total + ' 题';
-  if(q.source) html += ' · ' + escHtml(q.source);
-  if(q.type_label) html += ' · ' + escHtml(q.type_label);
-  html += '</div>';
-  
-  // 题目
-  html += '<div class="quiz-q-text">' + processStarQuestion(q) + '</div>';
-  if(q.passage) html += '<div class="quiz-passage-box">' + escHtml(q.passage) + '</div>';
-  
-  // 选项
-  html += '<div class="quiz-opts">';
-  (q.options || []).forEach(function(opt, i) {
-    var label = String.fromCharCode(65+i);
-    html += '<button class="quiz-opt-btn" onclick="checkQuizAnswer(' + i + ')">'
-      + '<span class="opt-label">' + label + '</span>'
-      + '<span class="opt-text">' + escHtml(opt) + '</span>'
-      + '</button>';
-  });
-  html += '</div>';
-  
-  return html;
-}
-
 // ── 启动增强版题库 ──
 function startEnhancedQuiz(mode) {
   QUIZ_MODE = mode || 'all';
   
-  // 筛选数据源
   var all = QUIZ_DATA_REAL || [];
   var filtered = all;
   if(_qzFilterYear && _qzFilterYear !== 'all') {
     filtered = all.filter(function(d) { return (d.source||'').indexOf(_qzFilterYear) === 0; });
   }
   
-  // 按类型筛选
   if(QUIZ_MODE !== 'all') {
     if(QUIZ_MODE === 'vocab') {
       filtered = filtered.filter(function(d) {
@@ -138,11 +109,11 @@ function startEnhancedQuiz(mode) {
   }
   
   if(filtered.length === 0) {
-    document.getElementById('quizArea').innerHTML = '<p style="color:#666;text-align:center;padding:40px;">当前筛选条件下无题目，请切换筛选。</p>';
+    var a = document.getElementById('quizArea');
+    if(a) a.innerHTML = '<p style="color:#666;text-align:center;padding:40px;">当前筛选条件下无题目，请切换筛选。</p>';
     return;
   }
   
-  // 随机打乱，最多20题
   _qzPool = shuffle([].concat(filtered));
   _qzData = _qzPool.slice(0, Math.min(20, _qzPool.length));
   _qzIdx = 0;
@@ -151,8 +122,12 @@ function startEnhancedQuiz(mode) {
   _qzLastPassage = '';
   _qzTotal = _qzData.length;
   
+  // 隐藏开始界面，显示答题区
+  var start = document.getElementById('quizStart');
+  if(start) start.style.display = 'none';
+  
   showEnhancedQuiz();
-  if(window.speak) {
+  if(window.speak && _qzData[0]) {
     try { speak(_qzData[0].question); } catch(e) {}
   }
 }
@@ -162,22 +137,62 @@ function showEnhancedQuiz() {
   var q = _qzData[_qzIdx];
   if(!q) return showQuizResult();
   
+  // 显示 quizArea
   var area = document.getElementById('quizArea');
+  if(!area) return;
   area.style.display = 'block';
-  area.innerHTML = buildQuizQuestionHTML(q, _qzIdx, _qzTotal);
   
-  // 重置反馈区
-  var fb = document.getElementById('quizFeedback');
-  if(fb) fb.innerHTML = '';
-  
-  // 隐藏结果
+  // 隐藏结果页
   var res = document.getElementById('quizResult');
   if(res) res.style.display = 'none';
   
-  // 更新模式卡高亮
-  document.querySelectorAll('.quiz-mode-card').forEach(function(c) {
-    c.classList.toggle('active', false);
-  });
+  // 进度文字
+  var prog = document.getElementById('quizProg');
+  if(prog) {
+    var t = '第 ' + (_qzIdx+1) + '/' + _qzTotal + ' 题';
+    if(q.source) t += ' · ' + escHtml(q.source);
+    if(q.type_label) t += ' · ' + escHtml(q.type_label);
+    prog.textContent = t;
+  }
+  
+  // 篇章区
+  var passage = document.getElementById('quizPassage');
+  if(passage) {
+    if(q.passage) {
+      passage.style.display = 'block';
+      passage.innerHTML = '<div class="quiz-passage-box">' + escHtml(q.passage) + '</div>';
+    } else {
+      passage.style.display = 'none';
+    }
+  }
+  
+  // 题目
+  var qDiv = document.getElementById('quizQ');
+  if(qDiv) {
+    qDiv.innerHTML = processStarQuestion(q);
+  }
+  
+  // 选项
+  var opts = document.getElementById('quizOpts');
+  if(opts) {
+    var html = '';
+    (q.options || []).forEach(function(opt, i) {
+      var label = String.fromCharCode(65+i);
+      html += '<button class="quiz-opt-btn" onclick="checkQuizAnswer(' + i + ')">'
+        + '<span class="opt-label">' + label + '</span>'
+        + '<span class="opt-text">' + escHtml(opt) + '</span>'
+        + '</button>';
+    });
+    opts.innerHTML = html;
+  }
+  
+  // 隐藏反馈和下一题按钮
+  var fb = document.getElementById('quizFeedback');
+  if(fb) { fb.style.display = 'none'; fb.innerHTML = ''; }
+  var nb = document.getElementById('quizNextBtn');
+  if(nb) nb.style.display = 'none';
+  
+  _qzAnswered = false;
 }
 
 // ── 检查答案 ──
@@ -186,12 +201,14 @@ function checkQuizAnswer(idx) {
   _qzAnswered = true;
   
   var q = _qzData[_qzIdx];
+  if(!q) return;
+  
   var correct = q.answer;
   var isRight = (idx === correct);
   if(isRight) _qzRight++;
   
   // 高亮选项
-  var btns = document.querySelectorAll('#quizArea .quiz-opt-btn');
+  var btns = document.querySelectorAll('#quizOpts .quiz-opt-btn');
   btns.forEach(function(b, i) {
     b.classList.add(i === correct ? 'correct' : (i === idx && !isRight ? 'wrong' : 'dimmed'));
     b.disabled = true;
@@ -205,7 +222,6 @@ function checkQuizAnswer(idx) {
     fbHtml += '<div class="quiz-fb-wrong">❌ 错误！正确答案：' + String.fromCharCode(65+correct) + '</div>';
   }
   
-  // 解析展示
   if(q.explanation) {
     fbHtml += '<div class="quiz-explain-box">' + formatExplanation(q.explanation) + '</div>';
   }
@@ -216,14 +232,20 @@ function checkQuizAnswer(idx) {
     fbHtml += '<div class="quiz-note-box">💡 ' + escHtml(q.note) + '</div>';
   }
   
-  // 下一题按钮
-  fbHtml += '<div style="text-align:center;margin-top:16px;">'
-    + '<button class="quiz-next-btn" onclick="nextEnhancedQuiz()">'
-    + (_qzIdx < _qzTotal - 1 ? '下一题 →' : '查看结果')
-    + '</button></div>';
-  
+  // 显示反馈
   var fb = document.getElementById('quizFeedback');
-  if(fb) fb.innerHTML = fbHtml;
+  if(fb) {
+    fb.innerHTML = fbHtml;
+    fb.style.display = 'block';
+  }
+  
+  // 显示下一题按钮，改文案
+  var nb = document.getElementById('quizNextBtn');
+  if(nb) {
+    nb.style.display = 'inline-block';
+    nb.textContent = _qzIdx < _qzTotal - 1 ? '下一题 →' : '查看结果';
+    nb.onclick = nextEnhancedQuiz;
+  }
 }
 
 // ── 下一题 ──
@@ -234,7 +256,7 @@ function nextEnhancedQuiz() {
   } else {
     _qzAnswered = false;
     showEnhancedQuiz();
-    if(window.speak) {
+    if(window.speak && _qzData[_qzIdx]) {
       try { speak(_qzData[_qzIdx].question); } catch(e) {}
     }
   }
@@ -243,7 +265,7 @@ function nextEnhancedQuiz() {
 // ── 显示结果 ──
 function showQuizResult() {
   var area = document.getElementById('quizArea');
-  area.style.display = 'none';
+  if(area) area.style.display = 'none';
   
   var res = document.getElementById('quizResult');
   if(!res) return;
@@ -252,24 +274,28 @@ function showQuizResult() {
   var rate = _qzTotal > 0 ? Math.round(_qzRight / _qzTotal * 100) : 0;
   var emoji = rate >= 80 ? '🎉' : rate >= 60 ? '💪' : '📖';
   
-  var html = '<div class="quiz-result-card">'
-    + '<div class="qr-emoji">' + emoji + '</div>'
-    + '<div class="qr-title">答题完成！</div>'
-    + '<div class="qr-score">正确率：' + rate + '%（' + _qzRight + '/' + _qzTotal + '）</div>';
+  var emoEl = document.getElementById('quizEmo');
+  var titleEl = document.getElementById('quizTitle');
+  var scoreEl = document.getElementById('quizScore');
   
-  if(rate === 100) {
-    html += '<div class="qr-msg">全部正确，太厉害了！</div>';
-  } else if(rate >= 80) {
-    html += '<div class="qr-msg">很不错！继续保持~</div>';
-  } else {
-    html += '<div class="qr-msg">加油！错题多看看解析~</div>';
-  }
-  
-  html += '<div style="text-align:center;margin-top:20px;">'
-    + '<button class="quiz-retry-btn" onclick="startEnhancedQuiz(\'' + QUIZ_MODE + '\')">🔄 再来一次</button>'
-    + '</div></div>';
-  
-  res.innerHTML = html;
+  if(emoEl) emoEl.textContent = emoji;
+  if(titleEl) titleEl.textContent = '答题完成！';
+  if(scoreEl) scoreEl.textContent = '正确率：' + rate + '%（' + _qzRight + '/' + _qzTotal + '）';
+}
+
+// ── 退出题库 ──
+function exitQuiz() {
+  var area = document.getElementById('quizArea');
+  var res = document.getElementById('quizResult');
+  var start = document.getElementById('quizStart');
+  if(area) area.style.display = 'none';
+  if(res) res.style.display = 'none';
+  if(start) start.style.display = 'block';
+}
+
+// ── 重新练习 ──
+function retryQuiz() {
+  startEnhancedQuiz(QUIZ_MODE);
 }
 
 // ── 页面初始化入口 ──
@@ -277,9 +303,10 @@ function initQuizPage() {
   buildQuizFilterBar();
   buildQuizModeCards();
   
-  // 默认启动综合模式
+  var start = document.getElementById('quizStart');
   var area = document.getElementById('quizArea');
   var res = document.getElementById('quizResult');
+  if(start) start.style.display = 'block';
   if(area) area.style.display = 'none';
   if(res) res.style.display = 'none';
 }
