@@ -226,7 +226,16 @@ function checkQuizAnswer(idx) {
     fbHtml += '<div class="quiz-explain-box">' + formatExplanation(q.explanation) + '</div>';
   }
   if(q.error_analysis) {
-    fbHtml += '<div class="quiz-ea-box">' + escHtml(q.error_analysis) + '</div>';
+    var ea = q.error_analysis;
+    var eaStr = '';
+    if(typeof ea === 'object') {
+      if(ea.category) eaStr += '<span class="ea-cat ea-cat-' + escAttr(ea.category) + '">' + escHtml(ea.category) + '</span> ';
+      if(ea.clue) eaStr += '<div><strong>🔍 线索：</strong>' + escHtml(ea.clue) + '</div>';
+      if(ea.action) eaStr += '<div><strong>💡 行动：</strong>' + escHtml(ea.action) + '</div>';
+    } else {
+      eaStr = escHtml(String(ea));
+    }
+    fbHtml += '<div class="quiz-ea-box">' + eaStr + '</div>';
   }
   if(q.note) {
     fbHtml += '<div class="quiz-note-box">💡 ' + escHtml(q.note) + '</div>';
