@@ -665,6 +665,23 @@ function gApSyncMarks(gr){if(!gr)return;var b=(JSON.parse(localStorage.getItem('
 var _vApQueue=[],_vApIdx=0,_vApPaused=false,_vApTimer=null,_vApActive=false;
 var ALL_CATEGORIES=[];
 (function(){var c={};VOCAB.forEach(function(v){c[v.category]=1});ALL_CATEGORIES=Object.keys(c).sort()})();
+var AP_CUSTOM_CATEGORIES=[
+  {key:'N2听力',label:'N2听力'},
+  {key:'N2阅读',label:'N2阅读'},
+  {key:'拟声拟态',label:'拟声词/叠词'},
+  {key:'外来语',label:'外来语'},
+  {key:'易混汉字词',label:'易混汉字'}
+];
+function getApCustomCounts(){
+  var counts={};
+  AP_CUSTOM_CATEGORIES.forEach(function(item){counts[item.key]=0});
+  VOCAB.forEach(function(v){if(v&&Object.prototype.hasOwnProperty.call(counts,v.category))counts[v.category]++});
+  return counts;
+}
+function isApCustomSelected(saved,key){
+  var selected=saved.customCategories||[];
+  return selected.length===0||selected.indexOf(key)>=0;
+}
 
 function renderAutoPlayOptions(){
   var c=document.getElementById('p-autoplay');if(!c)return;
@@ -677,6 +694,8 @@ function renderAutoPlayOptions(){
   var count=typeof saved.count==='number' ? saved.count : 50;
   var lvlOn=saved.lvlOn!==false; // 默认开启
   var catOn=saved.catOn||false;   // 默认关闭（需要显式开启）
+  var customOn=saved.customOn||false;
+  var customCounts=getApCustomCounts();
   c.innerHTML='<div style="padding:20px;max-width:600px;margin:0 auto">'
     +'<div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">'
     +'<button onclick="go(\'home\')" style="background:none;border:none;color:#94a3b8;font-size:20px;cursor:pointer;padding:4px 8px">←</button>'
@@ -691,6 +710,23 @@ function renderAutoPlayOptions(){
     +'</div>'
     +'<div id="ap-lvl-body" style="margin-top:12px;display:flex;flex-wrap:wrap;gap:8px;'+(lvlOn?'':'opacity:0.35;pointer-events:none')+'">'
     +lvls.map(function(l){var a=selLvls.indexOf(l)>=0;return '<span class="ap-tag'+(a?' ap-tag-on':'')+'" data-lvl="'+l+'" onclick="_apToggleLvl(this,\''+l+'\')" style="display:inline-block;padding:6px 16px;border-radius:14px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;'+(a?'background:linear-gradient(135deg,#e94560,#ff6b9d);color:#fff':'background:rgba(255,255,255,0.06);color:#64748b')+'">'+lvlNames[l]+'</span>'}).join('')
+    +'</div>'
+    +'</div>'
+    // 自定义分类（专题）
+    +'<div class="ap-section" style="padding:14px 16px;background:rgba(255,255,255,0.03);border-radius:10px;margin-bottom:12px;border:1px solid rgba(255,255,255,0.06)">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center">'
+    +'<span onclick="_apToggleCustomSection()" style="cursor:pointer;display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:#e2e8f0">'
+    +'<span class="ap-checkbox'+(customOn?' ap-checked':'')+'" id="ap-cb-custom">'+(customOn?'☑':'☐')+'</span>🎯 自定义分类</span>'
+    +'<span style="display:flex;gap:6px;align-items:center">'
+    +(customOn?'<span onclick="event.stopPropagation();_apCustomAll()" style="font-size:11px;color:#4ecca3;cursor:pointer">全选</span>':'')
+    +'<span id="ap-custom-arrow" onclick="_apToggle(document.getElementById(\'ap-custom-section\'),\'ap-custom-body\')" style="color:#64748b;font-size:14px;cursor:pointer;transition:transform 0.2s">▼</span></span>'
+    +'</div>'
+    +'<div id="ap-custom-body" style="margin-top:12px;display:flex;flex-wrap:wrap;gap:6px;'+(customOn?'':'opacity:0.35;pointer-events:none')+'">'
+    +AP_CUSTOM_CATEGORIES.map(function(item){
+      var a=isApCustomSelected(saved,item.key);
+      var n=customCounts[item.key]||0;
+      return '<span class="ap-tag'+(a?' ap-tag-on':'')+'" data-custom-cat="'+item.key+'" onclick="_apToggleCustomCat(this)" style="display:inline-block;padding:6px 12px;border-radius:14px;font-size:12px;font-weight:600;cursor:pointer;transition:background 0.2s,color 0.2s;'+(a?'background:linear-gradient(135deg,#06b6d4,#3b82f6);color:#fff':'background:rgba(255,255,255,0.06);color:#64748b')+'">'+item.label+(n?' ('+n+'词)':'')+'</span>'
+    }).join('')
     +'</div>'
     +'</div>'
     // 场景分类（带勾选）
@@ -758,7 +794,7 @@ function _apToggle(triggerEl,bodyId){
 function _apToggleLvlSection(){
   var saved=JSON.parse(localStorage.getItem('ap_settings')||'{}');
   saved.lvlOn=!saved.lvlOn;
-  if(!saved.lvlOn&&!saved.catOn){saved.lvlOn=true} // 至少保留一个
+  if(!saved.lvlOn&&!saved.catOn&&!saved.customOn){saved.lvlOn=true} // 至少保留一个
   localStorage.setItem('ap_settings',JSON.stringify(saved));
   renderAutoPlayOptions();
 }
@@ -767,7 +803,16 @@ function _apToggleLvlSection(){
 function _apToggleCatSection(){
   var saved=JSON.parse(localStorage.getItem('ap_settings')||'{}');
   saved.catOn=!saved.catOn;
-  if(!saved.lvlOn&&!saved.catOn){saved.catOn=true} // 至少保留一个
+  if(saved.lvlOn===false&&!saved.catOn&&!saved.customOn){saved.catOn=true} // 至少保留一个
+  localStorage.setItem('ap_settings',JSON.stringify(saved));
+  renderAutoPlayOptions();
+}
+
+// 自定义分类勾选切换
+function _apToggleCustomSection(){
+  var saved=JSON.parse(localStorage.getItem('ap_settings')||'{}');
+  saved.customOn=!saved.customOn;
+  if(saved.lvlOn===false&&!saved.catOn&&!saved.customOn){saved.customOn=true} // 至少保留一个
   localStorage.setItem('ap_settings',JSON.stringify(saved));
   renderAutoPlayOptions();
 }
@@ -798,11 +843,33 @@ function _apToggleCat(el){
   el.style.color=el.classList.contains('ap-tag-on')?'#fff':'#64748b';
 }
 
+// 自定义分类点击
+function _apToggleCustomCat(el){
+  var saved=JSON.parse(localStorage.getItem('ap_settings')||'{}');
+  var cats=saved.customCategories||[];
+  var cat=el.getAttribute('data-custom-cat');
+  if(cats.length===0)cats=AP_CUSTOM_CATEGORIES.map(function(item){return item.key});
+  var idx=cats.indexOf(cat);
+  if(idx>=0)cats.splice(idx,1);else cats.push(cat);
+  if(cats.length===0)cats=AP_CUSTOM_CATEGORIES.map(function(item){return item.key});
+  if(cats.length===AP_CUSTOM_CATEGORIES.length)cats=[];
+  saved.customCategories=cats;
+  localStorage.setItem('ap_settings',JSON.stringify(saved));
+  renderAutoPlayOptions();
+}
+
 // 全选场景
 function _apCatAll(){
   var saved=JSON.parse(localStorage.getItem('ap_settings')||'{}');
   saved.categories=[];localStorage.setItem('ap_settings',JSON.stringify(saved));
   document.querySelectorAll('#ap-cat-body .ap-tag').forEach(function(el){el.classList.add('ap-tag-on');el.style.background='linear-gradient(135deg,#a855f7,#7c3aed)';el.style.color='#fff'});
+}
+
+// 全选自定义分类
+function _apCustomAll(){
+  var saved=JSON.parse(localStorage.getItem('ap_settings')||'{}');
+  saved.customCategories=[];localStorage.setItem('ap_settings',JSON.stringify(saved));
+  renderAutoPlayOptions();
 }
 
 // 形式
@@ -838,13 +905,20 @@ function startVocabAutoPlay(){
   var count=typeof saved.count==='number' ? saved.count : 50;
   var lvlOn=saved.lvlOn!==false;
   var catOn=saved.catOn||false;
+  var customOn=saved.customOn||false;
+  var selCustomCats=saved.customCategories||[];
   var format=saved.format||'word';
-  
+
   // 过滤词汇
   var pool=VOCAB.filter(function(v){
-    if(lvlOn&&selLvls.indexOf(v.level)<0)return false;
-    if(catOn&&selCats.length>0&&selCats.indexOf(v.category)<0)return false;
-    return true;
+    var lvlMatch=lvlOn&&selLvls.indexOf(v.level)>=0;
+    var catMatch=catOn&&(selCats.length===0||selCats.indexOf(v.category)>=0);
+    var customMatch=customOn&&AP_CUSTOM_CATEGORIES.some(function(item){
+      return item.key===v.category&&(selCustomCats.length===0||selCustomCats.indexOf(item.key)>=0);
+    });
+    if(customOn)return customMatch||lvlMatch||catMatch;
+    if(lvlOn&&catOn)return lvlMatch&&catMatch;
+    return lvlMatch||catMatch;
   });
   if(pool.length===0){showT('没有符合条件的词汇，请调整筛选条件');return}
   
