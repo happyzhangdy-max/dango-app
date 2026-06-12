@@ -2493,13 +2493,33 @@ function updateBookAiFilterBtn(){
     sections[0].parentNode.insertBefore(section, sections[0].nextElementSibling);
   };
 
+  function apAnySourceOn(settings){
+    return settings.lvlOn !== false || !!settings.catOn || !!settings.customOn || !!settings.bookOn;
+  }
+
   window._apToggleCustomSection = function(){
     var settings = JSON.parse(localStorage.getItem('ap_settings') || '{}');
     delete settings.todayWordIds;
     settings.customOn = !settings.customOn;
-    var lvlActive = settings.lvlOn !== false;
-    var catActive = !!settings.catOn;
-    if (!lvlActive && !catActive && !settings.customOn && !settings.bookOn) settings.customOn = true;
+    if (!apAnySourceOn(settings)) settings.customOn = true;
+    localStorage.setItem('ap_settings', JSON.stringify(settings));
+    renderAutoPlayOptions();
+  };
+
+  window._apToggleLvlSection = function(){
+    var settings = JSON.parse(localStorage.getItem('ap_settings') || '{}');
+    delete settings.todayWordIds;
+    settings.lvlOn = !(settings.lvlOn !== false);
+    if (!apAnySourceOn(settings)) settings.lvlOn = true;
+    localStorage.setItem('ap_settings', JSON.stringify(settings));
+    renderAutoPlayOptions();
+  };
+
+  window._apToggleCatSection = function(){
+    var settings = JSON.parse(localStorage.getItem('ap_settings') || '{}');
+    delete settings.todayWordIds;
+    settings.catOn = !settings.catOn;
+    if (!apAnySourceOn(settings)) settings.catOn = true;
     localStorage.setItem('ap_settings', JSON.stringify(settings));
     renderAutoPlayOptions();
   };
