@@ -2663,6 +2663,161 @@ function updateBookAiFilterBtn(){
 })();
 </script>
 <script>
+/* AI search bookmark: preserve and display full result details */
+(function(){
+  if (window._aiSearchBookFullFix) return;
+  window._aiSearchBookFullFix = true;
+
+  function cleanAiText(text){
+    return (text || '').replace(/^\s*(?:→|🔊)\s*/, '').trim();
+  }
+
+  function enrichAiBookItem(item){
+    if (!item || item.type !== 'ai') return item;
+    var enriched = {};
+    Object.keys(item).forEach(function(key){ enriched[key] = item[key]; });
+
+    var target = window.event && window.event.target;
+    var card = target && target.closest ? target.closest('.search-result-item') : null;
+    if (!card) return enriched;
+
+    var wordEl = card.querySelector('.search-result-word');
+    var levelEl = card.querySelector('.search-result-level');
+    var readingEl = card.querySelector('.search-result-furigana');
+    var meaningEl = card.querySelector('.search-result-meaning');
+    var grammarEl = card.querySelector('.search-result-grammar div:last-child');
+    var tagEls = card.querySelectorAll('.search-result-tag');
+
+    if (wordEl) enriched.word = cleanAiText(wordEl.textContent);
+    if (levelEl) enriched.aiLabel = cleanAiText(levelEl.textContent);
+    if (readingEl) enriched.reading = cleanAiText(readingEl.textContent);
+    if (meaningEl) enriched.meaning = cleanAiText(meaningEl.textContent);
+    if (grammarEl) enriched.grammar = cleanAiText(grammarEl.textContent);
+
+    tagEls.forEach(function(tag){
+      var text = cleanAiText(tag.textContent);
+      if (!text) return;
+      if (text.indexOf('语源：') === 0) enriched.origin = text.replace(/^语源：/, '').trim();
+      else if (text.indexOf('💡') === 0) enriched.note = text.replace(/^💡\s*/, '').trim();
+      else if (!enriched.note) enriched.note = text;
+    });
+
+    enriched.fullText = cleanAiText(card.innerText || card.textContent || '');
+    enriched.savedAt = Date.now();
+    return enriched;
+  }
+
+  function aiBookDetailsHtml(item){
+    var parts = [];
+    if (item.origin) parts.push('<div class="search-result-tags" style="margin-top:6px"><span class="search-result-tag" style="font-size:12px;padding:3px 10px">语源：' + escHtml(item.origin) + '</span></div>');
+    if (item.note) parts.push('<div style="margin-top:8px;color:#cbd5e1;font-size:13px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere">' + escHtml(item.note) + '</div>');
+    if (item.grammar) {
+      parts.push(
+        '<div class="search-result-grammar" style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.08);font-size:13px;line-height:1.8">' +
+        '<div style="color:#4ecca3;font-weight:700;margin-bottom:6px;font-size:14px">🔧 语法点</div>' +
+        '<div style="color:#cbd5e1;white-space:pre-wrap;overflow-wrap:anywhere">' + escHtml(item.grammar) + '</div>' +
+        '</div>'
+      );
+    }
+    if (!item.origin && !item.note && !item.grammar && item.fullText) {
+      parts.push('<div style="margin-top:8px;color:#cbd5e1;font-size:13px;line-height:1.8;white-space:pre-wrap;overflow-wrap:anywhere">' + escHtml(item.fullText) + '</div>');
+    }
+    return parts.join('');
+  }
+
+  function renderAiBookCard(item){
+    var label = item.aiLabel || item.level || 'AI';
+    var meaning = item.meaning || '';
+    return '' +
+      '<div class="vt"><span class="vl l2">' + escHtml(label).toUpperCase() + '</span></div>' +
+      '<div class="vw" style="white-space:normal;overflow-wrap:anywhere">' + escHtml(item.word || '') + '</div>' +
+      (item.reading ? '<div class="vr" style="white-space:normal;overflow-wrap:anywhere">' + escHtml(item.reading) + '</div>' : '') +
+      '<div class="vm" style="white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.7">' + escHtml(meaning) + ' <span style="font-size:10px;color:#a855f7;margin-left:4px">AI搜</span></div>' +
+      aiBookDetailsHtml(item);
+  }
+
+  function renderSearchBookCard(item){
+    var level = (item.level || 'N3').toUpperCase();
+    return '' +
+      '<div class="vt"><span class="vl ' + (item.level === 'n3' ? 'l3' : item.level === 'n2' ? 'l2' : 'l1') + '">' + escHtml(level) + '</span></div>' +
+      '<div class="vw">' + escHtml(item.word || '') + '</div>' +
+      '<div class="vr">' + escHtml(item.reading || '') + '</div>' +
+      '<div class="vm" style="white-space:pre-wrap;overflow-wrap:anywhere">' + escHtml(item.meaning || '') + '</div>' +
+      '<div style="font-size:10px;color:#888;margin-top:4px">' + new Date(item.time || item.savedAt || Date.now()).toLocaleDateString() + '</div>';
+  }
+
+  var originalToggleBook = window.toggleBook;
+  if (typeof originalToggleBook === 'function') {
+    window.toggleBook = function(item){
+      if (item && item.type === 'ai') item = enrichAiBookItem(item);
+      return originalToggleBook(item);
+    };
+  }
+
+  window.renderBook = function(){
+    var container = document.getElementById('bookC');
+    var countEl = document.getElementById('bookCount');
+    if (!container) return;
+
+    var tabState = document.getElementById('bookTabState');
+    if (!tabState) {
+      tabState = document.createElement('span');
+      tabState.id = 'bookTabState';
+      tabState.style.display = 'none';
+      tabState.textContent = 'book';
+      document.body.appendChild(tabState);
+    }
+    var activeTab = tabState.textContent || 'book';
+    var tabsHtml = '<div style="display:flex;gap:8px;margin-bottom:12px"><button class="btn ' + (activeTab === 'book' ? 'bp' : 'bs') + '" onclick="switchBookTab(\'book\')" style="font-size:12px">📖 收藏</button><button class="btn ' + (activeTab === 'search' ? 'bp' : 'bs') + '" onclick="switchBookTab(\'search\')" style="font-size:12px">🔍 搜索收藏</button><button onclick="' + (activeTab === 'book' ? 'clearBook' : 'clearSearchBook') + '()" class="btn br" style="font-size:11px;padding:3px 10px;margin-left:auto">清空</button></div>';
+
+    if (activeTab === 'search') {
+      var searchItems = getSearchBook();
+      if (countEl) countEl.textContent = '共 ' + searchItems.length + ' 个搜索收藏';
+      if (!searchItems.length) {
+        container.innerHTML = tabsHtml + '<div style="text-align:center;color:#999;padding:40px 0;font-size:14px">搜索收藏为空<br><span style="font-size:12px">在搜索页面点击 ☆ 收藏搜索结果</span></div>';
+        return;
+      }
+      container.innerHTML = tabsHtml;
+      searchItems.forEach(function(item){
+        var card = document.createElement('div');
+        card.className = 'vc';
+        card.style.cursor = 'pointer';
+        card.innerHTML = renderSearchBookCard(item);
+        card.onclick = function(){
+          var vocab = VOCAB.find(function(v){ return v.id === item.id; });
+          vocab ? openD(vocab) : showT('该词未在词库中找到');
+        };
+        container.appendChild(card);
+      });
+      return;
+    }
+
+    var bookItems = getBook();
+    if (countEl) countEl.textContent = '共 ' + bookItems.length + ' 个条目';
+    if (!bookItems.length) {
+      container.innerHTML = tabsHtml + '<div style="text-align:center;color:#999;padding:40px 0;font-size:14px">生词本为空<br><span style="font-size:12px">从词汇卡、搜索、AI 搜索加入</span></div>';
+      return;
+    }
+
+    container.innerHTML = tabsHtml;
+    bookItems.forEach(function(item){
+      var card = document.createElement('div');
+      card.className = 'vc';
+      card.style.cursor = item.type === 'ai' ? 'default' : 'pointer';
+      if (item.type === 'ai') {
+        card.innerHTML = renderAiBookCard(item);
+      } else {
+        var vocabItem = VOCAB.find(function(v){ return v.id === item.id; });
+        if (!vocabItem) return;
+        card.innerHTML = '<div class="vt"><span class="vl ' + (vocabItem.level === 'n3' ? 'l3' : 'l2') + '">' + (vocabItem.level || 'N3').toUpperCase() + '</span></div><div class="vw">' + escHtml(vocabItem.word) + '</div><div class="vr">' + escHtml(vocabItem.reading) + '</div><div class="vm">' + escHtml(vocabItem.meaning) + '</div>';
+        card.onclick = function(){ openD(vocabItem); };
+      }
+      container.appendChild(card);
+    });
+  };
+})();
+</script>
+<script>
 /* Capacitor WebView: comprehensive fix for event dispatch issues */
 (function(){
   if (location.hostname === '' || location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.protocol === 'capacitor:') {
